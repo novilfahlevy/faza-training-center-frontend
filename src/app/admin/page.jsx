@@ -21,7 +21,7 @@ import {
   EllipsisVerticalIcon,
   ArrowUpIcon,
 } from "@heroicons/react/24/outline";
-import { StatisticsCard } from "@/components/cards/statistics-card";
+import StatisticsCard from "@/components/cards/statistics-card";
 const StatisticsChart = dynamic(
   () => import("@/components/charts/statistics-chart"),
   { ssr: false }
