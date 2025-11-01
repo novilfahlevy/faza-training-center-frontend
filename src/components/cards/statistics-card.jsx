@@ -7,7 +7,7 @@ import {
 } from "@material-tailwind/react";
 import PropTypes from "prop-types";
 
-export function StatisticsCard({ color, icon, title, value, footer }) {
+export default function StatisticsCard({ color, icon, title, value, footer }) {
   return (
     <Card className="border border-blue-gray-100 shadow-sm">
       <CardHeader
@@ -66,5 +66,3 @@ StatisticsCard.propTypes = {
 };
 
 StatisticsCard.displayName = "/src/widgets/cards/statistics-card.jsx";
-
-export default StatisticsCard;

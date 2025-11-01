@@ -40,7 +40,7 @@ function formatNumber(number, decPlaces) {
   return number;
 }
 
-export function Configurator() {
+export default function Configurator() {
   const [controller, dispatch] = useMaterialTailwindController();
   const { openConfigurator, sidenavColor, sidenavType, fixedNavbar } =
     controller;
@@ -233,5 +233,3 @@ export function Configurator() {
 }
 
 Configurator.displayName = "/src/widgets/layout/configurator.jsx";
-
-export default Configurator;
