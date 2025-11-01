@@ -47,7 +47,7 @@ function DashboardLayoutContent({ children }) {
           <main>{children}</main>
         </div>
 
-        <div className="text-blue-gray-600">
+        <div className="text-blue-gray-600 mt-32">
           <Footer
             brandName="Creative Tim"
             brandLink="https://www.creative-tim.com"
