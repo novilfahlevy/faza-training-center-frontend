@@ -8,10 +8,8 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
-export default function SignIn() {
-  const router = useRouter();
+export default function Login() {
   return (
     <section className="m-8 flex gap-4">
       <div className="w-full lg:w-3/5 mt-24">
@@ -57,9 +55,11 @@ export default function SignIn() {
             />
           </div>
 
-          <Button className="mt-6" fullWidth onClick={router.push('/admin')}>
-            Masuk
-          </Button>
+          <Link href="/admin">
+            <Button className="mt-6" fullWidth>
+              Masuk
+            </Button>
+          </Link>
 
           <div className="text-center mt-6">
             <Typography
