@@ -1,6 +1,5 @@
 import localFont from "next/font/local";
 import "./globals.css";
-import { MaterialTailwindControllerProvider } from "@/context";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -20,14 +19,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <MaterialTailwindControllerProvider>
-      <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          {children}
-        </body>
-      </html>
-    </MaterialTailwindControllerProvider>
+    <html lang="id">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        {children}
+      </body>
+    </html>
   );
 }

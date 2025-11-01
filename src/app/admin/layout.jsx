@@ -8,13 +8,13 @@ import DashboardNavbar from "@/components/layout/dashboard-navbar";
 import Configurator from "@/components/layout/configurator";
 import Footer from "@/components/layout/footer";
 
-import { useMaterialTailwindController, setOpenConfigurator } from "@/context";
+import { MaterialTailwindControllerProvider, useMaterialTailwindController, setOpenConfigurator } from "@/context";
 import routes from "@/routes";
 import { usePathname } from "next/navigation";
 
 import "@/app/globals.css";
 
-export default function DashboardLayout({ children }) {
+function DashboardLayoutContent({ children }) {
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavType } = controller;
   const pathname = usePathname();
@@ -61,5 +61,13 @@ export default function DashboardLayout({ children }) {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DashboardLayout({ children }) {
+  return (
+    <MaterialTailwindControllerProvider>
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+    </MaterialTailwindControllerProvider>
   );
 }

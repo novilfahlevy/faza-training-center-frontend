@@ -75,7 +75,7 @@ export default function DashboardNavbar() {
           </Breadcrumbs>
         </div>
         <div className="flex items-center">
-          <div className="mr-auto md:mr-4 md:w-56">
+          {/* <div className="mr-auto md:mr-4 md:w-56">
             <Input label="Search" />
           </div>
           <IconButton
@@ -85,18 +85,18 @@ export default function DashboardNavbar() {
             onClick={() => setOpenSidenav(dispatch, !openSidenav)}
           >
             <Bars3Icon strokeWidth={3} className="h-6 w-6 text-blue-gray-500" />
-          </IconButton>
-          <Link href="/auth/sign-in">
+          </IconButton> */}
+          <Link href="/login">
             <Button
               variant="text"
               color="blue-gray"
               className="hidden items-center gap-1 px-4 xl:flex normal-case"
             >
               <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-              Sign In
+              Keluar
             </Button>
           </Link>
-          <Menu>
+          {/* <Menu>
             <MenuHandler>
               <IconButton variant="text" color="blue-gray">
                 <BellIcon className="h-5 w-5 text-blue-gray-500" />
@@ -124,14 +124,14 @@ export default function DashboardNavbar() {
                 </div>
               </MenuItem>
             </MenuList>
-          </Menu>
-          <IconButton
+          </Menu> */}
+          {/* <IconButton
             variant="text"
             color="blue-gray"
             onClick={() => setOpenConfigurator(dispatch, true)}
           >
             <Cog6ToothIcon className="h-5 w-5 text-blue-gray-500" />
-          </IconButton>
+          </IconButton> */}
         </div>
       </div>
     </Navbar>
