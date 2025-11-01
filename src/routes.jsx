@@ -5,14 +5,10 @@ import {
   InformationCircleIcon,
   ServerStackIcon,
   RectangleStackIcon,
+  AcademicCapIcon,
 } from "@heroicons/react/24/solid";
 
 // import { SignIn, SignUp } from "@/pages/auth";
-
-import Home from "./app/admin/page";
-import Profile from "./app/admin/profile/page";
-import Notifications from "./app/admin/notifications/page";
-import Tables from "./app/admin/tables/page";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
@@ -25,26 +21,27 @@ export const routes = [
       {
         icon: <HomeIcon {...icon} />,
         name: "dashboard",
-        path: "/admin",
-        element: <Home />,
+        path: "/admin"
+      },
+      {
+        icon: <AcademicCapIcon {...icon} />,
+        name: "Pelatihan",
+        path: "/admin/pelatihan"
       },
       {
         icon: <UserCircleIcon {...icon} />,
         name: "profile",
-        path: "/admin/profile",
-        element: <Profile />,
+        path: "/admin/profile"
       },
       {
         icon: <TableCellsIcon {...icon} />,
         name: "tables",
-        path: "/admin/tables",
-        element: <Tables />,
+        path: "/admin/tables"
       },
       {
         icon: <InformationCircleIcon {...icon} />,
         name: "notifications",
-        path: "/admin/notifications",
-        element: <Notifications />,
+        path: "/admin/notifications"
       },
     ],
   },

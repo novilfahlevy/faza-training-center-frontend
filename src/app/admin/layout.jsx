@@ -1,4 +1,3 @@
-// app/dashboard/layout.jsx
 "use client";
 
 import { Cog6ToothIcon } from "@heroicons/react/24/solid";
@@ -30,21 +29,23 @@ export default function DashboardLayout({ children }) {
         brandName="Faza Training Center"
       />
 
-      <div className="p-4 xl:ml-80">
-        <DashboardNavbar currentPath={pathname} />
-        <Configurator />
-        <IconButton
-          size="lg"
-          color="white"
-          className="fixed bottom-8 right-8 z-40 rounded-full shadow-blue-gray-900/10"
-          ripple={false}
-          onClick={() => setOpenConfigurator(dispatch, true)}
-        >
-          <Cog6ToothIcon className="h-5 w-5" />
-        </IconButton>
+      <div className="p-4 xl:ml-80 flex flex-col justify-between min-h-screen">
+        <div>
+          <DashboardNavbar currentPath={pathname} />
+          <Configurator />
+          <IconButton
+            size="lg"
+            color="white"
+            className="fixed bottom-8 right-8 z-40 rounded-full shadow-blue-gray-900/10"
+            ripple={false}
+            onClick={() => setOpenConfigurator(dispatch, true)}
+          >
+            <Cog6ToothIcon className="h-5 w-5" />
+          </IconButton>
 
-        {/* Render halaman anak (child routes) */}
-        <main>{children}</main>
+          {/* Render halaman anak (child routes) */}
+          <main>{children}</main>
+        </div>
 
         <div className="text-blue-gray-600">
           <Footer
