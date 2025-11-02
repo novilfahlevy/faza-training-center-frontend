@@ -1,5 +1,6 @@
 "use client";
 
+import NextTopLoader from "nextjs-toploader";
 import { Cog6ToothIcon } from "@heroicons/react/24/solid";
 import { IconButton } from "@material-tailwind/react";
 
@@ -8,7 +9,11 @@ import DashboardNavbar from "@/components/layout/dashboard-navbar";
 import Configurator from "@/components/layout/configurator";
 import Footer from "@/components/layout/footer";
 
-import { MaterialTailwindControllerProvider, useMaterialTailwindController, setOpenConfigurator } from "@/context";
+import {
+  MaterialTailwindControllerProvider,
+  useMaterialTailwindController,
+  setOpenConfigurator,
+} from "@/context";
 import routes from "@/routes";
 import { usePathname } from "next/navigation";
 
@@ -21,6 +26,14 @@ function DashboardLayoutContent({ children }) {
 
   return (
     <div className="min-h-screen bg-blue-gray-50/50">
+      {/* 🔵 Loading bar di atas halaman */}
+      <NextTopLoader
+        color="#171717"       // biru elegan
+        height={3}            // tinggi bar
+        showSpinner={false}   // hilangkan spinner kecil
+        crawlSpeed={200}      // efek animasi halus
+      />
+
       <Sidenav
         routes={routes}
         brandImg={
@@ -43,7 +56,7 @@ function DashboardLayoutContent({ children }) {
             <Cog6ToothIcon className="h-5 w-5" />
           </IconButton>
 
-          {/* Render halaman anak (child routes) */}
+          {/* Render halaman anak */}
           <main>{children}</main>
         </div>
 
