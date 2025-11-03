@@ -6,6 +6,7 @@ import {
   ServerStackIcon,
   RectangleStackIcon,
   AcademicCapIcon,
+  UserGroupIcon,
 } from "@heroicons/react/24/solid";
 
 // import { SignIn, SignUp } from "@/pages/auth";
@@ -29,20 +30,25 @@ export const routes = [
         path: "/admin/pelatihan"
       },
       {
-        icon: <UserCircleIcon {...icon} />,
-        name: "profile",
-        path: "/admin/profile"
+        icon: <UserGroupIcon {...icon} />,
+        name: "Mitra",
+        path: "/admin/mitra"
       },
-      {
-        icon: <TableCellsIcon {...icon} />,
-        name: "tables",
-        path: "/admin/tables"
-      },
-      {
-        icon: <InformationCircleIcon {...icon} />,
-        name: "notifications",
-        path: "/admin/notifications"
-      },
+      // {
+      //   icon: <UserCircleIcon {...icon} />,
+      //   name: "profile",
+      //   path: "/admin/profile"
+      // },
+      // {
+      //   icon: <TableCellsIcon {...icon} />,
+      //   name: "tables",
+      //   path: "/admin/tables"
+      // },
+      // {
+      //   icon: <InformationCircleIcon {...icon} />,
+      //   name: "notifications",
+      //   path: "/admin/notifications"
+      // },
     ],
   },
   // {
