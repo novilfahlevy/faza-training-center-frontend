@@ -1,6 +1,5 @@
-import { UsersIcon } from "@heroicons/react/24/outline";
+import { ChartBarSquareIcon, UsersIcon } from "@heroicons/react/24/outline";
 import {
-  HomeIcon,
   AcademicCapIcon,
 } from "@heroicons/react/24/solid";
 
@@ -15,8 +14,8 @@ export const routes = [
     layout: "dashboard",
     pages: [
       {
-        icon: <HomeIcon {...icon} />,
-        name: "dashboard",
+        icon: <ChartBarSquareIcon {...icon} />,
+        name: "Dasbor",
         path: "/admin"
       },
       {
