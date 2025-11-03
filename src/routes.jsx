@@ -1,12 +1,7 @@
+import { UsersIcon } from "@heroicons/react/24/outline";
 import {
   HomeIcon,
-  UserCircleIcon,
-  TableCellsIcon,
-  InformationCircleIcon,
-  ServerStackIcon,
-  RectangleStackIcon,
   AcademicCapIcon,
-  UserGroupIcon,
 } from "@heroicons/react/24/solid";
 
 // import { SignIn, SignUp } from "@/pages/auth";
@@ -30,9 +25,9 @@ export const routes = [
         path: "/admin/pelatihan"
       },
       {
-        icon: <UserGroupIcon {...icon} />,
-        name: "Mitra",
-        path: "/admin/mitra"
+        icon: <UsersIcon {...icon} />,
+        name: "Pengguna",
+        path: "/admin/pengguna"
       },
       // {
       //   icon: <UserCircleIcon {...icon} />,
