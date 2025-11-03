@@ -9,6 +9,7 @@ import {
   IconButton,
   Tooltip,
   Chip,
+  Input,
 } from "@material-tailwind/react";
 import {
   PlusIcon,
@@ -93,15 +94,25 @@ export default function PenggunaPage() {
           floated={false}
           shadow={false}
           color="transparent"
-          className="m-0 flex justify-between p-6"
+          className="m-0 flex flex-col gap-y-4 md:flex-row md:items-center md:justify-between p-6"
         >
           <Typography variant="h6">Daftar Pengguna</Typography>
-          <Button
-            onClick={() => setOpenTambah(true)}
-            className="flex items-center gap-2"
-          >
-            <PlusIcon className="h-5 w-5" /> Tambah Pengguna
-          </Button>
+          <div className="flex flex-col gap-y-4 md:flex-row md:items-center md:gap-x-4">
+            <Input
+              size="lg"
+              placeholder="Cari pengguna"
+              className="!w-full md:!w-64 !border-t-blue-gray-200 focus:!border-t-gray-900"
+              labelProps={{
+                className: "before:content-none after:content-none",
+              }}
+            />
+            <Button
+              onClick={() => setOpenTambah(true)}
+              className="flex items-center gap-2 px-4 py-2 whitespace-nowrap"
+            >
+              <PlusIcon className="h-5 w-5" /> Tambah Pengguna
+            </Button>
+          </div>
         </CardHeader>
 
         <CardBody className="px-0 pt-0 pb-2">
