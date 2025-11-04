@@ -94,23 +94,27 @@ export default function PenggunaPage() {
           floated={false}
           shadow={false}
           color="transparent"
-          className="m-0 flex flex-col gap-y-4 md:flex-row md:items-center md:justify-between p-6"
+          className="m-0 flex gap-y-4 flex-col md:flex-row md:items-center md:justify-between p-6"
         >
-          <Typography variant="h6">Daftar Pengguna</Typography>
-          <div className="flex flex-col gap-y-4 md:flex-row md:items-center md:gap-x-4">
+          <Typography variant="h6">
+            Daftar Pengguna
+          </Typography>
+          <div className="flex flex-col gap-y-4 sm:flex-row sm:items-center sm:gap-x-4">
             <Input
               placeholder="Cari pengguna"
-              className="!w-full md:!w-64 !border-t-blue-gray-200 focus:!border-t-gray-900"
+              className="!w-full sm:!w-64 !border-t-blue-gray-200 focus:!border-t-gray-900"
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
             />
-            <Button
-              onClick={() => setOpenTambah(true)}
-              className="flex items-center gap-2 px-4 py-2 whitespace-nowrap"
-            >
-              <PlusIcon className="h-5 w-5" /> Tambah Pengguna
-            </Button>
+            <div>
+              <Button
+                onClick={() => setOpenTambah(true)}
+                className="flex items-center gap-2 px-4 py-2 whitespace-nowrap"
+              >
+                <PlusIcon className="h-5 w-5" /> Tambah Pengguna
+              </Button>
+            </div>
           </div>
         </CardHeader>
 

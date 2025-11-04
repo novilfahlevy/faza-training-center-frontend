@@ -115,15 +115,15 @@ export default function Pelatihan() {
           floated={false}
           shadow={false}
           color="transparent"
-          className="m-0 flex gap-y-4 flex-col sm:flex-row sm:items-center sm:justify-between p-6"
+          className="m-0 flex gap-y-4 flex-col md:flex-row md:items-center md:justify-between p-6"
         >
-          <Typography variant="h6" color="blue-gray">
+          <Typography variant="h6">
             Daftar Pelatihan
           </Typography>
-          <div className="flex flex-col gap-y-4 md:flex-row md:items-center md:gap-x-4">
+          <div className="flex flex-col gap-y-4 sm:flex-row sm:items-center sm:gap-x-4">
             <Input
               placeholder="Cari pelatihan"
-              className="!w-full md:!w-64 !border-t-blue-gray-200 focus:!border-t-gray-900"
+              className="!w-full sm:!w-64 !border-t-blue-gray-200 focus:!border-t-gray-900"
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
