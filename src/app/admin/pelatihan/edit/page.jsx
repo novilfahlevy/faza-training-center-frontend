@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Card,
   CardHeader,
@@ -9,46 +9,111 @@ import {
   Textarea,
   Button,
   Typography,
+  Select,
+  Option,
 } from "@material-tailwind/react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
+import { id } from "date-fns/locale";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
+import { XMarkIcon, CalendarDaysIcon } from "@heroicons/react/24/outline";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 export default function EditPelatihan() {
   const router = useRouter();
+
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
 
-  const [formData, setFormData] = useState({
-    nama_pelatihan: "",
-    deskripsi_pelatihan: "",
-    tanggal_pelatihan: "",
-    durasi_pelatihan: "",
-    lokasi_pelatihan: "",
-    user_id: 1,
-    role: "admin",
+  const dateRef = useRef(null);
+  const calendarRef = useRef(null);
+
+  const mitraList = [
+    { id: 1, nama: "PT Teknologi Cerdas" },
+    { id: 2, nama: "CV Karya Mandiri" },
+    { id: 3, nama: "Universitas Samarinda" },
+  ];
+
+  const validationSchema = Yup.object({
+    nama_pelatihan: Yup.string()
+      .min(3, "Minimal 3 karakter")
+      .required("Nama pelatihan wajib diisi"),
+    deskripsi_pelatihan: Yup.string()
+      .min(10, "Deskripsi minimal 10 karakter")
+      .required("Deskripsi wajib diisi"),
+    tanggal_pelatihan: Yup.string().required("Tanggal wajib dipilih"),
+    durasi_pelatihan: Yup.string().required("Durasi wajib diisi"),
+    lokasi_pelatihan: Yup.string().required("Lokasi wajib diisi"),
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+  const formik = useFormik({
+    initialValues: {
+      nama_pelatihan: "Pelatihan React Advanced",
+      deskripsi_pelatihan: "Pelatihan lanjutan React dengan Next.js dan Tailwind.",
+      tanggal_pelatihan: "Senin, 14 Oktober 2024",
+      durasi_pelatihan: "3 Hari",
+      lokasi_pelatihan: "Kampus UNMUL",
+      mitra_id: "2",
+      user_id: 1,
+      role: "admin",
+    },
+    validationSchema,
+    onSubmit: (values) => {
+      const payload = {
+        ...values,
+        tanggal_pelatihan: format(selectedDate, "yyyy-MM-dd"),
+      };
+      console.log("📦 Data pelatihan disimpan:", payload);
+      alert("Perubahan pelatihan berhasil disimpan!");
+      router.push("/admin/pelatihan");
+    },
+  });
+
+  // Tutup kalender saat klik di luar
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (calendarRef.current && !calendarRef.current.contains(e.target)) {
+        setShowCalendar(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Tutup + blur dengan ESC / Ctrl+ESC
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === "Escape" || (e.ctrlKey && e.key === "Escape")) {
+        setShowCalendar(false);
+        dateRef.current?.blur();
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const handleDateSelect = (date) => {
     setSelectedDate(date);
-    setFormData({
-      ...formData,
-      tanggal_pelatihan: format(date, "yyyy-MM-dd"),
-    });
+    if (date) {
+      formik.setFieldValue(
+        "tanggal_pelatihan",
+        format(date, "EEEE, dd MMMM yyyy", { locale: id })
+      );
+    }
     setShowCalendar(false);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Data pelatihan baru:", formData);
-    alert("Pelatihan berhasil ditambahkan!");
-    router.push("/admin/pelatihan");
+  const clearDate = () => {
+    setSelectedDate(null);
+    formik.setFieldValue("tanggal_pelatihan", "");
+    dateRef.current?.focus();
+  };
+
+  // 🔹 Clear Mitra
+  const clearMitra = () => {
+    formik.setFieldValue("mitra_id", "");
   };
 
   return (
@@ -57,40 +122,82 @@ export default function EditPelatihan() {
         <CardHeader floated={false} shadow={false} className="p-3">
           <Typography variant="h6" color="blue-gray">
             Edit Pelatihan
-          </Typography> 
+          </Typography>
         </CardHeader>
 
         <CardBody className="px-6 pb-6">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-            <Input
-              label="Nama Pelatihan"
-              name="nama_pelatihan"
-              value={formData.nama_pelatihan}
-              onChange={handleChange}
-              required
-            />
+          <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
+            {/* Nama */}
+            <div>
+              <Input
+                label="Nama Pelatihan"
+                name="nama_pelatihan"
+                value={formik.values.nama_pelatihan}
+                onChange={formik.handleChange}
+              />
+              {formik.touched.nama_pelatihan && formik.errors.nama_pelatihan && (
+                <Typography variant="small" color="red">
+                  {formik.errors.nama_pelatihan}
+                </Typography>
+              )}
+            </div>
 
-            <Textarea
-              label="Deskripsi Pelatihan"
-              name="deskripsi_pelatihan"
-              value={formData.deskripsi_pelatihan}
-              onChange={handleChange}
-              required
-            />
+            {/* Deskripsi */}
+            <div>
+              <Textarea
+                label="Deskripsi Pelatihan"
+                name="deskripsi_pelatihan"
+                value={formik.values.deskripsi_pelatihan}
+                onChange={formik.handleChange}
+              />
+              {formik.touched.deskripsi_pelatihan &&
+                formik.errors.deskripsi_pelatihan && (
+                  <Typography variant="small" color="red">
+                    {formik.errors.deskripsi_pelatihan}
+                  </Typography>
+                )}
+            </div>
 
+            {/* Grid tanggal & durasi */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative">
-              {/* Date Picker Input */}
-              <div>
-                <Input
-                  label="Tanggal Pelatihan"
-                  name="tanggal_pelatihan"
-                  value={formData.tanggal_pelatihan}
-                  onFocus={() => setShowCalendar(true)}
-                  readOnly
-                  required
-                />
+              {/* Tanggal */}
+              <div className="relative" ref={calendarRef}>
+                <div className="relative">
+                  <Input
+                    ref={dateRef}
+                    label="Tanggal Pelatihan"
+                    name="tanggal_pelatihan"
+                    value={formik.values.tanggal_pelatihan}
+                    readOnly
+                    onFocus={() => setShowCalendar(true)}
+                    className="cursor-pointer"
+                  />
+                  {formik.values.tanggal_pelatihan ? (
+                    <button
+                      type="button"
+                      onClick={clearDate}
+                      className="absolute right-2 top-1.5 p-1 text-gray-500 hover:text-red-600 transition"
+                    >
+                      <XMarkIcon className="w-5 h-5" />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setShowCalendar(true)}
+                      className="absolute right-2 top-1.5 p-1 text-gray-500 hover:text-blue-600 transition"
+                    >
+                      <CalendarDaysIcon className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+                {formik.touched.tanggal_pelatihan &&
+                  formik.errors.tanggal_pelatihan && (
+                    <Typography variant="small" color="red">
+                      {formik.errors.tanggal_pelatihan}
+                    </Typography>
+                  )}
                 {showCalendar && (
-                  <div className="absolute z-50 bg-white shadow-lg rounded-lg mt-2 p-3">
+                  <div className="absolute z-50 bg-white shadow-lg rounded-lg mt-2 p-3 border border-blue-gray-100">
                     <DayPicker
                       mode="single"
                       selected={selectedDate}
@@ -100,32 +207,65 @@ export default function EditPelatihan() {
                 )}
               </div>
 
+              {/* Durasi */}
               <div>
                 <Input
-                  label="Durasi Pelatihan"
+                  label="Durasi Pelatihan (Contoh: 3 Hari, 2 Minggu, 1 Bulan)"
                   name="durasi_pelatihan"
-                  value={formData.durasi_pelatihan}
-                  onChange={handleChange}
-                  required
+                  value={formik.values.durasi_pelatihan}
+                  onChange={formik.handleChange}
                 />
-                <Typography
-                  variant="small"
-                  color="gray"
-                  className="mt-1 ml-1 text-xs"
-                >
-                  Contoh: 3 Hari, 2 Minggu, 1 Bulan
-                </Typography>
+                {formik.touched.durasi_pelatihan &&
+                  formik.errors.durasi_pelatihan && (
+                    <Typography variant="small" color="red">
+                      {formik.errors.durasi_pelatihan}
+                    </Typography>
+                  )}
               </div>
             </div>
 
-            <Input
-              label="Lokasi Pelatihan"
-              name="lokasi_pelatihan"
-              value={formData.lokasi_pelatihan}
-              onChange={handleChange}
-              required
-            />
+            {/* Lokasi */}
+            <div>
+              <Input
+                label="Lokasi Pelatihan"
+                name="lokasi_pelatihan"
+                value={formik.values.lokasi_pelatihan}
+                onChange={formik.handleChange}
+              />
+              {formik.touched.lokasi_pelatihan &&
+                formik.errors.lokasi_pelatihan && (
+                  <Typography variant="small" color="red">
+                    {formik.errors.lokasi_pelatihan}
+                  </Typography>
+                )}
+            </div>
 
+            {/* Mitra */}
+            <div className="relative">
+              <Select
+                label="Pilih Mitra (opsional)"
+                value={formik.values.mitra_id}
+                onChange={(value) => formik.setFieldValue("mitra_id", value)}
+              >
+                {mitraList.map((m) => (
+                  <Option key={m.id} value={m.id.toString()}>
+                    {m.nama}
+                  </Option>
+                ))}
+              </Select>
+              {formik.values.mitra_id && (
+                <button
+                  type="button"
+                  onClick={clearMitra}
+                  className="absolute right-8 top-1.5 p-1 text-gray-500 hover:text-red-600 transition"
+                  title="Hapus pilihan mitra"
+                >
+                  <XMarkIcon className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+
+            {/* Tombol */}
             <div className="flex justify-end gap-3">
               <Button
                 type="button"
