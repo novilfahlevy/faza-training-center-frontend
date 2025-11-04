@@ -11,6 +11,7 @@ import {
   Tooltip,
   Select,
   Option,
+  Input,
 } from "@material-tailwind/react";
 import {
   PlusIcon,
@@ -119,11 +120,20 @@ export default function Pelatihan() {
           <Typography variant="h6" color="blue-gray">
             Daftar Pelatihan
           </Typography>
-          <Link href="/admin/pelatihan/tambah">
-            <Button className="flex items-center gap-2">
-              <PlusIcon className="h-5 w-5" /> Tambah Pelatihan
-            </Button>
-          </Link>
+          <div className="flex flex-col gap-y-4 md:flex-row md:items-center md:gap-x-4">
+            <Input
+              placeholder="Cari pelatihan"
+              className="!w-full md:!w-64 !border-t-blue-gray-200 focus:!border-t-gray-900"
+              labelProps={{
+                className: "before:content-none after:content-none",
+              }}
+            />
+            <Link href="/admin/pelatihan/tambah">
+              <Button className="flex items-center gap-2 px-4 py-2 whitespace-nowrap">
+                <PlusIcon className="h-5 w-5" /> Tambah Pelatihan
+              </Button>
+            </Link>
+          </div>
         </CardHeader>
 
         <CardBody className="px-0 pt-0 pb-2">

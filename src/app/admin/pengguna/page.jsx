@@ -99,7 +99,6 @@ export default function PenggunaPage() {
           <Typography variant="h6">Daftar Pengguna</Typography>
           <div className="flex flex-col gap-y-4 md:flex-row md:items-center md:gap-x-4">
             <Input
-              size="lg"
               placeholder="Cari pengguna"
               className="!w-full md:!w-64 !border-t-blue-gray-200 focus:!border-t-gray-900"
               labelProps={{
