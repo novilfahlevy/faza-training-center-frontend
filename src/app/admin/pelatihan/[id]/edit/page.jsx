@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useRef, useEffect } from "react";
 import {
   Card,
@@ -12,7 +11,7 @@ import {
   Select,
   Option,
 } from "@material-tailwind/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { DayPicker } from "react-day-picker";
@@ -20,22 +19,24 @@ import "react-day-picker/dist/style.css";
 import { XMarkIcon, CalendarDaysIcon } from "@heroicons/react/24/outline";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import httpClient from "@/httpClient";
+import { toast } from "react-toastify";
 
 export default function EditPelatihan() {
   const router = useRouter();
+  const params = useParams();
+  const { id: pelatihanId } = params;
 
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [mitraList, setMitraList] = useState([]);
+  const [isMitraListLoaded, setMitraListLoaded] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const dateRef = useRef(null);
   const calendarRef = useRef(null);
 
-  const mitraList = [
-    { id: 1, nama: "PT Teknologi Cerdas" },
-    { id: 2, nama: "CV Karya Mandiri" },
-    { id: 3, nama: "Universitas Samarinda" },
-  ];
-
+  // 📦 Validasi Form
   const validationSchema = Yup.object({
     nama_pelatihan: Yup.string()
       .min(3, "Minimal 3 karakter")
@@ -48,30 +49,46 @@ export default function EditPelatihan() {
     lokasi_pelatihan: Yup.string().required("Lokasi wajib diisi"),
   });
 
+  // 🧠 Formik setup
   const formik = useFormik({
     initialValues: {
-      nama_pelatihan: "Pelatihan React Advanced",
-      deskripsi_pelatihan: "Pelatihan lanjutan React dengan Next.js dan Tailwind.",
-      tanggal_pelatihan: "Senin, 14 Oktober 2024",
-      durasi_pelatihan: "3 Hari",
-      lokasi_pelatihan: "Kampus UNMUL",
-      mitra_id: "2",
-      user_id: 1,
-      role: "admin",
+      nama_pelatihan: "",
+      deskripsi_pelatihan: "",
+      tanggal_pelatihan: "",
+      durasi_pelatihan: "",
+      lokasi_pelatihan: "",
+      mitra_id: "",
     },
     validationSchema,
-    onSubmit: (values) => {
-      const payload = {
-        ...values,
-        tanggal_pelatihan: format(selectedDate, "yyyy-MM-dd"),
-      };
-      console.log("📦 Data pelatihan disimpan:", payload);
-      alert("Perubahan pelatihan berhasil disimpan!");
-      router.push("/admin/pelatihan");
+    onSubmit: async (values) => {
+      try {
+        const payload = {
+          ...values,
+          tanggal_pelatihan: selectedDate
+            ? format(selectedDate, "yyyy-MM-dd")
+            : values.tanggal_pelatihan,
+        };
+
+        const response = await httpClient.put(`/v1/pelatihan/${pelatihanId}`, payload);
+
+        toast.success(response.data.message || "Pelatihan berhasil diperbarui!", {
+          position: "top-right",
+          autoClose: 2500,
+        });
+
+        setTimeout(() => router.push("/admin/pelatihan"), 500);
+      } catch (error) {
+        console.error(error);
+        toast.error(
+          "Gagal memperbarui pelatihan: " +
+            (error.response?.data?.message || error.message),
+          { position: "top-right", autoClose: 3500 }
+        );
+      }
     },
   });
 
-  // Tutup kalender saat klik di luar
+  // 📅 Tutup kalender saat klik di luar
   useEffect(() => {
     function handleClickOutside(e) {
       if (calendarRef.current && !calendarRef.current.contains(e.target)) {
@@ -82,7 +99,7 @@ export default function EditPelatihan() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Tutup + blur dengan ESC / Ctrl+ESC
+  // ⌨️ Tutup kalender + blur input saat tekan ESC / Ctrl+ESC
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === "Escape" || (e.ctrlKey && e.key === "Escape")) {
@@ -94,6 +111,7 @@ export default function EditPelatihan() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // 📅 Pilih tanggal
   const handleDateSelect = (date) => {
     setSelectedDate(date);
     if (date) {
@@ -111,15 +129,73 @@ export default function EditPelatihan() {
     dateRef.current?.focus();
   };
 
-  // 🔹 Clear Mitra
   const clearMitra = () => {
     formik.setFieldValue("mitra_id", "");
   };
 
+  // 🔹 Fetch Mitra
+  useEffect(() => {
+    const fetchMitra = async () => {
+      try {
+        const res = await httpClient.get("/v1/mitra");
+        setMitraList(res.data.records || []);
+      } catch (err) {
+        console.error("Gagal mengambil mitra:", err);
+      } finally {
+        setMitraListLoaded(true);
+      }
+    };
+    fetchMitra();
+  }, []);
+
+  // 🔹 Fetch Data Pelatihan by ID
+  useEffect(() => {
+    const fetchPelatihan = async () => {
+      try {
+        const res = await httpClient.get(`/v1/pelatihan/${pelatihanId}`);
+        const data = res.data;
+
+        let parsedDate = null;
+        if (data.tanggal_pelatihan) {
+          parsedDate = new Date(data.tanggal_pelatihan);
+        }
+
+        formik.setValues({
+          nama_pelatihan: data.nama_pelatihan || "",
+          deskripsi_pelatihan: data.deskripsi_pelatihan || "",
+          tanggal_pelatihan: parsedDate
+            ? format(parsedDate, "EEEE, dd MMMM yyyy", { locale: id })
+            : "",
+          durasi_pelatihan: data.durasi_pelatihan || "",
+          lokasi_pelatihan: data.lokasi_pelatihan || "",
+          mitra_id: data.mitra_id ? String(data.mitra_id) : "",
+        });
+
+        if (parsedDate) {
+          setSelectedDate(parsedDate);
+        }
+      } catch (err) {
+        console.error("Gagal memuat data pelatihan:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPelatihan();
+  }, [pelatihanId]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Typography>Memuat data pelatihan...</Typography>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-12 flex justify-center">
       <Card className="w-full max-w-3xl border border-blue-gray-100 shadow-sm">
-        <CardHeader floated={false} shadow={false} className="p-3">
+        <CardHeader floated={false} shadow={false} className="p-3 sticky top-0 bg-white z-10 border-b">
           <Typography variant="h6" color="blue-gray">
             Edit Pelatihan
           </Typography>
@@ -242,17 +318,25 @@ export default function EditPelatihan() {
 
             {/* Mitra */}
             <div className="relative">
-              <Select
-                label="Pilih Mitra (opsional)"
-                value={formik.values.mitra_id}
-                onChange={(value) => formik.setFieldValue("mitra_id", value)}
-              >
-                {mitraList.map((m) => (
-                  <Option key={m.id} value={m.id.toString()}>
-                    {m.nama}
-                  </Option>
-                ))}
-              </Select>
+              {!isMitraListLoaded ? (
+                <Input label="Memuat daftar mitra..." disabled />
+              ) : (
+                <Select
+                  label="Pilih Mitra (opsional)"
+                  value={formik.values.mitra_id}
+                  onChange={(value) => formik.setFieldValue("mitra_id", value)}
+                >
+                  {mitraList.length > 0 ? (
+                    mitraList.map((m) => (
+                      <Option key={m.mitra_id} value={m.mitra_id.toString()}>
+                        {m.nama_mitra}
+                      </Option>
+                    ))
+                  ) : (
+                    <Option disabled>Tidak ada mitra</Option>
+                  )}
+                </Select>
+              )}
               {formik.values.mitra_id && (
                 <button
                   type="button"
@@ -266,7 +350,7 @@ export default function EditPelatihan() {
             </div>
 
             {/* Tombol */}
-            <div className="flex justify-end gap-3">
+            <div className="sticky bottom-0 bg-white py-3 flex justify-end gap-3 border-t mt-4">
               <Button
                 type="button"
                 variant="text"
