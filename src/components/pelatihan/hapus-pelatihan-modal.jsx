@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogHeader,
@@ -11,6 +11,14 @@ import {
 } from "@material-tailwind/react";
 
 export default function HapusPelatihanModal({ open, onClose, onConfirm, namaPelatihan }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleConfirm = async () => {
+    setLoading(true);
+    await onConfirm();
+    setLoading(false);
+  };
+
   return (
     <Dialog open={open} handler={onClose} size="sm" className="p-2">
       <DialogHeader>
@@ -35,17 +43,16 @@ export default function HapusPelatihanModal({ open, onClose, onConfirm, namaPela
           variant="text"
           color="blue-gray"
           onClick={onClose}
+          disabled={loading}
         >
           Batal
         </Button>
         <Button
           color="red"
-          onClick={() => {
-            onConfirm();
-            onClose();
-          }}
+          onClick={handleConfirm}
+          disabled={loading}
         >
-          Hapus
+          {loading ? "Menghapus..." : "Hapus"}
         </Button>
       </DialogFooter>
     </Dialog>

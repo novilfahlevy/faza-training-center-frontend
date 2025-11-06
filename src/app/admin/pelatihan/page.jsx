@@ -21,6 +21,7 @@ import { ArrowRightIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import HapusPelatihanModal from "@/components/pelatihan/hapus-pelatihan-modal";
 import httpClient from "@/httpClient";
+import { toast } from "react-toastify";
 
 // 🧠 Utility: debounce function
 const debounce = (func, delay) => {
@@ -91,6 +92,30 @@ export default function Pelatihan() {
   const handleDelete = (pelatihan) => {
     setSelectedPelatihan(pelatihan);
     setOpenModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedPelatihan) return;
+
+    try {
+      const response = await httpClient.delete(`/v1/pelatihan/${selectedPelatihan.pelatihan_id}`);
+
+      toast.success(response.data.message || "Pelatihan berhasil dihapus!", {
+        position: "top-right",
+        autoClose: 2500,
+      });
+
+      // Refresh daftar pelatihan setelah hapus
+      fetchPelatihan(activePage, limit, search);
+    } catch (error) {
+      console.error("Gagal menghapus pelatihan:", error);
+      toast.error(
+        error.response?.data?.message || "Gagal menghapus pelatihan.",
+        { position: "top-right", autoClose: 3000 }
+      );
+    } finally {
+      setOpenModal(false);
+    }
   };
 
   const next = () => {
@@ -309,6 +334,7 @@ export default function Pelatihan() {
       <HapusPelatihanModal
         open={openModal}
         onClose={() => setOpenModal(false)}
+        onConfirm={handleConfirmDelete}
         namaPelatihan={selectedPelatihan?.nama_pelatihan}
       />
     </div>
