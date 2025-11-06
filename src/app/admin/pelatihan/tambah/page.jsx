@@ -20,21 +20,37 @@ import "react-day-picker/dist/style.css";
 import { XMarkIcon, CalendarDaysIcon } from "@heroicons/react/24/outline";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import httpClient from "@/httpClient";
+import { toast } from "react-toastify";
 
 export default function TambahPelatihan() {
   const router = useRouter();
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const [mitraList, setMitraList] = useState([]);
+  const [isMitraListLoaded, setMitraListLoaded] = useState(false);
 
   const dateRef = useRef(null);
   const calendarRef = useRef(null);
 
-  const mitraList = [
-    { id: 1, nama: "PT Teknologi Cerdas" },
-    { id: 2, nama: "CV Karya Mandiri" },
-    { id: 3, nama: "Universitas Samarinda" },
-  ];
+  // 🔹 Fetch daftar mitra dari backend
+  useEffect(() => {
+    const fetchMitra = async () => {
+      try {
+        const response = await httpClient.get("/v1/mitra");
+        setMitraList(response.data.records || []);
+        setMitraListLoaded(true);
+      } catch (error) {
+        toast.error("Gagal mengambil daftar mitra.", { position: "top-right" });
+        console.error("Gagal mengambil daftar mitra:", error);
+      }
+    };
+    fetchMitra();
+  }, []);
 
+  // ✅ Validasi form
   const validationSchema = Yup.object({
     nama_pelatihan: Yup.string()
       .min(3, "Minimal 3 karakter")
@@ -47,6 +63,7 @@ export default function TambahPelatihan() {
     lokasi_pelatihan: Yup.string().required("Lokasi wajib diisi"),
   });
 
+  // ✅ Formik setup
   const formik = useFormik({
     initialValues: {
       nama_pelatihan: "",
@@ -59,18 +76,37 @@ export default function TambahPelatihan() {
       role: "admin",
     },
     validationSchema,
-    onSubmit: (values) => {
-      const payload = {
-        ...values,
-        tanggal_pelatihan: format(selectedDate, "yyyy-MM-dd"),
-      };
-      console.log("📦 Data pelatihan baru:", payload);
-      alert("Pelatihan berhasil ditambahkan!");
-      router.push("/admin/pelatihan");
+    onSubmit: async (values) => {
+      try {
+        setLoading(true);
+        const payload = {
+          ...values,
+          mitra_id: values.mitra_id || null,
+          tanggal_pelatihan: format(selectedDate, "yyyy-MM-dd"),
+        };
+
+        const response = await httpClient.post("/v1/pelatihan", payload);
+
+        toast.success(response.data.message || "Pelatihan berhasil ditambahkan!", {
+          position: "top-right",
+          autoClose: 2500,
+        });
+
+        setTimeout(() => router.push("/admin/pelatihan"), 500);
+      } catch (error) {
+        console.error("Gagal menambahkan pelatihan:", error);
+        toast.error(
+          "Gagal menambahkan pelatihan: " +
+            (error.response?.data?.message || error.message),
+          { position: "top-right", autoClose: 3500 }
+        );
+      } finally {
+        setLoading(false);
+      }
     },
   });
 
-  // Tutup kalender saat klik di luar
+  // 📅 Tutup kalender saat klik di luar
   useEffect(() => {
     function handleClickOutside(e) {
       if (calendarRef.current && !calendarRef.current.contains(e.target)) {
@@ -81,7 +117,7 @@ export default function TambahPelatihan() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Tutup + blur dengan ESC / Ctrl+ESC
+  // 🔹 Tutup kalender dengan ESC
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === "Escape" || (e.ctrlKey && e.key === "Escape")) {
@@ -110,7 +146,6 @@ export default function TambahPelatihan() {
     dateRef.current?.focus();
   };
 
-  // 🔹 Clear Mitra
   const clearMitra = () => {
     formik.setFieldValue("mitra_id", "");
   };
@@ -241,17 +276,23 @@ export default function TambahPelatihan() {
 
             {/* Mitra */}
             <div className="relative">
-              <Select
-                label="Pilih Mitra (opsional)"
-                value={formik.values.mitra_id}
-                onChange={(value) => formik.setFieldValue("mitra_id", value)}
-              >
-                {mitraList.map((m) => (
-                  <Option key={m.id} value={m.id.toString()}>
-                    {m.nama}
-                  </Option>
-                ))}
-              </Select>
+              {isMitraListLoaded && (
+                <Select
+                  label="Pilih Mitra (opsional)"
+                  value={formik.values.mitra_id}
+                  onChange={(value) => formik.setFieldValue("mitra_id", value)}
+                >
+                  {mitraList.length > 0 ? (
+                    mitraList.map((m) => (
+                      <Option key={m.mitra_id} value={m.mitra_id}>
+                        {m.nama_mitra}
+                      </Option>
+                    ))
+                  ) : (
+                    <Option disabled>Tidak ada mitra</Option>
+                  )}
+                </Select>
+              )}
               {formik.values.mitra_id && (
                 <button
                   type="button"
@@ -274,8 +315,8 @@ export default function TambahPelatihan() {
               >
                 Batal
               </Button>
-              <Button type="submit" color="blue">
-                Simpan
+              <Button type="submit" color="blue" disabled={loading}>
+                {loading ? "Menyimpan..." : "Simpan"}
               </Button>
             </div>
           </form>
