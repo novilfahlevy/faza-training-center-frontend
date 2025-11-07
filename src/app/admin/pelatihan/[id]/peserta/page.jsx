@@ -227,7 +227,7 @@ export default function PesertaPelatihanPage({ params }) {
               <table className="w-full min-w-[800px] table-auto">
                 <thead className="bg-gray-200">
                   <tr>
-                    {["No", "Nama", "Email", "No HP", "Status", "Aksi"].map(
+                    {["No", "Nama", "Email", "No HP", "Status"].map(
                       (head, index) => (
                         <th
                           key={head}
@@ -279,7 +279,7 @@ export default function PesertaPelatihanPage({ params }) {
                         <td className="py-3 px-5">
                           {peserta.status_pendaftaran}
                         </td>
-                        <td className="py-3 px-5 flex gap-2">
+                        {/* <td className="py-3 px-5 flex gap-2">
                           <Tooltip content="Hapus">
                             <IconButton
                               variant="outlined"
@@ -289,7 +289,7 @@ export default function PesertaPelatihanPage({ params }) {
                               <TrashIcon className="h-4 w-4" />
                             </IconButton>
                           </Tooltip>
-                        </td>
+                        </td> */}
                       </tr>
                     ))
                   )}
