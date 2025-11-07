@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Card,
   CardHeader,
@@ -13,60 +13,103 @@ import {
 } from "@material-tailwind/react";
 import {
   ArrowLeftIcon,
-  UserPlusIcon,
   TrashIcon,
+  UserPlusIcon,
 } from "@heroicons/react/24/solid";
-import { ArrowRightIcon, ArrowLeftIcon as OutlineArrowLeft } from "@heroicons/react/24/outline";
+import {
+  ArrowRightIcon,
+  ArrowLeftIcon as OutlineArrowLeft,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
+import httpClient from "@/httpClient";
+import { toast } from "react-toastify";
+
+// 🔹 Utility: debounce function
+const debounce = (func, delay) => {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => func(...args), delay);
+  };
+};
 
 export default function PesertaPelatihanPage({ params }) {
   const { id } = params;
 
-  // Data pelatihan dummy
-  const pelatihan = {
-    id,
-    nama_pelatihan: "Pelatihan Dasar Pemrograman",
-    tanggal_pelatihan: "10 November 2025",
-    lokasi_pelatihan: "Lab Komputer UNMUL",
-  };
-
+  const [pelatihan, setPelatihan] = useState(null);
   const [pesertaList, setPesertaList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPelatihanLoading, setIsPelatihanLoading] = useState(false);
+  const [search, setSearch] = useState("");
 
   const [activePage, setActivePage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
 
-  // 🔹 Fungsi simulasi fetch peserta dari API
-  const fetchPeserta = async (page = 1, perPage = 5) => {
-    setIsLoading(true);
-
-    const dummyData = [
-      { id: 1, nama: "Ahmad Fauzan", email: "ahmad@example.com", no_hp: "081234567890", status: "Terdaftar" },
-      { id: 2, nama: "Budi Santoso", email: "budi@example.com", no_hp: "081298765432", status: "Lulus" },
-      { id: 3, nama: "Citra Dewi", email: "citra@example.com", no_hp: "081355512345", status: "Tidak Hadir" },
-      { id: 4, nama: "Dewi Anggraini", email: "dewi@example.com", no_hp: "081278945612", status: "Lulus" },
-      { id: 5, nama: "Eka Purnama", email: "eka@example.com", no_hp: "081299887766", status: "Terdaftar" },
-      { id: 6, nama: "Fajar Ramadhan", email: "fajar@example.com", no_hp: "081277776655", status: "Lulus" },
-      { id: 7, nama: "Gita Pramudita", email: "gita@example.com", no_hp: "081233344455", status: "Lulus" },
-      { id: 8, nama: "Hadi Saputra", email: "hadi@example.com", no_hp: "081234567891", status: "Tidak Hadir" },
-    ];
-
-    const totalData = dummyData.length;
-    const totalPages = Math.ceil(totalData / perPage);
-    const startIndex = (page - 1) * perPage;
-    const paginatedData = dummyData.slice(startIndex, startIndex + perPage);
-
-    await new Promise((r) => setTimeout(r, 500)); // simulasi delay
-
-    setPesertaList(paginatedData);
-    setTotalPages(totalPages);
-    setIsLoading(false);
+  // 🔹 Fetch detail pelatihan
+  const fetchPelatihanDetail = async () => {
+    try {
+      setIsPelatihanLoading(true);
+      const res = await httpClient.get(`/v1/pelatihan/${id}`);
+      setPelatihan(res.data);
+    } catch (error) {
+      console.error("Gagal mengambil detail pelatihan:", error);
+      toast.error("Gagal memuat detail pelatihan.");
+    } finally {
+      setIsPelatihanLoading(false);
+    }
   };
 
+  // 🔹 Fetch peserta pelatihan
+  const fetchPeserta = async (page = 1, perPage = 5, query = "") => {
+    try {
+      setIsLoading(true);
+      const res = await httpClient.get(`/v1/pelatihan/${id}/peserta`, {
+        params: { page: page - 1, size: perPage, search: query || undefined },
+      });
+
+      const { records, totalPages } = res.data;
+
+      // Ambil data peserta dari backend
+      const peserta = records.map((item) => ({
+        peserta_id: item.peserta_id,
+        nama_lengkap: item.peserta?.nama_lengkap,
+        no_hp: item.peserta?.no_telp,
+        email: item.peserta?.pengguna?.email,
+        status_pendaftaran: item.status_pendaftaran || "Terdaftar",
+      }));
+
+      setPesertaList(peserta);
+      setTotalPages(totalPages);
+    } catch (error) {
+      console.error("Gagal mengambil data peserta:", error);
+      toast.error("Gagal memuat data peserta pelatihan.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 🔸 Debounced search handler
+  const debouncedFetch = useCallback(
+    debounce((query) => {
+      fetchPeserta(1, limit, query);
+    }, 500),
+    [limit]
+  );
+
   useEffect(() => {
-    fetchPeserta(activePage, limit);
+    fetchPelatihanDetail();
+    fetchPeserta(activePage, limit, search);
   }, [activePage, limit]);
+
+  useEffect(() => {
+    debouncedFetch(search);
+  }, [search, debouncedFetch]);
+
+  const handleSearch = (e) => {
+    setSearch(e.target.value);
+    setActivePage(1);
+  };
 
   const next = () => {
     if (activePage < totalPages) setActivePage((prev) => prev + 1);
@@ -76,21 +119,56 @@ export default function PesertaPelatihanPage({ params }) {
     if (activePage > 1) setActivePage((prev) => prev - 1);
   };
 
-  const handleDelete = (id) => {
-    setPesertaList((prev) => prev.filter((p) => p.id !== id));
+  const handleDelete = (pesertaId) => {
+    toast.info(`Fitur hapus peserta #${pesertaId} akan segera tersedia.`);
   };
 
   return (
     <div className="mt-10">
+      {/* Header Detail Pelatihan */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <Typography variant="h5" color="blue-gray">
-            Daftar Peserta - {pelatihan.nama_pelatihan}
-          </Typography>
-          <Typography variant="small" color="gray">
-            {pelatihan.tanggal_pelatihan} • {pelatihan.lokasi_pelatihan}
-          </Typography>
+          {isPelatihanLoading ? (
+            <Typography variant="small" color="gray">
+              Memuat detail pelatihan...
+            </Typography>
+          ) : pelatihan ? (
+            <>
+              <Typography variant="h5" color="blue-gray">
+                {pelatihan.nama_pelatihan}
+              </Typography>
+              <Typography variant="small" color="gray" className="flex gap-x-2">
+                <span>
+                  {new Date(pelatihan.tanggal_pelatihan).toLocaleDateString(
+                    "id-ID",
+                    {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    }
+                  )}{" "}
+                </span>
+                <span>•</span>
+                <span>
+                  {pelatihan.lokasi_pelatihan}
+                </span>
+                {pelatihan.mitra && (
+                  <React.Fragment>
+                    <span>•</span>
+                    <span>
+                      {pelatihan.mitra.nama_mitra}
+                    </span>
+                  </React.Fragment>
+                )}
+              </Typography>
+            </>
+          ) : (
+            <Typography variant="small" color="gray">
+              Data pelatihan tidak ditemukan.
+            </Typography>
+          )}
         </div>
+
         <div className="flex items-center gap-3">
           <Link href="/admin/pelatihan">
             <Button
@@ -101,25 +179,44 @@ export default function PesertaPelatihanPage({ params }) {
               <ArrowLeftIcon className="h-5 w-5" /> Kembali
             </Button>
           </Link>
-          <Button color="blue" className="flex items-center gap-2">
+          {/* <Button color="blue" className="flex items-center gap-2">
             <UserPlusIcon className="h-5 w-5" /> Tambah Peserta
-          </Button>
+          </Button> */}
         </div>
       </div>
 
+      {/* Deskripsi Pelatihan */}
+      <Card className="border border-blue-gray-100 shadow-sm mb-6">
+        <CardHeader
+          shadow={false}
+          color="transparent"
+          className="m-0 flex gap-y-4 flex-col md:flex-row md:items-center md:justify-between p-6 sticky top-0 bg-white z-10 border-b border-blue-gray-50"
+        >
+          <Typography variant="h6">Deskripsi</Typography>
+        </CardHeader>
+        <CardBody>
+          {pelatihan?.deskripsi_pelatihan}
+        </CardBody>
+      </Card>
+
+      {/* Tabel Peserta */}
       <Card className="border border-blue-gray-100 shadow-sm">
         <CardHeader
           floated={false}
           shadow={false}
           color="transparent"
-          className="m-0 flex gap-y-4 flex-col md:flex-row md:items-center md:justify-between p-6 border-b border-blue-gray-50"
+          className="m-0 flex gap-y-4 flex-col md:flex-row md:items-center md:justify-between p-6 sticky top-0 bg-white z-10 border-b border-blue-gray-50"
         >
-          <Typography variant="h6">Tabel Peserta</Typography>
+          <Typography variant="h6">Daftar Peserta</Typography>
           <div>
             <Input
-              placeholder="Cari peserta"
+              placeholder="Cari peserta..."
+              value={search}
+              onChange={handleSearch}
               className="!w-full sm:!w-64 !border-t-blue-gray-200 focus:!border-t-gray-900"
-              labelProps={{ className: "before:content-none after:content-none" }}
+              labelProps={{
+                className: "before:content-none after:content-none",
+              }}
             />
           </div>
         </CardHeader>
@@ -154,35 +251,40 @@ export default function PesertaPelatihanPage({ params }) {
                     <tr>
                       <td
                         colSpan="6"
-                        className="py-6 text-gray-500 text-center h-[300px]"
+                        className="text-center py-6 text-gray-500"
                       >
-                        <div className="flex justify-center items-center h-full">
-                          Memuat data peserta...
-                        </div>
+                        Memuat data peserta...
                       </td>
                     </tr>
                   ) : pesertaList.length === 0 ? (
                     <tr>
-                      <td colSpan="6" className="text-center py-6 text-gray-500">
-                        Tidak ada data peserta.
+                      <td
+                        colSpan="6"
+                        className="text-center py-6 text-gray-500"
+                      >
+                        Tidak ada peserta terdaftar.
                       </td>
                     </tr>
                   ) : (
                     pesertaList.map((peserta, index) => (
-                      <tr key={peserta.id}>
+                      <tr key={index} className="border-y-2">
                         <td className="py-3 px-5">
                           {(activePage - 1) * limit + index + 1}
                         </td>
-                        <td className="py-3 px-5">{peserta.nama}</td>
-                        <td className="py-3 px-5">{peserta.email}</td>
-                        <td className="py-3 px-5">{peserta.no_hp}</td>
-                        <td className="py-3 px-5">{peserta.status}</td>
+                        <td className="py-3 px-5">
+                          {peserta.nama_lengkap || "-"}
+                        </td>
+                        <td className="py-3 px-5">{peserta.email || "-"}</td>
+                        <td className="py-3 px-5">{peserta.no_hp || "-"}</td>
+                        <td className="py-3 px-5">
+                          {peserta.status_pendaftaran}
+                        </td>
                         <td className="py-3 px-5 flex gap-2">
                           <Tooltip content="Hapus">
                             <IconButton
-                              variant="text"
+                              variant="outlined"
                               color="red"
-                              onClick={() => handleDelete(peserta.id)}
+                              onClick={() => handleDelete(peserta.peserta_id)}
                             >
                               <TrashIcon className="h-4 w-4" />
                             </IconButton>
@@ -197,7 +299,7 @@ export default function PesertaPelatihanPage({ params }) {
           </div>
 
           {/* Pagination */}
-          <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 gap-y-4 border-t border-blue-gray-50">
+          <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 gap-y-4 border-t border-blue-gray-50 sticky bottom-0 bg-white z-10">
             <div className="flex items-center gap-2">
               <Typography variant="small">Tampilkan</Typography>
               <div className="relative">
@@ -235,12 +337,12 @@ export default function PesertaPelatihanPage({ params }) {
 
             <div className="flex items-center gap-4">
               <Button
-                variant="text"
+                variant="filled"
                 className="flex items-center gap-2"
                 onClick={prev}
                 disabled={activePage === 1}
               >
-                <OutlineArrowLeft strokeWidth={2} className="h-4 w-4" /> Previous
+                <OutlineArrowLeft strokeWidth={2} className="h-4 w-4" />
               </Button>
 
               <div className="flex items-center gap-2">
@@ -257,7 +359,7 @@ export default function PesertaPelatihanPage({ params }) {
               </div>
 
               <Button
-                variant="text"
+                variant="filled"
                 className="flex items-center gap-2"
                 onClick={next}
                 disabled={activePage === totalPages}
