@@ -413,6 +413,7 @@ export default function PenggunaPage() {
         open={openHapus}
         onClose={() => setOpenHapus(false)}
         selectedUser={selectedUser}
+        onSuccess={() => fetchUsers(activePage, limit, search)}
       />
       <DetailPenggunaModal
         open={openDetail}
