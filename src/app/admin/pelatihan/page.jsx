@@ -17,12 +17,12 @@ import {
   TrashIcon,
   EyeIcon,
 } from "@heroicons/react/24/solid";
-import { ArrowRightIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import HapusPelatihanModal from "@/components/pelatihan/hapus-pelatihan-modal";
 import httpClient from "@/httpClient";
 import { toast } from "react-toastify";
 import Pagination from "@/components/pagination";
+import LoadingOverlay from '@/components/loading-overlay';
 
 // 🧠 Utility: debounce function
 const debounce = (func, delay) => {
@@ -99,7 +99,9 @@ export default function Pelatihan() {
     if (!selectedPelatihan) return;
 
     try {
-      const response = await httpClient.delete(`/v1/pelatihan/${selectedPelatihan.pelatihan_id}`);
+      const response = await httpClient.delete(
+        `/v1/pelatihan/${selectedPelatihan.pelatihan_id}`
+      );
 
       toast.success(response.data.message || "Pelatihan berhasil dihapus!", {
         position: "top-right",
@@ -157,107 +159,101 @@ export default function Pelatihan() {
         </CardHeader>
 
         <CardBody className="px-0 pt-0 pb-2">
-          <div className="overflow-x-auto">
-            <div className="min-h-[400px]">
-              <table className="w-full min-w-[800px] table-auto">
-                <thead className="bg-gray-200">
-                  <tr>
-                    {[
-                      "No",
-                      "Nama Pelatihan",
-                      "Tanggal",
-                      "Durasi",
-                      "Lokasi",
-                      "Aksi",
-                    ].map((head, index) => (
-                      <th
-                        key={head}
-                        className={`border-b border-blue-gray-50 py-3 px-5 text-left ${
-                          index != 0 ? "min-w-[200px]" : ""
-                        }`}
-                      >
-                        <Typography
-                          variant="small"
-                          className="text-[11px] font-bold uppercase text-blue-gray-400"
+          <LoadingOverlay active={isLoading}>
+            <div className="overflow-x-auto">
+              <div className="min-h-[400px]">
+                <table className="w-full min-w-[800px] table-auto">
+                  <thead className="bg-gray-200">
+                    <tr>
+                      {[
+                        "No",
+                        "Nama Pelatihan",
+                        "Tanggal",
+                        "Durasi",
+                        "Lokasi",
+                        "Aksi",
+                      ].map((head, index) => (
+                        <th
+                          key={head}
+                          className={`border-b border-blue-gray-50 py-3 px-5 text-left ${
+                            index != 0 ? "min-w-[200px]" : ""
+                          }`}
                         >
-                          {head}
-                        </Typography>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {isLoading ? (
-                    <tr>
-                      <td
-                        colSpan="7"
-                        className="py-6 text-gray-500 text-center h-[300px]"
-                      >
-                        <div className="flex justify-center items-center h-full">
-                          Memuat data pelatihan...
-                        </div>
-                      </td>
+                          <Typography
+                            variant="small"
+                            className="text-[11px] font-bold uppercase text-blue-gray-400"
+                          >
+                            {head}
+                          </Typography>
+                        </th>
+                      ))}
                     </tr>
-                  ) : pelatihanList.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan="7"
-                        className="text-center py-6 text-gray-500"
-                      >
-                        Tidak ada data pelatihan.
-                      </td>
-                    </tr>
-                  ) : (
-                    pelatihanList.map((item, index) => (
-                      <tr key={item.pelatihan_id} className="border-y-2">
-                        <td className="py-3 px-5">
-                          {(activePage - 1) * limit + index + 1}
-                        </td>
-                        <td className="py-3 px-5">{item.nama_pelatihan}</td>
-                        <td className="py-3 px-5">
-                          {new Date(item.tanggal_pelatihan).toLocaleDateString(
-                            "id-ID",
-                            { day: "2-digit", month: "long", year: "numeric" }
-                          )}
-                        </td>
-                        <td className="py-3 px-5">{item.durasi_pelatihan}</td>
-                        <td className="py-3 px-5">{item.lokasi_pelatihan}</td>
-                        <td className="py-3 px-5 flex gap-2">
-                          <Tooltip content="Lihat Peserta">
-                            <Link
-                              href={`/admin/pelatihan/${item.pelatihan_id}/peserta`}
-                            >
-                              <IconButton variant="outlined" color="green">
-                                <EyeIcon className="h-4 w-4" />
-                              </IconButton>
-                            </Link>
-                          </Tooltip>
-                          <Tooltip content="Edit">
-                            <Link
-                              href={`/admin/pelatihan/${item.pelatihan_id}/edit`}
-                            >
-                              <IconButton variant="outlined" color="blue">
-                                <PencilIcon className="h-4 w-4" />
-                              </IconButton>
-                            </Link>
-                          </Tooltip>
-                          <Tooltip content="Hapus">
-                            <IconButton
-                              variant="outlined"
-                              color="red"
-                              onClick={() => handleDelete(item)}
-                            >
-                              <TrashIcon className="h-4 w-4" />
-                            </IconButton>
-                          </Tooltip>
+                  </thead>
+                  <tbody>
+                    {pelatihanList.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan="7"
+                          className="text-center py-6 text-gray-500"
+                        >
+                          Tidak ada data pelatihan.
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      pelatihanList.map((item, index) => (
+                        <tr key={item.pelatihan_id} className="border-y-2">
+                          <td className="py-3 px-5">
+                            {(activePage - 1) * limit + index + 1}
+                          </td>
+                          <td className="py-3 px-5">{item.nama_pelatihan}</td>
+                          <td className="py-3 px-5">
+                            {new Date(
+                              item.tanggal_pelatihan
+                            ).toLocaleDateString("id-ID", {
+                              day: "2-digit",
+                              month: "long",
+                              year: "numeric",
+                            })}
+                          </td>
+                          <td className="py-3 px-5">{item.durasi_pelatihan}</td>
+                          <td className="py-3 px-5">{item.lokasi_pelatihan}</td>
+                          <td className="py-3 px-5 flex gap-2">
+                            <Tooltip content="Lihat Peserta">
+                              <Link
+                                href={`/admin/pelatihan/${item.pelatihan_id}/peserta`}
+                              >
+                                <IconButton variant="outlined" color="green">
+                                  <EyeIcon className="h-4 w-4" />
+                                </IconButton>
+                              </Link>
+                            </Tooltip>
+                            <Tooltip content="Edit">
+                              <Link
+                                href={`/admin/pelatihan/${item.pelatihan_id}/edit`}
+                              >
+                                <IconButton variant="outlined" color="blue">
+                                  <PencilIcon className="h-4 w-4" />
+                                </IconButton>
+                              </Link>
+                            </Tooltip>
+                            <Tooltip content="Hapus">
+                              <IconButton
+                                variant="outlined"
+                                color="red"
+                                onClick={() => handleDelete(item)}
+                              >
+                                <TrashIcon className="h-4 w-4" />
+                              </IconButton>
+                            </Tooltip>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          </LoadingOverlay>
 
           {/* Pagination */}
           <Pagination

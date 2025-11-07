@@ -24,6 +24,7 @@ import Link from "next/link";
 import httpClient from "@/httpClient";
 import { toast } from "react-toastify";
 import Pagination from "@/components/pagination";
+import LoadingOverlay from "@/components/loading-overlay";
 
 // 🔹 Utility: debounce function
 const debounce = (func, delay) => {
@@ -150,15 +151,11 @@ export default function PesertaPelatihanPage({ params }) {
                   )}{" "}
                 </span>
                 <span>•</span>
-                <span>
-                  {pelatihan.lokasi_pelatihan}
-                </span>
+                <span>{pelatihan.lokasi_pelatihan}</span>
                 {pelatihan.mitra && (
                   <React.Fragment>
                     <span>•</span>
-                    <span>
-                      {pelatihan.mitra.nama_mitra}
-                    </span>
+                    <span>{pelatihan.mitra.nama_mitra}</span>
                   </React.Fragment>
                 )}
               </Typography>
@@ -195,9 +192,7 @@ export default function PesertaPelatihanPage({ params }) {
         >
           <Typography variant="h6">Deskripsi</Typography>
         </CardHeader>
-        <CardBody>
-          {pelatihan?.deskripsi_pelatihan}
-        </CardBody>
+        <CardBody>{pelatihan?.deskripsi_pelatihan}</CardBody>
       </Card>
 
       {/* Tabel Peserta */}
@@ -223,81 +218,74 @@ export default function PesertaPelatihanPage({ params }) {
         </CardHeader>
 
         <CardBody className="px-0 pt-0 pb-2">
-          <div className="overflow-x-auto">
-            <div className="min-h-[400px]">
-              <table className="w-full min-w-[800px] table-auto">
-                <thead className="bg-gray-200">
-                  <tr>
-                    {["No", "Nama", "Email", "No HP", "Status"].map(
-                      (head, index) => (
-                        <th
-                          key={head}
-                          className={`border-b border-blue-gray-50 py-3 px-5 text-left ${
-                            index != 0 ? "min-w-[180px]" : ""
-                          }`}
-                        >
-                          <Typography
-                            variant="small"
-                            className="text-[11px] font-bold uppercase text-blue-gray-400"
+          <LoadingOverlay active={isLoading}>
+            <div className="overflow-x-auto">
+              <div className="min-h-[400px]">
+                <table className="w-full min-w-[800px] table-auto">
+                  <thead className="bg-gray-200">
+                    <tr>
+                      {["No", "Nama", "Email", "No HP", "Status"].map(
+                        (head, index) => (
+                          <th
+                            key={head}
+                            className={`border-b border-blue-gray-50 py-3 px-5 text-left ${
+                              index != 0 ? "min-w-[180px]" : ""
+                            }`}
                           >
-                            {head}
-                          </Typography>
-                        </th>
-                      )
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {isLoading ? (
-                    <tr>
-                      <td
-                        colSpan="6"
-                        className="text-center py-6 text-gray-500"
-                      >
-                        Memuat data peserta...
-                      </td>
-                    </tr>
-                  ) : pesertaList.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan="6"
-                        className="text-center py-6 text-gray-500"
-                      >
-                        Tidak ada peserta terdaftar.
-                      </td>
-                    </tr>
-                  ) : (
-                    pesertaList.map((peserta, index) => (
-                      <tr key={index} className="border-y-2">
-                        <td className="py-3 px-5">
-                          {(activePage - 1) * limit + index + 1}
-                        </td>
-                        <td className="py-3 px-5">
-                          {peserta.nama_lengkap || "-"}
-                        </td>
-                        <td className="py-3 px-5">{peserta.email || "-"}</td>
-                        <td className="py-3 px-5">{peserta.no_hp || "-"}</td>
-                        <td className="py-3 px-5">
-                          {peserta.status_pendaftaran}
-                        </td>
-                        {/* <td className="py-3 px-5 flex gap-2">
-                          <Tooltip content="Hapus">
-                            <IconButton
-                              variant="outlined"
-                              color="red"
-                              onClick={() => handleDelete(peserta.peserta_id)}
+                            <Typography
+                              variant="small"
+                              className="text-[11px] font-bold uppercase text-blue-gray-400"
                             >
-                              <TrashIcon className="h-4 w-4" />
-                            </IconButton>
-                          </Tooltip>
-                        </td> */}
+                              {head}
+                            </Typography>
+                          </th>
+                        )
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pesertaList.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan="6"
+                          className="text-center py-6 text-gray-500"
+                        >
+                          Tidak ada peserta terdaftar.
+                        </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      pesertaList.map((peserta, index) => (
+                        <tr key={index} className="border-y-2">
+                          <td className="py-3 px-5">
+                            {(activePage - 1) * limit + index + 1}
+                          </td>
+                          <td className="py-3 px-5">
+                            {peserta.nama_lengkap || "-"}
+                          </td>
+                          <td className="py-3 px-5">{peserta.email || "-"}</td>
+                          <td className="py-3 px-5">{peserta.no_hp || "-"}</td>
+                          <td className="py-3 px-5">
+                            {peserta.status_pendaftaran}
+                          </td>
+                          {/* <td className="py-3 px-5 flex gap-2">
+                            <Tooltip content="Hapus">
+                              <IconButton
+                                variant="outlined"
+                                color="red"
+                                onClick={() => handleDelete(peserta.peserta_id)}
+                              >
+                                <TrashIcon className="h-4 w-4" />
+                              </IconButton>
+                            </Tooltip>
+                          </td> */}
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          </LoadingOverlay>
 
           {/* Pagination */}
           <Pagination

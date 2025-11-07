@@ -23,7 +23,8 @@ import HapusPenggunaModal from "@/components/pengguna/hapus-pengguna-modal";
 import DetailPenggunaModal from "@/components/pengguna/detail-pengguna-modal";
 import httpClient from "@/httpClient";
 import { toast } from "react-toastify";
-import Pagination from '@/components/pagination';
+import Pagination from "@/components/pagination";
+import LoadingOverlay from "@/components/loading-overlay";
 
 // 🧠 Utility: debounce function
 const debounce = (func, delay) => {
@@ -141,143 +142,134 @@ export default function PenggunaPage() {
 
         {/* Tabel */}
         <CardBody className="px-0 pt-0 pb-2">
-          <div className="overflow-x-auto">
-            <div className="min-h-[400px]">
-              <table className="w-full min-w-[800px] table-auto">
-                <thead className="bg-gray-200">
-                  <tr>
-                    {[
-                      "No",
-                      "Role",
-                      "Email",
-                      "Nama Lengkap / Mitra",
-                      "Aksi",
-                    ].map((head, index) => (
-                      <th
-                        key={head}
-                        className={`border-b border-blue-gray-50 py-3 px-5 text-left ${
-                          index != 0 ? "min-w-[200px]" : ""
-                        }`}
-                      >
-                        <Typography
-                          variant="small"
-                          className="text-[11px] font-bold uppercase text-blue-gray-400"
+          <LoadingOverlay active={isLoading}>
+            <div className="overflow-x-auto">
+              <div className="min-h-[400px]">
+                <table className="w-full min-w-[800px] table-auto">
+                  <thead className="bg-gray-200">
+                    <tr>
+                      {[
+                        "No",
+                        "Role",
+                        "Email",
+                        "Nama Lengkap / Mitra",
+                        "Aksi",
+                      ].map((head, index) => (
+                        <th
+                          key={head}
+                          className={`border-b border-blue-gray-50 py-3 px-5 text-left ${
+                            index != 0 ? "min-w-[200px]" : ""
+                          }`}
                         >
-                          {head}
-                        </Typography>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {isLoading ? (
-                    <tr>
-                      <td
-                        colSpan="5"
-                        className="py-6 text-gray-500 text-center h-[300px]"
-                      >
-                        <div className="flex justify-center items-center h-full">
-                          Memuat data pengguna...
-                        </div>
-                      </td>
+                          <Typography
+                            variant="small"
+                            className="text-[11px] font-bold uppercase text-blue-gray-400"
+                          >
+                            {head}
+                          </Typography>
+                        </th>
+                      ))}
                     </tr>
-                  ) : users.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan="5"
-                        className="text-center py-6 text-gray-500"
-                      >
-                        Tidak ada data pengguna.
-                      </td>
-                    </tr>
-                  ) : (
-                    users.map((user, index) => (
-                      <tr key={user.user_id} className="border-y">
-                        <td className="py-3 px-5">
-                          {(activePage - 1) * limit + index + 1}
-                        </td>
-                        <td className="py-3 px-5 capitalize">
-                          <Chip
-                            variant="gradient"
-                            color={
-                              user.role === "calon_peserta"
-                                ? "green"
-                                : user.role === "mitra"
-                                ? "purple"
-                                : "blue-gray"
-                            }
-                            value={
-                              user.role === "calon_peserta"
-                                ? "Calon Peserta"
-                                : user.role
-                            }
-                            className="py-0.5 px-2 text-[11px] font-medium w-fit"
-                          />
-                        </td>
-                        <td className="py-3 px-5">{user.email}</td>
-                        <td className="py-3 px-5">
-                          {user.role === "calon_peserta"
-                            ? user.calon_peserta?.nama_lengkap
-                            : user.role === "mitra"
-                            ? user.mitra?.nama_mitra
-                            : "-"}
-                        </td>
-                        <td className="py-3 px-5 flex gap-2">
-                          <Tooltip content="Detail">
-                            <IconButton
-                              variant="outlined"
-                              color="green"
-                              onClick={() => {
-                                setSelectedUser(user);
-                                setOpenDetail(true);
-                              }}
-                              className={
-                                user.role === "calon_peserta" ||
-                                user.role === "mitra"
-                                  ? ""
-                                  : "opacity-0 pointer-events-none"
-                              }
-                            >
-                              <EyeIcon className="h-4 w-4" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip content="Edit Mitra">
-                            <IconButton
-                              variant="outlined"
-                              color="amber"
-                              onClick={() => {
-                                setSelectedUser(user);
-                                setOpenEdit(true);
-                              }}
-                              className={
-                                user.role === "mitra"
-                                  ? ""
-                                  : "opacity-0 pointer-events-none"
-                              }
-                            >
-                              <PencilIcon className="h-4 w-4" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip content="Hapus">
-                            <IconButton
-                              variant="outlined"
-                              color="red"
-                              onClick={() => {
-                                setSelectedUser(user);
-                                setOpenHapus(true);
-                              }}
-                            >
-                              <TrashIcon className="h-4 w-4" />
-                            </IconButton>
-                          </Tooltip>
+                  </thead>
+                  <tbody>
+                    {users.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan="5"
+                          className="text-center py-6 text-gray-500"
+                        >
+                          Tidak ada data pengguna.
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      users.map((user, index) => (
+                        <tr key={user.user_id} className="border-y">
+                          <td className="py-3 px-5">
+                            {(activePage - 1) * limit + index + 1}
+                          </td>
+                          <td className="py-3 px-5 capitalize">
+                            <Chip
+                              variant="gradient"
+                              color={
+                                user.role === "calon_peserta"
+                                  ? "green"
+                                  : user.role === "mitra"
+                                  ? "purple"
+                                  : "blue-gray"
+                              }
+                              value={
+                                user.role === "calon_peserta"
+                                  ? "Calon Peserta"
+                                  : user.role
+                              }
+                              className="py-0.5 px-2 text-[11px] font-medium w-fit"
+                            />
+                          </td>
+                          <td className="py-3 px-5">{user.email}</td>
+                          <td className="py-3 px-5">
+                            {user.role === "calon_peserta"
+                              ? user.calon_peserta?.nama_lengkap
+                              : user.role === "mitra"
+                              ? user.mitra?.nama_mitra
+                              : "-"}
+                          </td>
+                          <td className="py-3 px-5 flex gap-2">
+                            <Tooltip content="Detail">
+                              <IconButton
+                                variant="outlined"
+                                color="green"
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setOpenDetail(true);
+                                }}
+                                className={
+                                  user.role === "calon_peserta" ||
+                                  user.role === "mitra"
+                                    ? ""
+                                    : "opacity-0 pointer-events-none"
+                                }
+                              >
+                                <EyeIcon className="h-4 w-4" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip content="Edit Mitra">
+                              <IconButton
+                                variant="outlined"
+                                color="amber"
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setOpenEdit(true);
+                                }}
+                                className={
+                                  user.role === "mitra"
+                                    ? ""
+                                    : "opacity-0 pointer-events-none"
+                                }
+                              >
+                                <PencilIcon className="h-4 w-4" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip content="Hapus">
+                              <IconButton
+                                variant="outlined"
+                                color="red"
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setOpenHapus(true);
+                                }}
+                              >
+                                <TrashIcon className="h-4 w-4" />
+                              </IconButton>
+                            </Tooltip>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          </LoadingOverlay>
 
           {/* Pagination */}
           <Pagination
