@@ -402,6 +402,7 @@ export default function PenggunaPage() {
       <TambahPenggunaModal
         open={openTambah}
         onClose={() => setOpenTambah(false)}
+        onSuccess={() => fetchUsers(activePage, limit, search)} // 🔁 Refresh daftar pengguna setelah tambah
       />
       <EditPenggunaModal
         open={openEdit}
