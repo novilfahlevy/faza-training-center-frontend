@@ -17,13 +17,13 @@ import {
   EyeIcon,
   PencilIcon,
 } from "@heroicons/react/24/solid";
-import { ArrowRightIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import TambahPenggunaModal from "@/components/pengguna/tambah-pengguna-modal";
 import EditPenggunaModal from "@/components/pengguna/edit-pengguna-modal";
 import HapusPenggunaModal from "@/components/pengguna/hapus-pengguna-modal";
 import DetailPenggunaModal from "@/components/pengguna/detail-pengguna-modal";
 import httpClient from "@/httpClient";
 import { toast } from "react-toastify";
+import Pagination from '@/components/pagination';
 
 // 🧠 Utility: debounce function
 const debounce = (func, delay) => {
@@ -280,121 +280,15 @@ export default function PenggunaPage() {
           </div>
 
           {/* Pagination */}
-          {/* Pagination */}
-          <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 gap-y-4 border-t border-blue-gray-50 sticky bottom-0 bg-white z-10">
-            <div className="flex items-center gap-2">
-              <Typography variant="small">Tampilkan</Typography>
-              <div className="relative">
-                <select
-                  value={limit}
-                  onChange={(e) => {
-                    setLimit(Number(e.target.value));
-                    setActivePage(1);
-                  }}
-                  className="w-[100px] bg-transparent text-sm border border-slate-200 rounded pl-3 pr-8 py-2 cursor-pointer focus:outline-none focus:border-slate-400 hover:border-slate-400"
-                >
-                  {[5, 10, 20, 50].map((n) => (
-                    <option key={n} value={n}>
-                      {n}
-                    </option>
-                  ))}
-                </select>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.2"
-                  stroke="currentColor"
-                  className="h-5 w-5 absolute top-2.5 right-2.5 text-slate-700"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"
-                  />
-                </svg>
-              </div>
-              <Typography variant="small">data per halaman</Typography>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outlined"
-                className="flex items-center gap-2"
-                onClick={prev}
-                disabled={activePage === 1}
-              >
-                <ArrowLeftIcon strokeWidth={2} className="h-4 w-4" />
-              </Button>
-
-              {/* Nomor halaman dengan ellipsis */}
-              <div className="flex items-center gap-2">
-                {(() => {
-                  const maxVisible = 7;
-                  const pages = [];
-
-                  if (totalPages <= maxVisible) {
-                    for (let i = 1; i <= totalPages; i++) {
-                      pages.push(i);
-                    }
-                  } else {
-                    if (activePage <= 4) {
-                      pages.push(1, 2, 3, 4, 5, "...", totalPages);
-                    } else if (activePage >= totalPages - 3) {
-                      pages.push(
-                        1,
-                        "...",
-                        totalPages - 4,
-                        totalPages - 3,
-                        totalPages - 2,
-                        totalPages - 1,
-                        totalPages
-                      );
-                    } else {
-                      pages.push(
-                        1,
-                        "...",
-                        activePage - 1,
-                        activePage,
-                        activePage + 1,
-                        "...",
-                        totalPages
-                      );
-                    }
-                  }
-
-                  return pages.map((page, idx) =>
-                    page === "..." ? (
-                      <span
-                        key={`ellipsis-${idx}`}
-                        className="px-2 text-gray-500"
-                      >
-                        ...
-                      </span>
-                    ) : (
-                      <IconButton
-                        key={page}
-                        variant={activePage === page ? "filled" : "text"}
-                        color="gray"
-                        onClick={() => setActivePage(page)}
-                      >
-                        {page}
-                      </IconButton>
-                    )
-                  );
-                })()}
-              </div>
-
-              <Button
-                variant="outlined"
-                className="flex items-center gap-2"
-                onClick={next}
-                disabled={activePage === totalPages}
-              >
-                <ArrowRightIcon strokeWidth={2} className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          <Pagination
+            limit={limit}
+            setLimit={setLimit}
+            activePage={activePage}
+            setActivePage={setActivePage}
+            totalPages={totalPages}
+            prev={prev}
+            next={next}
+          />
         </CardBody>
       </Card>
 

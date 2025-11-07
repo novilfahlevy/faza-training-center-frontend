@@ -23,6 +23,7 @@ import {
 import Link from "next/link";
 import httpClient from "@/httpClient";
 import { toast } from "react-toastify";
+import Pagination from "@/components/pagination";
 
 // 🔹 Utility: debounce function
 const debounce = (func, delay) => {
@@ -299,75 +300,15 @@ export default function PesertaPelatihanPage({ params }) {
           </div>
 
           {/* Pagination */}
-          <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 gap-y-4 border-t border-blue-gray-50 sticky bottom-0 bg-white z-10">
-            <div className="flex items-center gap-2">
-              <Typography variant="small">Tampilkan</Typography>
-              <div className="relative">
-                <select
-                  value={limit}
-                  onChange={(e) => {
-                    setLimit(Number(e.target.value));
-                    setActivePage(1);
-                  }}
-                  className="w-[100px] bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded pl-3 pr-8 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-400 shadow-sm focus:shadow-md appearance-none cursor-pointer"
-                >
-                  {[5, 10, 20, 50].map((n) => (
-                    <option key={n} value={n}>
-                      {n}
-                    </option>
-                  ))}
-                </select>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.2"
-                  stroke="currentColor"
-                  className="h-5 w-5 ml-1 absolute top-2.5 right-2.5 text-slate-700"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"
-                  />
-                </svg>
-              </div>
-              <Typography variant="small">data per halaman</Typography>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <Button
-                variant="filled"
-                className="flex items-center gap-2"
-                onClick={prev}
-                disabled={activePage === 1}
-              >
-                <OutlineArrowLeft strokeWidth={2} className="h-4 w-4" />
-              </Button>
-
-              <div className="flex items-center gap-2">
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <IconButton
-                    key={i}
-                    variant={activePage === i + 1 ? "filled" : "text"}
-                    color="gray"
-                    onClick={() => setActivePage(i + 1)}
-                  >
-                    {i + 1}
-                  </IconButton>
-                ))}
-              </div>
-
-              <Button
-                variant="filled"
-                className="flex items-center gap-2"
-                onClick={next}
-                disabled={activePage === totalPages}
-              >
-                Next <ArrowRightIcon strokeWidth={2} className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          <Pagination
+            limit={limit}
+            setLimit={setLimit}
+            activePage={activePage}
+            setActivePage={setActivePage}
+            totalPages={totalPages}
+            prev={prev}
+            next={next}
+          />
         </CardBody>
       </Card>
     </div>
