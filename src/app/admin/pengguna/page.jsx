@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Card,
   CardHeader,
@@ -22,10 +22,22 @@ import TambahPenggunaModal from "@/components/pengguna/tambah-pengguna-modal";
 import EditPenggunaModal from "@/components/pengguna/edit-pengguna-modal";
 import HapusPenggunaModal from "@/components/pengguna/hapus-pengguna-modal";
 import DetailPenggunaModal from "@/components/pengguna/detail-pengguna-modal";
+import httpClient from "@/httpClient";
+import { toast } from "react-toastify";
+
+// 🧠 Utility: debounce function
+const debounce = (func, delay) => {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => func(...args), delay);
+  };
+};
 
 export default function PenggunaPage() {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [search, setSearch] = useState("");
 
   const [activePage, setActivePage] = useState(1);
   const [limit, setLimit] = useState(5);
@@ -37,96 +49,55 @@ export default function PenggunaPage() {
   const [openDetail, setOpenDetail] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
-  // 🚀 Simulasi ambil data pengguna
-  const fetchUsers = async (page = 1, perPage = 5) => {
-    setIsLoading(true);
-
-    const dummyUsers = [
-      {
-        user_id: 1,
-        email: "admin@ftc.com",
-        role: "admin",
-      },
-      {
-        user_id: 2,
-        email: "peserta1@ftc.com",
-        role: "calon_peserta",
-        calon_peserta: {
-          nama_lengkap: "Rizky Pratama",
-          tempat_lahir: "Samarinda",
-          tanggal_lahir: "1999-05-12",
-          jenis_kelamin: "L",
-          alamat: "Jl. Cendana No. 5 Samarinda",
-          profesi: "Mahasiswa",
-          instansi: "Universitas Mulawarman",
-          no_reg_kes: "REG-2025-001",
-          no_telp: "081234567890",
+  // 🚀 Fetch data pengguna dari backend
+  const fetchUsers = async (page = 1, perPage = 5, query = "") => {
+    try {
+      setIsLoading(true);
+      const response = await httpClient.get("/v1/pengguna", {
+        params: {
+          page: page - 1, // backend mulai dari 0
+          size: perPage,
+          search: query || undefined,
         },
-      },
-      {
-        user_id: 3,
-        email: "mitra@ftc.com",
-        role: "mitra",
-        mitra: {
-          nama_mitra: "PT Sukses Bersama",
-          deskripsi_mitra: "Perusahaan mitra pelatihan kerja profesional",
-          alamat_mitra: "Jl. Gatot Subroto No. 45",
-          telepon_mitra: "081298765432",
-          email_mitra: "mitra@ftc.com",
-          website_mitra: "www.suksesbersama.co.id",
-        },
-      },
-      {
-        user_id: 4,
-        email: "peserta2@ftc.com",
-        role: "calon_peserta",
-        calon_peserta: {
-          nama_lengkap: "Dewi Lestari",
-          tempat_lahir: "Balikpapan",
-          tanggal_lahir: "2000-02-21",
-          jenis_kelamin: "P",
-          alamat: "Jl. Merpati No. 12 Balikpapan",
-          profesi: "Karyawan Swasta",
-          instansi: "PT Maju Jaya",
-          no_reg_kes: "REG-2025-002",
-          no_telp: "081234111222",
-        },
-      },
-      {
-        user_id: 5,
-        email: "admin2@ftc.com",
-        role: "admin",
-      },
-      {
-        user_id: 6,
-        email: "mitra2@ftc.com",
-        role: "mitra",
-        mitra: {
-          nama_mitra: "CV Cipta Kreatif",
-          deskripsi_mitra: "Mitra penyedia pelatihan desain dan multimedia",
-          alamat_mitra: "Jl. Pahlawan No. 88",
-          telepon_mitra: "081276543210",
-          email_mitra: "mitra2@ftc.com",
-          website_mitra: "www.ciptakreatif.id",
-        },
-      },
-    ];
+      });
 
-    const totalData = dummyUsers.length;
-    const totalPages = Math.ceil(totalData / perPage);
-    const startIndex = (page - 1) * perPage;
-    const paginatedData = dummyUsers.slice(startIndex, startIndex + perPage);
-
-    await new Promise((r) => setTimeout(r, 500));
-
-    setUsers(paginatedData);
-    setTotalPages(totalPages);
-    setIsLoading(false);
+      const { records, totalPages } = response.data;
+      setUsers(records || []);
+      setTotalPages(totalPages || 1);
+    } catch (error) {
+      console.error("Gagal mengambil data pengguna:", error);
+      toast.error("Gagal memuat data pengguna.", {
+        position: "top-right",
+        autoClose: 2500,
+      });
+      setUsers([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  // ⚡️ Debounced search handler
+  const debouncedFetch = useCallback(
+    debounce((query) => {
+      fetchUsers(1, limit, query);
+    }, 500),
+    [limit]
+  );
+
+  // Trigger setiap kali halaman atau limit berubah
   useEffect(() => {
-    fetchUsers(activePage, limit);
+    fetchUsers(activePage, limit, search);
   }, [activePage, limit]);
+
+  // Trigger setiap kali search berubah
+  useEffect(() => {
+    debouncedFetch(search);
+  }, [search, debouncedFetch]);
+
+  const handleSearch = (e) => {
+    setSearch(e.target.value);
+    setActivePage(1);
+  };
 
   const next = () => {
     if (activePage < totalPages) setActivePage((prev) => prev + 1);
@@ -139,53 +110,63 @@ export default function PenggunaPage() {
   return (
     <div className="mt-12">
       <Card className="border border-blue-gray-100 shadow-sm">
+        {/* Header */}
         <CardHeader
           floated={false}
           shadow={false}
           color="transparent"
-          className="m-0 flex gap-y-4 flex-col md:flex-row md:items-center md:justify-between p-6"
+          className="m-0 flex gap-y-4 flex-col md:flex-row md:items-center md:justify-between p-6 sticky top-0 bg-white z-10 border-b border-blue-gray-50"
         >
           <Typography variant="h6">Daftar Pengguna</Typography>
           <div className="flex flex-col gap-y-4 sm:flex-row sm:items-center sm:gap-x-4">
             <Input
-              placeholder="Cari pengguna"
+              placeholder="Cari pengguna (nama/email/mitra)"
+              value={search}
+              onChange={handleSearch}
               className="!w-full sm:!w-64 !border-t-blue-gray-200 focus:!border-t-gray-900"
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
             />
-            <Button
-              onClick={() => setOpenTambah(true)}
-              className="flex items-center gap-2 px-4 py-2 whitespace-nowrap"
-            >
-              <PlusIcon className="h-5 w-5" /> Tambah Pengguna
-            </Button>
+            <div>
+              <Button
+                onClick={() => setOpenTambah(true)}
+                className="flex items-center gap-2 px-4 py-2 whitespace-nowrap"
+              >
+                <PlusIcon className="h-5 w-5" /> Tambah Pengguna
+              </Button>
+            </div>
           </div>
         </CardHeader>
 
+        {/* Tabel */}
         <CardBody className="px-0 pt-0 pb-2">
           <div className="overflow-x-auto">
             <div className="min-h-[400px]">
               <table className="w-full min-w-[800px] table-auto">
                 <thead className="bg-gray-200">
                   <tr>
-                    {["No", "Role", "Email", "Nama Lengkap / Mitra", "Aksi"].map(
-                      (head, index) => (
-                        <th
-                          key={head}
-                          className={`border-b border-blue-gray-50 py-3 px-5 text-left ${
-                            index != 0 ? "min-w-[200px]" : ""
-                          }`}
+                    {[
+                      "No",
+                      "Role",
+                      "Email",
+                      "Nama Lengkap / Mitra",
+                      "Aksi",
+                    ].map((head, index) => (
+                      <th
+                        key={head}
+                        className={`border-b border-blue-gray-50 py-3 px-5 text-left ${
+                          index != 0 ? "min-w-[200px]" : ""
+                        }`}
+                      >
+                        <Typography
+                          variant="small"
+                          className="text-[11px] font-bold uppercase text-blue-gray-400"
                         >
-                          <Typography
-                            variant="small"
-                            className="text-[11px] font-bold uppercase text-blue-gray-400"
-                          >
-                            {head}
-                          </Typography>
-                        </th>
-                      )
-                    )}
+                          {head}
+                        </Typography>
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
@@ -202,13 +183,16 @@ export default function PenggunaPage() {
                     </tr>
                   ) : users.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="text-center py-6 text-gray-500">
+                      <td
+                        colSpan="5"
+                        className="text-center py-6 text-gray-500"
+                      >
                         Tidak ada data pengguna.
                       </td>
                     </tr>
                   ) : (
                     users.map((user, index) => (
-                      <tr key={user.user_id}>
+                      <tr key={user.user_id} className="border-y">
                         <td className="py-3 px-5">
                           {(activePage - 1) * limit + index + 1}
                         </td>
@@ -241,7 +225,7 @@ export default function PenggunaPage() {
                         <td className="py-3 px-5 flex gap-2">
                           <Tooltip content="Detail">
                             <IconButton
-                              variant="text"
+                              variant="outlined"
                               color="green"
                               onClick={() => {
                                 setSelectedUser(user);
@@ -259,7 +243,7 @@ export default function PenggunaPage() {
                           </Tooltip>
                           <Tooltip content="Edit Mitra">
                             <IconButton
-                              variant="text"
+                              variant="outlined"
                               color="amber"
                               onClick={() => {
                                 setSelectedUser(user);
@@ -276,7 +260,7 @@ export default function PenggunaPage() {
                           </Tooltip>
                           <Tooltip content="Hapus">
                             <IconButton
-                              variant="text"
+                              variant="outlined"
                               color="red"
                               onClick={() => {
                                 setSelectedUser(user);
@@ -296,7 +280,8 @@ export default function PenggunaPage() {
           </div>
 
           {/* Pagination */}
-          <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 gap-y-4 border-t border-blue-gray-50">
+          {/* Pagination */}
+          <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 gap-y-4 border-t border-blue-gray-50 sticky bottom-0 bg-white z-10">
             <div className="flex items-center gap-2">
               <Typography variant="small">Tampilkan</Typography>
               <div className="relative">
@@ -334,45 +319,105 @@ export default function PenggunaPage() {
 
             <div className="flex items-center gap-4">
               <Button
-                variant="text"
+                variant="outlined"
                 className="flex items-center gap-2"
                 onClick={prev}
                 disabled={activePage === 1}
               >
-                <ArrowLeftIcon strokeWidth={2} className="h-4 w-4" /> Previous
+                <ArrowLeftIcon strokeWidth={2} className="h-4 w-4" />
               </Button>
 
+              {/* Nomor halaman dengan ellipsis */}
               <div className="flex items-center gap-2">
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <IconButton
-                    key={i}
-                    variant={activePage === i + 1 ? "filled" : "text"}
-                    color="gray"
-                    onClick={() => setActivePage(i + 1)}
-                  >
-                    {i + 1}
-                  </IconButton>
-                ))}
+                {(() => {
+                  const maxVisible = 7;
+                  const pages = [];
+
+                  if (totalPages <= maxVisible) {
+                    for (let i = 1; i <= totalPages; i++) {
+                      pages.push(i);
+                    }
+                  } else {
+                    if (activePage <= 4) {
+                      pages.push(1, 2, 3, 4, 5, "...", totalPages);
+                    } else if (activePage >= totalPages - 3) {
+                      pages.push(
+                        1,
+                        "...",
+                        totalPages - 4,
+                        totalPages - 3,
+                        totalPages - 2,
+                        totalPages - 1,
+                        totalPages
+                      );
+                    } else {
+                      pages.push(
+                        1,
+                        "...",
+                        activePage - 1,
+                        activePage,
+                        activePage + 1,
+                        "...",
+                        totalPages
+                      );
+                    }
+                  }
+
+                  return pages.map((page, idx) =>
+                    page === "..." ? (
+                      <span
+                        key={`ellipsis-${idx}`}
+                        className="px-2 text-gray-500"
+                      >
+                        ...
+                      </span>
+                    ) : (
+                      <IconButton
+                        key={page}
+                        variant={activePage === page ? "filled" : "text"}
+                        color="gray"
+                        onClick={() => setActivePage(page)}
+                      >
+                        {page}
+                      </IconButton>
+                    )
+                  );
+                })()}
               </div>
 
               <Button
-                variant="text"
+                variant="outlined"
                 className="flex items-center gap-2"
                 onClick={next}
                 disabled={activePage === totalPages}
               >
-                Next <ArrowRightIcon strokeWidth={2} className="h-4 w-4" />
+                <ArrowRightIcon strokeWidth={2} className="h-4 w-4" />
               </Button>
             </div>
           </div>
         </CardBody>
       </Card>
 
-      {/* Modal */}
-      <TambahPenggunaModal open={openTambah} onClose={() => setOpenTambah(false)} />
-      <EditPenggunaModal open={openEdit} onClose={() => setOpenEdit(false)} user={selectedUser} />
-      <HapusPenggunaModal open={openHapus} onClose={() => setOpenHapus(false)} selectedUser={selectedUser} />
-      <DetailPenggunaModal open={openDetail} onClose={() => setOpenDetail(false)} user={selectedUser} />
+      {/* Modal Section */}
+      <TambahPenggunaModal
+        open={openTambah}
+        onClose={() => setOpenTambah(false)}
+      />
+      <EditPenggunaModal
+        open={openEdit}
+        onClose={() => setOpenEdit(false)}
+        user={selectedUser}
+      />
+      <HapusPenggunaModal
+        open={openHapus}
+        onClose={() => setOpenHapus(false)}
+        selectedUser={selectedUser}
+      />
+      <DetailPenggunaModal
+        open={openDetail}
+        onClose={() => setOpenDetail(false)}
+        user={selectedUser}
+      />
     </div>
   );
 }
