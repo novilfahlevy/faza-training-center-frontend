@@ -26,10 +26,6 @@ body {
   }
 }
 
-.ql-editor {
-  min-height: 300px;
-}
-
 /* Styling untuk konten deskripsi pelatihan */
 .prose-custom {
   --tw-prose-headings: #111827; /* warna heading */
@@ -85,4 +81,8 @@ body {
 
 .prose-custom a:hover {
   color: #2563eb;
+}
+
+.ql-editor {
+  @apply prose prose-custom max-w-none min-h-[300px];
 }
