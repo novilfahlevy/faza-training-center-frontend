@@ -68,6 +68,7 @@ export default function EditPelatihan() {
       try {
         const payload = {
           ...values,
+          mitra_id: values.mitra_id || null,
           tanggal_pelatihan: selectedDate
             ? format(selectedDate, "yyyy-MM-dd")
             : values.tanggal_pelatihan,
