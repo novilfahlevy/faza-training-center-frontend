@@ -192,7 +192,9 @@ export default function PesertaPelatihanPage({ params }) {
         >
           <Typography variant="h6">Deskripsi</Typography>
         </CardHeader>
-        <CardBody>{pelatihan?.deskripsi_pelatihan}</CardBody>
+        <CardBody className="prose prose-custom max-w-none text-gray-800">
+          <div dangerouslySetInnerHTML={{ __html: pelatihan?.deskripsi_pelatihan }} />
+        </CardBody>
       </Card>
 
       {/* Tabel Peserta */}

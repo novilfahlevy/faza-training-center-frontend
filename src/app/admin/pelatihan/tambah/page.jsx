@@ -22,6 +22,11 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import httpClient from "@/httpClient";
 import { toast } from "react-toastify";
+import dynamic from "next/dynamic";
+
+const TextEditor = dynamic(() => import("@/components/text-editor"), {
+  ssr: false,
+});
 
 export default function TambahPelatihan() {
   const router = useRouter();
@@ -178,18 +183,18 @@ export default function TambahPelatihan() {
 
             {/* Deskripsi */}
             <div>
-              <Textarea
-                label="Deskripsi Pelatihan"
-                name="deskripsi_pelatihan"
+              <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
+                Deskripsi Pelatihan
+              </Typography>
+              <TextEditor
                 value={formik.values.deskripsi_pelatihan}
-                onChange={formik.handleChange}
+                onChange={(value) => formik.setFieldValue("deskripsi_pelatihan", value)}
               />
-              {formik.touched.deskripsi_pelatihan &&
-                formik.errors.deskripsi_pelatihan && (
-                  <Typography variant="small" color="red">
-                    {formik.errors.deskripsi_pelatihan}
-                  </Typography>
-                )}
+              {formik.touched.deskripsi_pelatihan && formik.errors.deskripsi_pelatihan && (
+                <Typography variant="small" color="red">
+                  {formik.errors.deskripsi_pelatihan}
+                </Typography>
+              )}
             </div>
 
             {/* Grid tanggal & durasi */}
