@@ -136,7 +136,7 @@ export default function PesertaPelatihanPage({ params }) {
               Memuat detail pelatihan...
             </Typography>
           ) : pelatihan ? (
-            <>
+            <div className="flex flex-col gap-y-1">
               <Typography variant="h5" color="blue-gray">
                 {pelatihan.nama_pelatihan}
               </Typography>
@@ -160,7 +160,7 @@ export default function PesertaPelatihanPage({ params }) {
                   </React.Fragment>
                 )}
               </Typography>
-            </>
+            </div>
           ) : (
             <Typography variant="small" color="gray">
               Data pelatihan tidak ditemukan.
