@@ -13,6 +13,7 @@ import {
 } from "@material-tailwind/react";
 import {
   ArrowLeftIcon,
+  PencilIcon,
   TrashIcon,
   UserPlusIcon,
 } from "@heroicons/react/24/solid";
@@ -168,6 +169,11 @@ export default function PesertaPelatihanPage({ params }) {
         </div>
 
         <div className="flex items-center gap-3">
+          <Link href={`/admin/pelatihan/${id}/edit`}>
+            <Button color="blue" className="flex items-center gap-2">
+              <PencilIcon className="h-5 w-5" /> Edit
+            </Button>
+          </Link>
           <Link href="/admin/pelatihan">
             <Button
               color="gray"
@@ -177,9 +183,6 @@ export default function PesertaPelatihanPage({ params }) {
               <ArrowLeftIcon className="h-5 w-5" /> Kembali
             </Button>
           </Link>
-          {/* <Button color="blue" className="flex items-center gap-2">
-            <UserPlusIcon className="h-5 w-5" /> Tambah Peserta
-          </Button> */}
         </div>
       </div>
 
