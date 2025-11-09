@@ -22,7 +22,7 @@ import HapusPelatihanModal from "@/components/pelatihan/hapus-pelatihan-modal";
 import httpClient from "@/httpClient";
 import { toast } from "react-toastify";
 import Pagination from "@/components/pagination";
-import LoadingOverlay from '@/components/loading-overlay';
+import LoadingOverlay from "@/components/loading-overlay";
 
 // 🧠 Utility: debounce function
 const debounce = (func, delay) => {
@@ -167,6 +167,7 @@ export default function Pelatihan() {
                     <tr>
                       {[
                         "No",
+                        "Thumbnail",
                         "Nama Pelatihan",
                         "Tanggal",
                         "Durasi",
@@ -176,7 +177,7 @@ export default function Pelatihan() {
                         <th
                           key={head}
                           className={`border-b border-blue-gray-50 py-3 px-5 text-left ${
-                            index != 0 ? "min-w-[200px]" : ""
+                            index !== 0 ? "min-w-[160px]" : ""
                           }`}
                         >
                           <Typography
@@ -189,6 +190,7 @@ export default function Pelatihan() {
                       ))}
                     </tr>
                   </thead>
+
                   <tbody>
                     {pelatihanList.length === 0 ? (
                       <tr>
@@ -201,11 +203,34 @@ export default function Pelatihan() {
                       </tr>
                     ) : (
                       pelatihanList.map((item, index) => (
-                        <tr key={item.pelatihan_id} className="border-y-2">
+                        <tr
+                          key={item.pelatihan_id}
+                          className="border-y-2 hover:bg-gray-50 transition"
+                        >
+                          {/* Nomor urut */}
                           <td className="py-3 px-5">
                             {(activePage - 1) * limit + index + 1}
                           </td>
+
+                          {/* Thumbnail */}
+                          <td className="py-3 px-5">
+                            {item.thumbnail_url ? (
+                              <img
+                                src={item.thumbnail_url}
+                                alt="Thumbnail"
+                                className="w-32 h-20 rounded-md object-cover border border-gray-200 shadow-sm"
+                              />
+                            ) : (
+                              <div className="w-32 h-20 bg-gray-100 rounded-md flex items-center justify-center text-gray-400 text-xs border">
+                                No Img
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Nama pelatihan */}
                           <td className="py-3 px-5">{item.nama_pelatihan}</td>
+
+                          {/* Tanggal */}
                           <td className="py-3 px-5">
                             {new Date(
                               item.tanggal_pelatihan
@@ -215,8 +240,14 @@ export default function Pelatihan() {
                               year: "numeric",
                             })}
                           </td>
+
+                          {/* Durasi */}
                           <td className="py-3 px-5">{item.durasi_pelatihan}</td>
+
+                          {/* Lokasi */}
                           <td className="py-3 px-5">{item.lokasi_pelatihan}</td>
+
+                          {/* Aksi */}
                           <td className="py-3 px-5 flex gap-2">
                             <Tooltip content="Lihat Peserta">
                               <Link

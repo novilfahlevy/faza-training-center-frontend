@@ -23,6 +23,7 @@ import * as Yup from "yup";
 import httpClient from "@/httpClient";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
+import ThumbnailUploader from "@/components/pelatihan/thumbnail-uploader";
 
 const TextEditor = dynamic(() => import("@/components/text-editor"), {
   ssr: false,
@@ -86,16 +87,20 @@ export default function TambahPelatihan() {
         setLoading(true);
         const payload = {
           ...values,
+          thumbnail_id: thumbnail?.id || null,
           mitra_id: values.mitra_id || null,
           tanggal_pelatihan: format(selectedDate, "yyyy-MM-dd"),
         };
 
         const response = await httpClient.post("/v1/pelatihan", payload);
 
-        toast.success(response.data.message || "Pelatihan berhasil ditambahkan!", {
-          position: "top-right",
-          autoClose: 2500,
-        });
+        toast.success(
+          response.data.message || "Pelatihan berhasil ditambahkan!",
+          {
+            position: "top-right",
+            autoClose: 2500,
+          }
+        );
 
         setTimeout(() => router.push("/admin/pelatihan"), 500);
       } catch (error) {
@@ -155,6 +160,8 @@ export default function TambahPelatihan() {
     formik.setFieldValue("mitra_id", "");
   };
 
+  const [thumbnail, setThumbnail] = useState(null);
+
   return (
     <div className="mt-12 flex justify-center">
       <Card className="w-full max-w-3xl border border-blue-gray-100 shadow-sm">
@@ -166,6 +173,18 @@ export default function TambahPelatihan() {
 
         <CardBody className="px-6 pb-6">
           <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
+            {/* Thumbnail uploader */}
+            <div>
+              <Typography
+                variant="small"
+                color="blue-gray"
+                className="mb-2 font-medium"
+              >
+                Poster/Sampul
+              </Typography>
+              <ThumbnailUploader value={thumbnail} onChange={setThumbnail} />
+            </div>
+
             {/* Nama */}
             <div>
               <Input
@@ -174,27 +193,35 @@ export default function TambahPelatihan() {
                 value={formik.values.nama_pelatihan}
                 onChange={formik.handleChange}
               />
-              {formik.touched.nama_pelatihan && formik.errors.nama_pelatihan && (
-                <Typography variant="small" color="red">
-                  {formik.errors.nama_pelatihan}
-                </Typography>
-              )}
+              {formik.touched.nama_pelatihan &&
+                formik.errors.nama_pelatihan && (
+                  <Typography variant="small" color="red">
+                    {formik.errors.nama_pelatihan}
+                  </Typography>
+                )}
             </div>
 
             {/* Deskripsi */}
             <div>
-              <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
+              <Typography
+                variant="small"
+                color="blue-gray"
+                className="mb-2 font-medium"
+              >
                 Deskripsi Pelatihan
               </Typography>
               <TextEditor
                 value={formik.values.deskripsi_pelatihan}
-                onChange={(value) => formik.setFieldValue("deskripsi_pelatihan", value)}
+                onChange={(value) =>
+                  formik.setFieldValue("deskripsi_pelatihan", value)
+                }
               />
-              {formik.touched.deskripsi_pelatihan && formik.errors.deskripsi_pelatihan && (
-                <Typography variant="small" color="red">
-                  {formik.errors.deskripsi_pelatihan}
-                </Typography>
-              )}
+              {formik.touched.deskripsi_pelatihan &&
+                formik.errors.deskripsi_pelatihan && (
+                  <Typography variant="small" color="red">
+                    {formik.errors.deskripsi_pelatihan}
+                  </Typography>
+                )}
             </div>
 
             {/* Grid tanggal & durasi */}

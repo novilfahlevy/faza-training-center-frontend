@@ -86,3 +86,79 @@ body {
 .ql-editor {
   @apply prose prose-custom max-w-none min-h-[300px];
 }
+
+/* ---------- Thumbnail preview: penuhi dropzone ---------- */
+/* Target wrapper utama dari react-images-upload */
+.image-upload > div.border-2 {
+  /* buat area dropzone dengan tinggi tetap responsive */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;                       /* kita atur padding sendiri di dalam */
+  background: #fafafa;
+  overflow: hidden;
+  min-height: 200px;
+}
+
+/* Buat kontainer gambar agar memenuhi seluruh area dropzone */
+.image-upload > div.border-2 .relative {
+  width: 100%;
+  /* tentukan aspect ratio thumbnail (ubah sesuai kebutuhan: 16/9, 4/3, etc.) */
+  aspect-ratio: 16 / 9;
+  display: block;
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem; /* rounding sesuai markup */
+}
+
+/* Gambar: penuh, proporsional, tidak meregang */
+.image-upload > div.border-2 .relative img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;    /* kunci agar memenuhi area tanpa distorsi */
+  display: block;
+  border-radius: 0;                /* already on parent */
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Tombol hapus: tetap di pojok, terlihat jelas */
+.image-upload > div.border-2 .relative button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 20;
+  padding: 0.35rem;
+  border-radius: 9999px;
+  background: rgba(255,255,255,0.9);
+}
+
+/* Jika tidak ada gambar, beri area placeholder yang proporsional */
+.image-upload > div.border-2 .relative:empty {
+  background: #f3f4f6; /* light gray */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+/* Responsive tweak: di layar kecil, kurangi tinggi agar muat */
+@media (max-width: 640px) {
+  .image-upload > div.border-2 .relative {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+/* Optional: batas lebar max untuk layout admin */
+.image-upload {
+  width: 100%;
+}
+
+/* Jika ada preview kecil (mis. class bawaan w-48 h-32), override supaya tidak memengaruhi */
+.image-upload img.w-48,
+.image-upload img.h-32 {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}

@@ -21,6 +21,7 @@ import * as Yup from "yup";
 import httpClient from "@/httpClient";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
+import ThumbnailUploader from "@/components/pelatihan/thumbnail-uploader";
 
 const TextEditor = dynamic(() => import("@/components/text-editor"), {
   ssr: false,
@@ -35,7 +36,9 @@ export default function EditPelatihan() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [mitraList, setMitraList] = useState([]);
   const [isMitraListLoaded, setMitraListLoaded] = useState(false);
+
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const dateRef = useRef(null);
   const calendarRef = useRef(null);
@@ -66,8 +69,11 @@ export default function EditPelatihan() {
     validationSchema,
     onSubmit: async (values) => {
       try {
+        setSubmitting(true);
+
         const payload = {
           ...values,
+          thumbnail_id: thumbnail?.id || null,
           mitra_id: values.mitra_id || null,
           tanggal_pelatihan: selectedDate
             ? format(selectedDate, "yyyy-MM-dd")
@@ -89,9 +95,13 @@ export default function EditPelatihan() {
             (error.response?.data?.message || error.message),
           { position: "top-right", autoClose: 3500 }
         );
+      } finally {
+        setSubmitting(false);
       }
     },
   });
+
+  const [thumbnail, setThumbnail] = useState(null);
 
   // 📅 Tutup kalender saat klik di luar
   useEffect(() => {
@@ -160,6 +170,10 @@ export default function EditPelatihan() {
         const res = await httpClient.get(`/v1/pelatihan/${pelatihanId}`);
         const data = res.data;
 
+        if (res.data.thumbnail_url) {
+          setThumbnail({ id: null, url: res.data.thumbnail_url });
+        }
+
         let parsedDate = null;
         if (data.tanggal_pelatihan) {
           parsedDate = new Date(data.tanggal_pelatihan);
@@ -208,6 +222,18 @@ export default function EditPelatihan() {
 
         <CardBody className="px-6 pb-6">
           <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
+            {/* Thumbnail uploader */}
+            <div>
+              <Typography
+                variant="small"
+                color="blue-gray"
+                className="mb-2 font-medium"
+              >
+                Poster/Sampul
+              </Typography>
+              <ThumbnailUploader value={thumbnail} onChange={setThumbnail} />
+            </div>
+
             {/* Nama */}
             <div>
               <Input
@@ -364,8 +390,8 @@ export default function EditPelatihan() {
               >
                 Batal
               </Button>
-              <Button type="submit" color="blue">
-                Simpan
+              <Button type="submit" color="blue" disabled={submitting}>
+                {submitting ? "Menyimpan..." : "Simpan"}
               </Button>
             </div>
           </form>

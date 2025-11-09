@@ -23,6 +23,7 @@
     "react-apexcharts": "1.4.1",
     "react-day-picker": "^9.11.1",
     "react-dom": "18.2.0",
+    "react-images-uploading": "^3.1.7",
     "react-loading-overlay-ts": "^2.0.2",
     "react-quill": "^2.0.0",
     "react-router-dom": "6.17.0",
