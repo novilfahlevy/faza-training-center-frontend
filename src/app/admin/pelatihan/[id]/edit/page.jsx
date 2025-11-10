@@ -21,9 +21,9 @@ import * as Yup from "yup";
 import httpClient from "@/httpClient";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
-import ThumbnailUploader from "@/components/pelatihan/thumbnail-uploader";
+import ThumbnailUploader from "@/components/admin/pelatihan/thumbnail-uploader";
 
-const TextEditor = dynamic(() => import("@/components/text-editor"), {
+const TextEditor = dynamic(() => import("@/components/admin/text-editor"), {
   ssr: false,
 });
 

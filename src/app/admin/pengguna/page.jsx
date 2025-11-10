@@ -17,14 +17,14 @@ import {
   EyeIcon,
   PencilIcon,
 } from "@heroicons/react/24/solid";
-import TambahPenggunaModal from "@/components/pengguna/tambah-pengguna-modal";
-import EditPenggunaModal from "@/components/pengguna/edit-pengguna-modal";
-import HapusPenggunaModal from "@/components/pengguna/hapus-pengguna-modal";
-import DetailPenggunaModal from "@/components/pengguna/detail-pengguna-modal";
+import TambahPenggunaModal from "@/components/admin/pengguna/tambah-pengguna-modal";
+import EditPenggunaModal from "@/components/admin/pengguna/edit-pengguna-modal";
+import HapusPenggunaModal from "@/components/admin/pengguna/hapus-pengguna-modal";
+import DetailPenggunaModal from "@/components/admin/pengguna/detail-pengguna-modal";
 import httpClient from "@/httpClient";
 import { toast } from "react-toastify";
-import Pagination from "@/components/pagination";
-import LoadingOverlay from "@/components/loading-overlay";
+import Pagination from "@/components/admin/pagination";
+import LoadingOverlay from "@/components/admin/loading-overlay";
 
 // 🧠 Utility: debounce function
 const debounce = (func, delay) => {

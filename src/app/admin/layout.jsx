@@ -2,9 +2,9 @@
 
 import NextTopLoader from "nextjs-toploader";
 
-import Sidenav from "@/components/layout/sidenav";
-import DashboardNavbar from "@/components/layout/dashboard-navbar";
-import Footer from "@/components/layout/footer";
+import Sidenav from "@/components/admin/layout/sidenav";
+import DashboardNavbar from "@/components/admin/layout/dashboard-navbar";
+import Footer from "@/components/admin/layout/footer";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";

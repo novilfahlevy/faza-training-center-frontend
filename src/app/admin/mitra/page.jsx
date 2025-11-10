@@ -18,10 +18,10 @@ import {
 } from "@heroicons/react/24/solid";
 import { ArrowRightIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 
-import TambahMitraModal from "@/components/mitra/tambah-mitra-modal";
-import EditMitraModal from "@/components/mitra/edit-mitra-modal";
-import HapusMitraModal from "@/components/mitra/hapus-mitra-modal";
-import DetailMitraModal from "@/components/mitra/detail-mitra-modal";
+import TambahMitraModal from "@/components/admin/mitra/tambah-mitra-modal";
+import EditMitraModal from "@/components/admin/mitra/edit-mitra-modal";
+import HapusMitraModal from "@/components/admin/mitra/hapus-mitra-modal";
+import DetailMitraModal from "@/components/admin/mitra/detail-mitra-modal";
 
 export default function MitraPage() {
   // Dummy data

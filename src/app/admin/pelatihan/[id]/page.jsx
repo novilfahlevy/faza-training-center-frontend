@@ -27,8 +27,8 @@ import {
 import Link from "next/link";
 import httpClient from "@/httpClient";
 import { toast } from "react-toastify";
-import Pagination from "@/components/pagination";
-import LoadingOverlay from "@/components/loading-overlay";
+import Pagination from "@/components/admin/pagination";
+import LoadingOverlay from "@/components/admin/loading-overlay";
 
 // 🔹 Utility: debounce function
 const debounce = (func, delay) => {

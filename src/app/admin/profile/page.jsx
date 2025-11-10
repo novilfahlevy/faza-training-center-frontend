@@ -21,8 +21,8 @@ import {
   PencilIcon,
 } from "@heroicons/react/24/solid";
 import Link from "next/link";
-import ProfileInfoCard from "@/components/cards/profile-info-card";
-import MessageCard from "@/components/cards/message-card";
+import ProfileInfoCard from "@/components/admin/cards/profile-info-card";
+import MessageCard from "@/components/admin/cards/message-card";
 import { platformSettingsData, conversationsData, projectsData } from "@/data";
 
 export default function Profile() {

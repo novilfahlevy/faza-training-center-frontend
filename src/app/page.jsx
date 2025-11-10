@@ -1,101 +1,113 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { Inter } from 'next/font/google';
+import '@/app/globals.css';
+import Link from 'next/link';
+import { fetchTrainings } from '@/api';
+import { useEffect, useState } from 'react';
+import TrainingCard from '@/components/main/training-card';
+import { ArrowRightIcon, PlayCircleIcon } from '@heroicons/react/24/solid';
+import { AcademicCapIcon, UserGroupIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
+import Header from '@/components/main/header';
+import Footer from '@/components/main/footer';
+import { Toaster } from 'react-hot-toast';
+
+const inter = Inter({ subsets: ['latin'] });
+
+export default function HomePage() {
+  const [trainings, setTrainings] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const getTrainings = async () => {
+      try {
+        const data = await fetchTrainings({ limit: 6 }); // Ambil 6 pelatihan terbaru
+        setTrainings(data.records || []);
+      } catch (error) {
+        console.error("Gagal memuat pelatihan:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    getTrainings();
+  }, []);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className={inter.className}>
+      <Header />
+      <div>
+        {/* Hero Section */}
+        <section className="bg-gradient-to-r from-blue-600 to-teal-500 text-white">
+          <div className="container mx-auto px-6 py-20 flex flex-col md:flex-row items-center">
+            <div className="md:w-1/2 mb-10 md:mb-0">
+              <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4">
+                Tingkatkan Kompetensi Medis Anda Bersama FTC
+              </h1>
+              <p className="text-lg mb-6">
+                Bergabunglah dengan pelatihan medis dan kesehatan terpercaya untuk dokter dan tenaga medis profesional, diselenggarakan oleh FTC bersama mitra berpengalaman.
+              </p>
+              <Link href="/pelatihan">
+                <button className="bg-white text-blue-600 font-bold py-3 px-6 rounded-full hover:bg-gray-100 transition duration-300 flex items-center">
+                  Lihat Pelatihan Kami
+                  <ArrowRightIcon className="h-5 w-5 ml-2" />
+                </button>
+              </Link>
+            </div>
+            <div className="md:w-1/2">
+              <img src="https://via.placeholder.com/600x400" alt="Medical Training" className="rounded-lg shadow-xl" />
+            </div>
+          </div>
+        </section>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        {/* Features Section */}
+        <section className="py-16 bg-gray-50">
+          <div className="container mx-auto px-6">
+            <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">Mengapa Memilih FTC?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <AcademicCapIcon className="h-16 w-16 text-blue-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">Pengajar Berpengalaman</h3>
+                <p className="text-gray-600">Didukung oleh para ahli dan praktisi medis terkemuka di bidangnya.</p>
+              </div>
+              <div className="text-center">
+                <ShieldCheckIcon className="h-16 w-16 text-blue-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">Sertifikat Resmi</h3>
+                <p className="text-gray-600">Dapatkan sertifikat yang diakui dan meningkatkan nilai profesional Anda.</p>
+              </div>
+              <div className="text-center">
+                <UserGroupIcon className="h-16 w-16 text-blue-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">Kolaborasi Mitra</h3>
+                <p className="text-gray-600">Bekerja sama dengan rumah sakit dan institusi kesehatan terpercaya.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Latest Trainings Section */}
+        <section className="py-16">
+          <div className="container mx-auto px-6">
+            <div className="flex justify-between items-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-800">Pelatihan Terbaru</h2>
+              <Link href="/pelatihan" className="text-blue-600 hover:underline flex items-center">
+                Lihat Semua
+                <ArrowRightIcon className="h-4 w-4 ml-1" />
+              </Link>
+            </div>
+
+            {loading ? (
+              <p>Memuat data...</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {trainings.map((training) => (
+                  <TrainingCard key={training.pelatihan_id} training={training} />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+      <Footer />
+      <Toaster position="top-right" />
     </div>
   );
 }
