@@ -1,23 +1,19 @@
 "use client";
 
 import NextTopLoader from "nextjs-toploader";
-import { Cog6ToothIcon } from "@heroicons/react/24/solid";
-import { IconButton } from "@material-tailwind/react";
 
 import Sidenav from "@/components/layout/sidenav";
 import DashboardNavbar from "@/components/layout/dashboard-navbar";
-import Configurator from "@/components/layout/configurator";
 import Footer from "@/components/layout/footer";
 
 import {
   MaterialTailwindControllerProvider,
   useMaterialTailwindController,
-  setOpenConfigurator,
 } from "@/context";
 import routes from "@/routes";
 import { usePathname } from "next/navigation";
 
-import "@/app/globals.css";
+import "@/app/admin/globals.css";
 
 function DashboardLayoutContent({ children }) {
   const [controller, dispatch] = useMaterialTailwindController();
