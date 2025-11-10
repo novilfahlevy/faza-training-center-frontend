@@ -10,12 +10,15 @@ import {
   IconButton,
   Tooltip,
   Input,
+  Chip,
 } from "@material-tailwind/react";
 import {
   ArrowLeftIcon,
   PencilIcon,
   TrashIcon,
-  UserPlusIcon,
+  CalendarDaysIcon,
+  MapPinIcon,
+  BuildingOfficeIcon,
 } from "@heroicons/react/24/solid";
 import {
   ArrowRightIcon,
@@ -73,7 +76,6 @@ export default function PesertaPelatihanPage({ params }) {
 
       const { records, totalPages } = res.data;
 
-      // Ambil data peserta dari backend
       const peserta = records.map((item) => ({
         peserta_id: item.peserta_id,
         nama_lengkap: item.peserta?.nama_lengkap,
@@ -127,80 +129,103 @@ export default function PesertaPelatihanPage({ params }) {
   };
 
   return (
-    <div className="mt-10">
-      {/* Header Detail Pelatihan */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
+    <div className="mt-10 mb-10">
+      {/* 🔹 HERO SECTION: Info Utama Pelatihan */}
+      <Card className="border border-blue-gray-100 shadow-lg mb-8 overflow-hidden">
+        <CardBody className="p-0">
           {isPelatihanLoading ? (
-            <Typography variant="small" color="gray">
-              Memuat detail pelatihan...
-            </Typography>
+            <div className="flex items-center justify-center h-64">
+              <Typography color="gray">Memuat detail pelatihan...</Typography>
+            </div>
           ) : pelatihan ? (
-            <div className="flex flex-col gap-y-1">
-              <Typography variant="h5" color="blue-gray">
-                {pelatihan.nama_pelatihan}
-              </Typography>
-              <Typography variant="small" color="gray" className="flex gap-x-2">
-                <span>
-                  {new Date(pelatihan.tanggal_pelatihan).toLocaleDateString(
-                    "id-ID",
-                    {
-                      day: "2-digit",
-                      month: "long",
-                      year: "numeric",
-                    }
-                  )}{" "}
-                </span>
-                <span>•</span>
-                <span>{pelatihan.lokasi_pelatihan}</span>
-                {pelatihan.mitra && (
-                  <React.Fragment>
-                    <span>•</span>
-                    <span>{pelatihan.mitra.nama_mitra}</span>
-                  </React.Fragment>
-                )}
-              </Typography>
+            <div className="flex flex-col lg:flex-row">
+              {/* Gambar Thumbnail */}
+              <div className="w-full lg:w-1/3 h-64 lg:h-auto">
+                <img
+                  src={pelatihan.thumbnail_url || 'https://via.placeholder.com/400x300.png?text=No+Image'}
+                  alt={pelatihan.nama_pelatihan}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {/* Konten Utama */}
+              <div className="w-full lg:w-2/3 p-6 lg:p-8 flex flex-col justify-between">
+                <div>
+                  <Typography variant="h3" color="blue-gray" className="mb-4">
+                    {pelatihan.nama_pelatihan}
+                  </Typography>
+                  
+                  {/* Metadata dalam bentuk Chip */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <Chip
+                      variant="ghost"
+                      value={new Date(pelatihan.tanggal_pelatihan).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                      icon={<CalendarDaysIcon className="h-4 w-4" />}
+                      className="rounded-full"
+                    />
+                    <Chip
+                      variant="ghost"
+                      value={pelatihan.lokasi_pelatihan}
+                      icon={<MapPinIcon className="h-4 w-4" />}
+                      className="rounded-full"
+                    />
+                    {pelatihan.mitra && (
+                      <Chip
+                        variant="ghost"
+                        color="blue"
+                        value={pelatihan.mitra.nama_mitra}
+                        icon={<BuildingOfficeIcon className="h-4 w-4" />}
+                        className="rounded-full"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* Tombol Aksi */}
+                <div className="flex gap-3 mt-4">
+                  <Link href={`/admin/pelatihan/${id}/edit`}>
+                    <Button color="blue" className="flex items-center gap-2">
+                      <PencilIcon className="h-5 w-5" /> Edit Pelatihan
+                    </Button>
+                  </Link>
+                  <Link href="/admin/pelatihan">
+                    <Button variant="outlined" color="gray" className="flex items-center gap-2">
+                      <ArrowLeftIcon className="h-5 w-5" /> Kembali
+                    </Button>
+                  </Link>
+                </div>
+              </div>
             </div>
           ) : (
-            <Typography variant="small" color="gray">
-              Data pelatihan tidak ditemukan.
-            </Typography>
+            <div className="flex items-center justify-center h-64">
+              <Typography color="gray">Data pelatihan tidak ditemukan.</Typography>
+            </div>
           )}
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Link href={`/admin/pelatihan/${id}/edit`}>
-            <Button color="blue" className="flex items-center gap-2">
-              <PencilIcon className="h-5 w-5" /> Edit
-            </Button>
-          </Link>
-          <Link href="/admin/pelatihan">
-            <Button
-              color="gray"
-              variant="outlined"
-              className="flex items-center gap-2"
-            >
-              <ArrowLeftIcon className="h-5 w-5" /> Kembali
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Deskripsi Pelatihan */}
-      <Card className="border border-blue-gray-100 shadow-sm mb-6">
-        <CardHeader
-          shadow={false}
-          color="transparent"
-          className="m-0 flex gap-y-4 flex-col md:flex-row md:items-center md:justify-between p-6 sticky top-0 bg-white z-10 border-b border-blue-gray-50"
-        >
-          <Typography variant="h6">Deskripsi</Typography>
-        </CardHeader>
-        <CardBody className="prose prose-custom max-w-none text-gray-800">
-          <div dangerouslySetInnerHTML={{ __html: pelatihan?.deskripsi_pelatihan }} />
         </CardBody>
       </Card>
 
-      {/* Tabel Peserta */}
+      {/* 🔹 KARTU DESKRIPSI */}
+      <Card className="border border-blue-gray-100 shadow-sm mb-8">
+        <CardHeader floated={false} shadow={false} className="m-0 p-6 border-b">
+          <Typography variant="h6" color="blue-gray">Deskripsi Pelatihan</Typography>
+        </CardHeader>
+        <CardBody className="p-6">
+          {pelatihan?.deskripsi_pelatihan ? (
+            <div 
+              className="prose prose-content max-w-none"
+              dangerouslySetInnerHTML={{ __html: pelatihan.deskripsi_pelatihan }} 
+            />
+          ) : (
+            <Typography color="gray">Tidak ada deskripsi tersedia.</Typography>
+          )}
+        </CardBody>
+      </Card>
+
+      {/* 🔹 KARTU DAFTAR PESERTA */}
       <Card className="border border-blue-gray-100 shadow-sm">
         <CardHeader
           floated={false}
@@ -208,16 +233,14 @@ export default function PesertaPelatihanPage({ params }) {
           color="transparent"
           className="m-0 flex gap-y-4 flex-col md:flex-row md:items-center md:justify-between p-6 sticky top-0 bg-white z-10 border-b border-blue-gray-50"
         >
-          <Typography variant="h6">Daftar Peserta</Typography>
-          <div>
+          <Typography variant="h6" color="blue-gray">Daftar Peserta</Typography>
+          <div className="w-full md:w-auto">
             <Input
               placeholder="Cari peserta..."
               value={search}
               onChange={handleSearch}
-              className="!w-full sm:!w-64 !border-t-blue-gray-200 focus:!border-t-gray-900"
-              labelProps={{
-                className: "before:content-none after:content-none",
-              }}
+              className="!w-full md:!w-64 !border-t-blue-gray-200 focus:!border-t-gray-900"
+              labelProps={{ className: "before:content-none after:content-none" }}
             />
           </div>
         </CardHeader>
@@ -227,62 +250,45 @@ export default function PesertaPelatihanPage({ params }) {
             <div className="overflow-x-auto">
               <div className="min-h-[400px]">
                 <table className="w-full min-w-[800px] table-auto">
-                  <thead className="bg-gray-200">
+                  <thead className="bg-gray-50">
                     <tr>
-                      {["No", "Nama", "Email", "No HP", "Status"].map(
-                        (head, index) => (
-                          <th
-                            key={head}
-                            className={`border-b border-blue-gray-50 py-3 px-5 text-left ${
-                              index != 0 ? "min-w-[180px]" : ""
-                            }`}
-                          >
-                            <Typography
-                              variant="small"
-                              className="text-[11px] font-bold uppercase text-blue-gray-400"
-                            >
-                              {head}
-                            </Typography>
-                          </th>
-                        )
-                      )}
+                      {["No", "Nama", "Email", "No. HP", "Status"].map((head) => (
+                        <th key={head} className="border-b border-blue-gray-100 py-3 px-5 text-left">
+                          <Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">
+                            {head}
+                          </Typography>
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
                     {pesertaList.length === 0 ? (
                       <tr>
-                        <td
-                          colSpan="6"
-                          className="text-center py-6 text-gray-500"
-                        >
+                        <td colSpan="5" className="text-center py-10 text-gray-500">
                           Tidak ada peserta terdaftar.
                         </td>
                       </tr>
                     ) : (
                       pesertaList.map((peserta, index) => (
-                        <tr key={index} className="border-y-2">
+                        <tr key={peserta.peserta_id} className="border-y">
                           <td className="py-3 px-5">
                             {(activePage - 1) * limit + index + 1}
                           </td>
-                          <td className="py-3 px-5">
+                          <td className="py-3 px-5 font-medium">
                             {peserta.nama_lengkap || "-"}
                           </td>
                           <td className="py-3 px-5">{peserta.email || "-"}</td>
                           <td className="py-3 px-5">{peserta.no_hp || "-"}</td>
                           <td className="py-3 px-5">
-                            {peserta.status_pendaftaran}
+                            <Chip
+                              variant="gradient"
+                              value={peserta.status_pendaftaran}
+                              color={peserta.status_pendaftaran === 'terdaftar'
+                                ? 'blue'
+                                : (peserta.status_pendaftaran === 'selesai' ? 'green' : 'gray')}
+                              className="py-0.5 px-2 text-[11px] font-medium w-fit"
+                            />
                           </td>
-                          {/* <td className="py-3 px-5 flex gap-2">
-                            <Tooltip content="Hapus">
-                              <IconButton
-                                variant="outlined"
-                                color="red"
-                                onClick={() => handleDelete(peserta.peserta_id)}
-                              >
-                                <TrashIcon className="h-4 w-4" />
-                              </IconButton>
-                            </Tooltip>
-                          </td> */}
                         </tr>
                       ))
                     )}

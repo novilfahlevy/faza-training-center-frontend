@@ -386,7 +386,7 @@ export default function EditPelatihan() {
                 type="button"
                 variant="text"
                 color="blue-gray"
-                onClick={() => router.push("/admin/pelatihan")}
+                onClick={() => router.back()}
               >
                 Batal
               </Button>

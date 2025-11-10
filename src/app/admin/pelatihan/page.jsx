@@ -249,9 +249,9 @@ export default function Pelatihan() {
 
                           {/* Aksi */}
                           <td className="py-3 px-5 flex gap-2">
-                            <Tooltip content="Lihat Peserta">
+                            <Tooltip content="Lihat Detail">
                               <Link
-                                href={`/admin/pelatihan/${item.pelatihan_id}/peserta`}
+                                href={`/admin/pelatihan/${item.pelatihan_id}`}
                               >
                                 <IconButton variant="outlined" color="green">
                                   <EyeIcon className="h-4 w-4" />

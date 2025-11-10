@@ -27,7 +27,7 @@ body {
 }
 
 /* Styling untuk konten deskripsi pelatihan */
-.prose-custom {
+.prose-content {
   --tw-prose-headings: #111827; /* warna heading */
   --tw-prose-body: #374151;
   --tw-prose-links: #1d4ed8;
@@ -40,51 +40,51 @@ body {
   line-height: 1.6;
 }
 
-.prose-custom h1 {
+.prose-content h1 {
   font-size: 1.5rem; /* kecilkan h1 */
   margin-top: 1rem;
   margin-bottom: 0.5rem;
 }
 
-.prose-custom h2 {
+.prose-content h2 {
   font-size: 1.25rem;
   margin-top: 0.75rem;
   margin-bottom: 0.25rem;
 }
 
-.prose-custom h3 {
+.prose-content h3 {
   font-size: 1.1rem;
   margin-top: 0.5rem;
   margin-bottom: 0.25rem;
 }
 
-.prose-custom p {
+.prose-content p {
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
 }
 
-.prose-custom ul,
-.prose-custom ol {
+.prose-content ul,
+.prose-content ol {
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
   padding-left: 1.2rem;
 }
 
-.prose-custom li {
+.prose-content li {
   margin-bottom: 0.15rem;
 }
 
-.prose-custom a {
+.prose-content a {
   color: #1d4ed8;
   text-decoration: underline;
 }
 
-.prose-custom a:hover {
+.prose-content a:hover {
   color: #2563eb;
 }
 
 .ql-editor {
-  @apply prose prose-custom max-w-none min-h-[300px];
+  @apply prose prose-content max-w-none min-h-[300px];
 }
 
 /* ---------- Thumbnail preview: penuhi dropzone ---------- */
