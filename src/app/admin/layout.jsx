@@ -29,7 +29,8 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-import "@/app/admin/globals.css";
+import "@/css/tailwind.css";
+import "@/css/admin/theme.css";
 
 function DashboardLayoutContent({ children }) {
   const [controller] = useMaterialTailwindController();

@@ -7,28 +7,23 @@ import {
   CardBody,
   Typography,
   Button,
-  IconButton,
-  Tooltip,
   Input,
   Chip,
 } from "@material-tailwind/react";
 import {
   ArrowLeftIcon,
   PencilIcon,
-  TrashIcon,
   CalendarDaysIcon,
   MapPinIcon,
   BuildingOfficeIcon,
 } from "@heroicons/react/24/solid";
-import {
-  ArrowRightIcon,
-  ArrowLeftIcon as OutlineArrowLeft,
-} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import httpClient from "@/httpClient";
 import { toast } from "react-toastify";
 import Pagination from "@/components/admin/pagination";
 import LoadingOverlay from "@/components/admin/loading-overlay";
+
+import '@/css/admin/editor-content.css';
 
 // 🔹 Utility: debounce function
 const debounce = (func, delay) => {

@@ -23,7 +23,7 @@ import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
 import ThumbnailUploader from "@/components/admin/pelatihan/thumbnail-uploader";
 
-const TextEditor = dynamic(() => import("@/components/admin/text-editor"), {
+const TextEditor = dynamic(() => import("@/components/admin/pelatihan/text-editor"), {
   ssr: false,
 });
 

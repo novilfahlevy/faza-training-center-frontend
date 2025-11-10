@@ -1,7 +1,10 @@
 "use client";
+
 import React from "react";
 import dynamic from "next/dynamic";
+
 import "react-quill/dist/quill.snow.css";
+import '@/css/admin/editor-content.css';
 
 // Gunakan dynamic import agar tidak error di Next.js (karena SSR)
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });

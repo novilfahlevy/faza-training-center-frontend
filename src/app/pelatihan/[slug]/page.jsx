@@ -1,6 +1,6 @@
 "use client";
 
-import '@/app/globals.css';
+import '@/css/tailwind.css';
 import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { fetchTrainings, fetchTrainingById } from '@/api';

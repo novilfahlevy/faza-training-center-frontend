@@ -6,6 +6,8 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
 import httpClient from "@/httpClient";
 
+import '@/css/admin/thumbnail-uploader.css';
+
 export default function ThumbnailUploader({ value, onChange }) {
   const [uploading, setUploading] = useState(false);
   const [imageList, setImageList] = useState([]);

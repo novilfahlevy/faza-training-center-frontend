@@ -1,8 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Styling untuk konten deskripsi pelatihan */
 .prose-content {
   --tw-prose-headings: #111827; /* warna heading */
   --tw-prose-body: #374151;
@@ -57,4 +52,8 @@
 
 .prose-content a:hover {
   color: #2563eb;
+}
+
+.ql-editor {
+  @apply prose prose-content max-w-none min-h-[300px];
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import '@/app/globals.css';
+import '@/css/tailwind.css';
 import { useState, useEffect, useCallback } from 'react';
 import { fetchTrainings } from '@/api';
 import { toast } from 'react-hot-toast';
