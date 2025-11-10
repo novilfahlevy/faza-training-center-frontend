@@ -6,6 +6,9 @@ import Sidenav from "@/components/layout/sidenav";
 import DashboardNavbar from "@/components/layout/dashboard-navbar";
 import Footer from "@/components/layout/footer";
 
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import {
   MaterialTailwindControllerProvider,
   useMaterialTailwindController,
@@ -13,15 +16,30 @@ import {
 import routes from "@/routes";
 import { usePathname } from "next/navigation";
 
+import localFont from "next/font/local";
+
+const geistSans = localFont({
+  src: "../fonts/GeistVF.woff",
+  variable: "--font-geist-sans",
+  weight: "100 900",
+});
+const geistMono = localFont({
+  src: "../fonts/GeistMonoVF.woff",
+  variable: "--font-geist-mono",
+  weight: "100 900",
+});
+
 import "@/app/admin/globals.css";
 
 function DashboardLayoutContent({ children }) {
-  const [controller, dispatch] = useMaterialTailwindController();
+  const [controller] = useMaterialTailwindController();
   const { sidenavType } = controller;
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-blue-gray-50/50">
+    <div className={`min-h-screen bg-blue-gray-50/50 ${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <ToastContainer />
+
       {/* 🔵 Loading bar di atas halaman */}
       <NextTopLoader
         color="#171717"       // biru elegan
