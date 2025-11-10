@@ -81,10 +81,14 @@ function DashboardLayoutContent({ children }) {
   );
 }
 
-export default function DashboardLayout({ children }) {
+export default function RootLayout({ children }) {
   return (
-    <MaterialTailwindControllerProvider>
-      <DashboardLayoutContent>{children}</DashboardLayoutContent>
-    </MaterialTailwindControllerProvider>
+    <html lang="id">
+      <body>
+        <MaterialTailwindControllerProvider>
+          <DashboardLayoutContent>{children}</DashboardLayoutContent>
+        </MaterialTailwindControllerProvider>
+      </body>
+    </html>
   );
 }
