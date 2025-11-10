@@ -1,14 +1,11 @@
 import Link from 'next/link';
-import Image from 'next/image';
-import { BeakerIcon } from '@heroicons/react/24/solid';
 
 const Header = () => {
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
-        <Link href="/" className="flex items-center space-x-2 text-2xl font-bold text-blue-600">
-          <BeakerIcon className="h-8 w-8" />
-          <span>FTC</span>
+        <Link href="/" className="hidden md:flex items-center space-x-2 text-2xl font-bold text-blue-600">
+          <img src="/img/LOGO1.png" className="w-40" />
         </Link>
         <div className="space-x-6">
           <Link href="/" className="text-gray-700 hover:text-blue-600 transition-colors">

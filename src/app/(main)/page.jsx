@@ -5,8 +5,6 @@ import { fetchTrainings } from '@/api';
 import TrainingCard from '@/components/main/training-card';
 import { ArrowRightIcon } from '@heroicons/react/24/solid';
 import { AcademicCapIcon, UserGroupIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
-import Header from '@/components/main/layout/header';
-import Footer from '@/components/main/layout/footer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -24,9 +22,9 @@ export default async function HomePage() {
     <div className={inter.className}>
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 to-teal-500 text-white">
-        <div className="container mx-auto px-6 py-20 flex flex-col md:flex-row items-center">
-          <div className="md:w-1/2 mb-10 md:mb-0">
-            <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4">
+        <div className="container mx-auto px-6 py-20 flex flex-col lg:flex-row items-center gap-x-12">
+          <div className="lg:w-1/2 mb-10 lg:mb-0">
+            <h1 className="text-4xl lg:text-5xl font-bold leading-tight mb-4">
               Tingkatkan Kompetensi Medis Anda Bersama FTC
             </h1>
             <p className="text-lg mb-6">
@@ -39,8 +37,8 @@ export default async function HomePage() {
               </button>
             </Link>
           </div>
-          <div className="md:w-1/2">
-            <img src="https://via.placeholder.com/600x400" alt="Medical Training" className="rounded-lg shadow-xl" />
+          <div className="hidden lg:block lg:w-1/2">
+            <img src="/img/LOGO1.png" alt="Medical Training" className="rounded-lg" />
           </div>
         </div>
       </section>
@@ -49,7 +47,7 @@ export default async function HomePage() {
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-6">
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">Mengapa Memilih FTC?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="text-center">
               <AcademicCapIcon className="h-16 w-16 text-blue-600 mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-2">Pengajar Berpengalaman</h3>
@@ -81,7 +79,7 @@ export default async function HomePage() {
           </div>
 
           {/* 🔹 Tidak perlu loading state, data sudah ada saat render */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {trainings.length > 0 ? (
               trainings.map((training) => (
                 <TrainingCard key={training.pelatihan_id} training={training} />

@@ -8,13 +8,19 @@ const TrainingCard = ({ training }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
-      <img
-        src={training.thumbnail_url || 'https://via.placeholder.com/400x250.png?text=No+Image'}
-        alt={training.nama_pelatihan}
-        width={400}
-        height={250}
-        className="w-full h-48 object-cover"
-      />
+      {training.thumbnail_url ? (
+        <img
+          src={training.thumbnail_url}
+          alt={training.nama_pelatihan}
+          width={400}
+          height={250}
+          className="w-full h-48 object-cover"
+        />
+      ) : (
+        <div className="h-48 bg-gray-100 rounded-md flex items-center justify-center text-gray-400 text-xs border">
+          No Img
+        </div>
+      )}
       <div className="p-6">
         <h3 className="text-xl font-semibold text-gray-800 mb-2">{training.nama_pelatihan}</h3>
         <div className="flex items-center text-sm text-gray-600 mb-4 space-x-4">

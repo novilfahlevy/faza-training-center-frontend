@@ -17,11 +17,6 @@ const debounce = (func, delay) => {
   };
 };
 
-// export const metadata = {
-//   title: 'Daftar Pelatihan - Faza Training Center',
-//   description: 'Temukan berbagai pelatihan medis dan kesehatan untuk meningkatkan kompetensi profesional Anda.',
-// };
-
 export default function PelatihanPage() {
   const [trainings, setTrainings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +32,8 @@ export default function PelatihanPage() {
   const fetchData = useCallback(async (page = 1, query = '') => {
     try {
       setLoading(true);
-      const params = { page: page - 1, size: limit, search: query || undefined };
+      const params = { page: page - 1, size: limit };
+      if (query != '') params.search = query;
       const response = await fetchTrainings(params);
       
       setTrainings(response.records || []);
