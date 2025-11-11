@@ -172,7 +172,7 @@ export default function PesertaPelatihanPage({ params }) {
                       <Chip
                         variant="ghost"
                         color="blue"
-                        value={pelatihan.mitra.nama_mitra}
+                        value={pelatihan.mitra.data_mitra.nama_mitra}
                         icon={<BuildingOfficeIcon className="h-4 w-4" />}
                         className="rounded-full"
                       />

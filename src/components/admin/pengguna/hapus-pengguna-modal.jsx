@@ -19,7 +19,7 @@ export default function HapusPenggunaModal({ open, onClose, selectedUser, onSucc
 
     setIsDeleting(true);
     try {
-      await httpClient.delete(`/v1/pengguna/${selectedUser.user_id}`);
+      await httpClient.delete(`/v1/pengguna/${selectedUser.pengguna_id}`);
       toast.success("Pengguna berhasil dihapus!");
       onClose();
       if (onSuccess) onSuccess(); // 🔁 Refresh data di halaman utama

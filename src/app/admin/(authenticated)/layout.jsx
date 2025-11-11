@@ -1,6 +1,6 @@
 import { MaterialTailwindControllerProvider } from "@/context";
 
-import DashboardLayout from '@/app/admin/dashboard-layout';
+import DashboardLayout from '@/app/admin/(authenticated)/dashboard-layout';
 
 import "@/css/tailwind.css";
 import "@/css/admin/theme.css";

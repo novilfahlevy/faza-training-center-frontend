@@ -183,7 +183,7 @@ export default function PenggunaPage() {
                       </tr>
                     ) : (
                       users.map((user, index) => (
-                        <tr key={user.user_id} className="border-y">
+                        <tr key={user.pengguna_id} className="border-y">
                           <td className="py-3 px-5">
                             {(activePage - 1) * limit + index + 1}
                           </td>

@@ -1,16 +1,17 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogHeader,
   DialogBody,
   DialogFooter,
-  Button,
   Input,
+  Textarea,
+  Button,
+  Typography,
   Select,
   Option,
-  Typography,
-  Textarea,
 } from "@material-tailwind/react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -18,41 +19,42 @@ import httpClient from "@/httpClient";
 import { toast } from "react-toastify";
 
 export default function TambahPenggunaModal({ open, onClose, onSuccess }) {
-  // Skema validasi
-  const validationSchema = Yup.object().shape({
-    email: Yup.string()
-      .email("Format email tidak valid")
-      .required("Email wajib diisi"),
-    password: Yup.string()
-      .min(6, "Minimal 6 karakter")
-      .required("Password wajib diisi"),
-    role: Yup.string().required("Role wajib dipilih"),
+  const [isAdding, setIsAdding] = useState(false);
 
-    // Validasi untuk mitra
+  const validationSchema = Yup.object().shape({
+    email: Yup.string().email("Format email tidak valid").required("Email wajib diisi"),
+    password: Yup.string().min(6, "Password minimal 6 karakter").required("Password wajib diisi"),
+    role: Yup.string().oneOf(["admin", "mitra"]).required("Role wajib dipilih"),
+
     nama_mitra: Yup.string().when("role", {
       is: "mitra",
       then: (schema) => schema.required("Nama Mitra wajib diisi"),
+      otherwise: (schema) => schema.nullable(),
     }),
-    email_mitra: Yup.string().when("role", {
+    deskripsi_mitra: Yup.string().when("role", {
       is: "mitra",
-      then: (schema) =>
-        schema.email("Format email tidak valid").required("Email Mitra wajib diisi"),
+      then: (schema) => schema.required("Deskripsi wajib diisi"),
+      otherwise: (schema) => schema.nullable(),
+    }),
+    alamat_mitra: Yup.string().when("role", {
+      is: "mitra",
+      then: (schema) => schema.required("Alamat wajib diisi"),
+      otherwise: (schema) => schema.nullable(),
     }),
     telepon_mitra: Yup.string().when("role", {
       is: "mitra",
-      then: (schema) => schema.required("Telepon Mitra wajib diisi"),
+      then: (schema) => schema.required("Telepon wajib diisi"),
+      otherwise: (schema) => schema.nullable(),
     }),
+    website_mitra: Yup.string().nullable()
   });
-
-  const [isAdding, setIsAdding] = useState(false)
 
   const formik = useFormik({
     initialValues: {
       email: "",
       password: "",
-      role: "",
+      role: "admin",
       nama_mitra: "",
-      email_mitra: "",
       deskripsi_mitra: "",
       alamat_mitra: "",
       telepon_mitra: "",
@@ -60,170 +62,181 @@ export default function TambahPenggunaModal({ open, onClose, onSuccess }) {
     },
     validationSchema,
     onSubmit: async (values, { resetForm }) => {
+      console.log(values);
+      setIsAdding(true);
       try {
-        setIsAdding(true);
-
-        // 🔹 Kirim data ke backend
-        await httpClient.post("/v1/pengguna", values);
-
-        toast.success("Pengguna berhasil ditambahkan!", {
-          position: "top-right",
-          autoClose: 2500,
-        });
-
+        const response = await httpClient.post("/v1/pengguna", values);
+        toast.success(response.data.message || "Pengguna berhasil dibuat!");
         resetForm();
         onClose();
-
-        // 🔁 Panggil ulang daftar pengguna di parent
         if (onSuccess) onSuccess();
       } catch (error) {
-        console.error("Gagal menambah pengguna:", error);
-        toast.error(
-          error.response?.data?.message || "Gagal menambah pengguna.",
-          { position: "top-right", autoClose: 3000 }
-        );
+        console.error("Gagal membuat pengguna:", error);
+        toast.error(error.response?.data?.message || "Gagal membuat pengguna.");
       } finally {
         setIsAdding(false);
       }
     },
   });
 
-  const { values, errors, touched, handleChange, handleSubmit, setFieldValue } = formik;
+  useEffect(() => {
+    if (formik.values.role !== "mitra") {
+      formik.setValues({
+        ...formik.values,
+        nama_mitra: "",
+        email_mitra: "",
+        deskripsi_mitra: "",
+        alamat_mitra: "",
+        telepon_mitra: "",
+        website_mitra: "",
+      });
+    }
+  }, [formik.values.role]);
 
   return (
-    <Dialog
-      open={open}
-      handler={onClose}
-      size="lg"
-      className="!max-h-[90vh] overflow-y-auto flex flex-col"
-    >
-      <form onSubmit={handleSubmit} className="flex flex-col flex-1">
-        <DialogHeader className="sticky top-0 z-10 bg-white border-b border-blue-gray-50">
-          Tambah Pengguna Baru
-        </DialogHeader>
+    <Dialog open={open} handler={onClose} size="lg" className="!max-h-[90vh] overflow-y-auto">
+      <DialogHeader className="flex justify-between items-center">
+        <Typography variant="h5">Tambah Pengguna Baru</Typography>
+        <Button variant="text" onClick={onClose}>
+          <span>X</span>
+        </Button>
+      </DialogHeader>
 
-        <DialogBody divider className="space-y-4 flex-1 overflow-y-auto px-4">
-          {/* Email dan Password */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={formik.handleSubmit}>
+        <DialogBody className="flex flex-col gap-6">
+          {/* --- Field Umum --- */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
             <div>
-              <Input label="Email" name="email" value={values.email} onChange={handleChange} />
-              {touched.email && errors.email && (
-                <Typography color="red" className="text-xs mt-1 ml-1">
-                  {errors.email}
+              <Input
+                label="Email"
+                name="email"
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                error={Boolean(formik.touched.email && formik.errors.email)}
+              />
+              {formik.touched.email && formik.errors.email && (
+                <Typography variant="small" color="red">
+                  {formik.errors.email}
                 </Typography>
               )}
             </div>
 
             <div>
               <Input
+                type="password"
                 label="Password"
                 name="password"
-                type="password"
-                value={values.password}
-                onChange={handleChange}
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                error={Boolean(formik.touched.password && formik.errors.password)}
               />
-              {touched.password && errors.password && (
-                <Typography color="red" className="text-xs mt-1 ml-1">
-                  {errors.password}
+              {formik.touched.password && formik.errors.password && (
+                <Typography variant="small" color="red">
+                  {formik.errors.password}
                 </Typography>
               )}
             </div>
           </div>
 
-          {/* Role */}
           <div>
             <Select
               label="Role"
-              value={values.role}
-              onChange={(val) => setFieldValue("role", val)}
+              value={formik.values.role}
+              onChange={(value) => formik.setFieldValue("role", value)}
             >
               <Option value="admin">Admin</Option>
               <Option value="mitra">Mitra</Option>
             </Select>
-            {touched.role && errors.role && (
-              <Typography color="red" className="text-xs mt-1 ml-1">
-                {errors.role}
+            {formik.touched.role && formik.errors.role && (
+              <Typography variant="small" color="red">
+                {formik.errors.role}
               </Typography>
             )}
           </div>
 
-          {/* Form Mitra */}
-          {values.role === "mitra" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* --- Field Khusus Mitra --- */}
+          {formik.values.role === "mitra" && (
+            <div className="space-y-4 border-t pt-4">
+              <Typography variant="h6" className="text-blue-gray-700">
+                Informasi Mitra
+              </Typography>
+              
               <div>
                 <Input
                   label="Nama Mitra"
                   name="nama_mitra"
-                  value={values.nama_mitra}
-                  onChange={handleChange}
+                  value={formik.values.nama_mitra}
+                  onChange={formik.handleChange}
+                  error={Boolean(formik.touched.nama_mitra && formik.errors.nama_mitra)}
                 />
-                {touched.nama_mitra && errors.nama_mitra && (
-                  <Typography color="red" className="text-xs mt-1 ml-1">
-                    {errors.nama_mitra}
+                {formik.touched.nama_mitra && formik.errors.nama_mitra && (
+                  <Typography variant="small" color="red">
+                    {formik.errors.nama_mitra}
                   </Typography>
                 )}
               </div>
 
               <div>
-                <Input
-                  label="Email Mitra"
-                  name="email_mitra"
-                  value={values.email_mitra}
-                  onChange={handleChange}
-                />
-                {touched.email_mitra && errors.email_mitra && (
-                  <Typography color="red" className="text-xs mt-1 ml-1">
-                    {errors.email_mitra}
-                  </Typography>
-                )}
-              </div>
-
-              <div className="md:col-span-2">
                 <Textarea
-                  label="Deskripsi Mitra"
+                  label="Deskripsi"
                   name="deskripsi_mitra"
-                  value={values.deskripsi_mitra}
-                  onChange={handleChange}
+                  value={formik.values.deskripsi_mitra}
+                  onChange={formik.handleChange}
+                  error={Boolean(formik.touched.deskripsi_mitra && formik.errors.deskripsi_mitra)}
                 />
-              </div>
-
-              <div className="md:col-span-2">
-                <Textarea
-                  label="Alamat Mitra"
-                  name="alamat_mitra"
-                  value={values.alamat_mitra}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div>
-                <Input
-                  label="Telepon Mitra"
-                  name="telepon_mitra"
-                  value={values.telepon_mitra}
-                  onChange={handleChange}
-                />
-                {touched.telepon_mitra && errors.telepon_mitra && (
-                  <Typography color="red" className="text-xs mt-1 ml-1">
-                    {errors.telepon_mitra}
+                {formik.touched.deskripsi_mitra && formik.errors.deskripsi_mitra && (
+                  <Typography variant="small" color="red">
+                    {formik.errors.deskripsi_mitra}
                   </Typography>
                 )}
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Input
+                    label="Alamat"
+                    name="alamat_mitra"
+                    value={formik.values.alamat_mitra}
+                    onChange={formik.handleChange}
+                    error={Boolean(formik.touched.alamat_mitra && formik.errors.alamat_mitra)}
+                  />
+                  {formik.touched.alamat_mitra && formik.errors.alamat_mitra && (
+                    <Typography variant="small" color="red">
+                      {formik.errors.alamat_mitra}
+                    </Typography>
+                  )}
+                </div>
+
+                <div>
+                  <Input
+                    label="Telepon"
+                    name="telepon_mitra"
+                    value={formik.values.telepon_mitra}
+                    onChange={formik.handleChange}
+                    error={Boolean(formik.touched.telepon_mitra && formik.errors.telepon_mitra)}
+                  />
+                  {formik.touched.telepon_mitra && formik.errors.telepon_mitra && (
+                    <Typography variant="small" color="red">
+                      {formik.errors.telepon_mitra}
+                    </Typography>
+                  )}
+                </div>
+              </div>
+
               <div>
                 <Input
-                  label="Website Mitra"
+                  label="Website"
                   name="website_mitra"
-                  value={values.website_mitra}
-                  onChange={handleChange}
+                  value={formik.values.website_mitra}
+                  onChange={formik.handleChange}
                 />
               </div>
             </div>
           )}
         </DialogBody>
 
-        <DialogFooter className="sticky bottom-0 z-10 bg-white border-t border-blue-gray-50">
-          <Button variant="text" color="red" onClick={onClose} className="mr-2">
+        <DialogFooter className="flex justify-end gap-2">
+          <Button onClick={onClose} variant="text" color="gray">
             Batal
           </Button>
           <Button type="submit" color="blue" disabled={isAdding}>

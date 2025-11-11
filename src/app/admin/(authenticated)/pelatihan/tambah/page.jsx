@@ -45,7 +45,7 @@ export default function TambahPelatihan() {
   useEffect(() => {
     const fetchMitra = async () => {
       try {
-        const response = await httpClient.get("/v1/mitra");
+        const response = await httpClient.get("/v1/data-mitra");
         setMitraList(response.data.records || []);
         setMitraListLoaded(true);
       } catch (error) {
