@@ -3,7 +3,7 @@
 import '@/css/tailwind.css';
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { fetchTrainings, fetchTrainingById, registerUser, loginUser, registerForTraining } from '@/api';
+import { fetchTrainings, fetchTrainingById, registerUser, loginUser, registerForTraining } from '@/mainHttpClient';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';

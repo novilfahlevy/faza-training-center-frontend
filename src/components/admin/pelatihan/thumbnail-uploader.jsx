@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import ImageUploading from "react-images-uploading";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
-import httpClient from "@/httpClient";
+import httpClient from "@/adminHttpClient";
 
 import '@/css/admin/thumbnail-uploader.css';
 

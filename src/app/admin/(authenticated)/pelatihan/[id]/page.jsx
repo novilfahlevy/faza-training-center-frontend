@@ -18,7 +18,7 @@ import {
   BuildingOfficeIcon,
 } from "@heroicons/react/24/solid";
 import Link from "next/link";
-import httpClient from "@/httpClient";
+import httpClient from "@/adminHttpClient";
 import { toast } from "react-toastify";
 import Pagination from "@/components/admin/pagination";
 import LoadingOverlay from "@/components/admin/loading-overlay";

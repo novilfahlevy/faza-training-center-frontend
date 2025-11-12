@@ -13,7 +13,7 @@ import {
 } from "@material-tailwind/react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import httpClient from "@/httpClient";
+import httpClient from "@/adminHttpClient";
 import { toast } from "react-toastify";
 
 export default function EditPenggunaModal({ open, onClose, user, onSuccess }) {

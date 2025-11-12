@@ -28,6 +28,8 @@ import {
   setOpenConfigurator,
   setOpenSidenav,
 } from "@/context";
+import { clearAuthData } from "@/authCredentials";
+import { useRouter } from "next/navigation";
 
 export default function DashboardNavbar() {
   const [controller, dispatch] = useMaterialTailwindController();
@@ -37,6 +39,18 @@ export default function DashboardNavbar() {
   const pathSegments = pathname.split("/").filter(Boolean);
   const layout = pathSegments[0] || "dashboard";
   const page = pathSegments[1] || "home";
+
+  const router = useRouter();
+
+  const logout = () => {
+    clearAuthData();
+
+    // Hapus cookies juga agar middleware mendeteksi logout
+    document.cookie = "token=; path=/; max-age=0";
+    document.cookie = "user=; path=/; max-age=0";
+    
+    router.push('/admin/login');
+  }
 
   return (
     <Navbar
@@ -86,16 +100,15 @@ export default function DashboardNavbar() {
           >
             <Bars3Icon strokeWidth={3} className="h-6 w-6 text-blue-gray-500" />
           </IconButton> */}
-          <Link href="/admin/login">
-            <Button
-              variant="text"
-              color="blue-gray"
-              className="hidden items-center gap-1 px-4 xl:flex normal-case"
-            >
-              <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-              Keluar
-            </Button>
-          </Link>
+          <Button
+            variant="text"
+            color="blue-gray"
+            className="hidden items-center gap-1 px-4 xl:flex normal-case"
+            onClick={logout}
+          >
+            <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
+            Keluar
+          </Button>
           {/* <Menu>
             <MenuHandler>
               <IconButton variant="text" color="blue-gray">

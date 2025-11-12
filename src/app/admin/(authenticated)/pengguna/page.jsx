@@ -21,7 +21,7 @@ import TambahPenggunaModal from "@/components/admin/pengguna/tambah-pengguna-mod
 import EditPenggunaModal from "@/components/admin/pengguna/edit-pengguna-modal";
 import HapusPenggunaModal from "@/components/admin/pengguna/hapus-pengguna-modal";
 import DetailPenggunaModal from "@/components/admin/pengguna/detail-pengguna-modal";
-import httpClient from "@/httpClient";
+import httpClient from "@/adminHttpClient";
 import { toast } from "react-toastify";
 import Pagination from "@/components/admin/pagination";
 import LoadingOverlay from "@/components/admin/loading-overlay";

@@ -8,7 +8,7 @@ import {
   Button,
   Typography,
 } from "@material-tailwind/react";
-import httpClient from "@/httpClient";
+import httpClient from "@/adminHttpClient";
 import { toast } from "react-toastify";
 
 export default function HapusPenggunaModal({ open, onClose, selectedUser, onSuccess }) {

@@ -1,7 +1,7 @@
 import { Inter } from 'next/font/google';
 import '@/css/tailwind.css';
 import Link from 'next/link';
-import { fetchTrainings } from '@/api';
+import { fetchTrainings } from '@/mainHttpClient';
 import TrainingCard from '@/components/main/training-card';
 import { ArrowRightIcon } from '@heroicons/react/24/solid';
 import { AcademicCapIcon, UserGroupIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';

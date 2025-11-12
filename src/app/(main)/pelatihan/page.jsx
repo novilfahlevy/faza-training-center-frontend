@@ -2,7 +2,7 @@
 
 import '@/css/tailwind.css';
 import { useState, useEffect, useCallback } from 'react';
-import { fetchTrainings } from '@/api';
+import { fetchTrainings } from '@/mainHttpClient';
 import { toast } from 'react-hot-toast';
 import TrainingCard from '@/components/main/training-card';
 // import Pagination from '@/components/main/ui/Pagination';

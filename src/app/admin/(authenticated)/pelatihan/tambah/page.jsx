@@ -20,7 +20,7 @@ import "react-day-picker/dist/style.css";
 import { XMarkIcon, CalendarDaysIcon } from "@heroicons/react/24/outline";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import httpClient from "@/httpClient";
+import httpClient from "@/adminHttpClient";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
 import ThumbnailUploader from "@/components/admin/pelatihan/thumbnail-uploader";
