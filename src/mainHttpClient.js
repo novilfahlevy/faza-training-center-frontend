@@ -92,5 +92,5 @@ export const fetchTrainings = async (params = {}) => {
 export const fetchTrainingById = async (id) => api.get(`/v1/pelatihan/${id}`);
 export const fetchTrainingBySlug = async (slug) => api.get(`/v1/pelatihan/by-slug/${slug}`);
 export const registerForTraining = async (trainingId) => clientApi.post(`/v1/pelatihan/${trainingId}/register`);
-export const getUserProfile = async () => clientApi.get("/v1/pengguna/profile");
-export const updateUserProfile = async (data) => clientApi.put("/v1/pengguna/profile", data);
+export const getUserProfile = async () => clientApi.get("/v1/data-peserta");
+export const updateUserProfile = async (data) => clientApi.put("/v1/data-peserta", data);

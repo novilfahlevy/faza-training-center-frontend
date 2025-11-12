@@ -56,6 +56,11 @@ const Header = () => {
               <span className="text-gray-700 font-semibold">
                 Halo, {user.nama_lengkap}
               </span>
+              <Link href="/profil">
+                <button type="button" className="text-sm text-gray-700 hover:text-blue-600 font-medium transition-colors">
+                  Profil
+                </button>
+              </Link>
               <button
                 onClick={handleLogout}
                 className="text-sm text-red-500 hover:text-red-700 font-medium transition-colors"
