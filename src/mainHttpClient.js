@@ -76,6 +76,10 @@ export const login = async (credentials) => {
   return api.post("/v1/auth/login", credentials);
 };
 
+export const loginPeserta = async (credentials) => {
+  return api.post("/v1/auth/peserta/login", credentials);
+};
+
 export const registerUser = async (userData) => {
   return api.post("/v1/auth/register", userData);
 };
