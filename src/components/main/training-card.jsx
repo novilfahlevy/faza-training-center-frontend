@@ -3,8 +3,6 @@ import Image from 'next/image';
 import { CalendarDaysIcon, MapPinIcon } from '@heroicons/react/24/outline';
 
 const TrainingCard = ({ training }) => {
-  const slug = training.nama_pelatihan.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-
   return (
     <div className="flex flex-col bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
       {training.thumbnail_url ? (
@@ -33,7 +31,7 @@ const TrainingCard = ({ training }) => {
             <MapPinIcon className="h-4 w-4 mr-1" />
             {training.lokasi_pelatihan}
           </div>
-          <Link href={`/pelatihan/${slug}`}>
+          <Link href={`/pelatihan/${training.slug_pelatihan}`}>
             <button className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition duration-300">
               Lihat Detail
             </button>

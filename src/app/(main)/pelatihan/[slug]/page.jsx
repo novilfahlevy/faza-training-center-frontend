@@ -3,7 +3,7 @@
 import "@/css/tailwind.css";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { fetchTrainings, fetchTrainingById } from "@/mainHttpClient";
+import { fetchTrainings, fetchTrainingById, fetchTrainingBySlug } from "@/mainHttpClient";
 import Link from "next/link";
 import {
   CalendarDaysIcon,
@@ -28,26 +28,7 @@ export default function TrainingDetailPage() {
     const getTraining = async () => {
       setLoading(true);
       try {
-        // ambil semua pelatihan, cari yang slug-nya cocok lalu fetch by id
-        const allTrainings = await fetchTrainings();
-        const found = (allTrainings?.records || []).find((t) => {
-          const slug = String(t.nama_pelatihan || "")
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)/g, "");
-          return slug === params.slug;
-        });
-
-        if (!found) {
-          if (mounted) {
-            toast.error("Pelatihan tidak ditemukan.");
-            setTraining(null);
-          }
-          return;
-        }
-
-        // gunakan fetch by id (sesuai permintaan)
-        const detail = await fetchTrainingById(found.pelatihan_id);
+        const detail = await fetchTrainingBySlug(params.slug);
 
         if (mounted) {
           setTraining(detail);
