@@ -75,7 +75,7 @@ const Header = () => {
           {user ? (
             <div className="flex items-center space-x-4 border-l pl-4 border-gray-300">
               <span className="text-gray-700 font-semibold">
-                Halo, {user.nama_lengkap.split(' ')[0]}
+                Halo, {user?.nama_lengkap?.split(' ')[0]}
               </span>
               <Link href="/profil">
                 <button className="px-3 py-1.5 rounded-md border border-gray-300 text-gray-700 hover:bg-blue-600 hover:text-white transition-colors text-sm font-medium">
@@ -123,7 +123,7 @@ const Header = () => {
               <>
                 <hr className="border-gray-200" />
                 <span className="text-gray-700 font-medium">
-                  Halo, {user.nama_lengkap.split(' ')[0]}
+                  Halo, {user?.nama_lengkap?.split(' ')[0]}
                 </span>
                 <Link
                   href="/profil"

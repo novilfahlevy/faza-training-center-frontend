@@ -23,7 +23,7 @@ import { toast } from "react-toastify";
 import Pagination from "@/components/admin/pagination";
 import LoadingOverlay from "@/components/admin/loading-overlay";
 
-import '@/css/admin/editor-content.css';
+import "@/css/admin/editor-content.css";
 
 // 🔹 Utility: debounce function
 const debounce = (func, delay) => {
@@ -71,15 +71,7 @@ export default function PesertaPelatihanPage({ params }) {
 
       const { records, totalPages } = res.data;
 
-      const peserta = records.map((item) => ({
-        peserta_id: item.peserta_id,
-        nama_lengkap: item.peserta?.nama_lengkap,
-        no_hp: item.peserta?.no_telp,
-        email: item.peserta?.pengguna?.email,
-        status_pendaftaran: item.status_pendaftaran || "Terdaftar",
-      }));
-
-      setPesertaList(peserta);
+      setPesertaList(records);
       setTotalPages(totalPages);
     } catch (error) {
       console.error("Gagal mengambil data peserta:", error);
@@ -137,7 +129,10 @@ export default function PesertaPelatihanPage({ params }) {
               {/* Gambar Thumbnail */}
               <div className="w-full lg:w-1/3 h-64 lg:h-auto">
                 <img
-                  src={pelatihan.thumbnail_url || 'https://via.placeholder.com/400x300.png?text=No+Image'}
+                  src={
+                    pelatihan.thumbnail_url ||
+                    "https://via.placeholder.com/400x300.png?text=No+Image"
+                  }
                   alt={pelatihan.nama_pelatihan}
                   className="w-full h-full object-cover"
                 />
@@ -149,12 +144,14 @@ export default function PesertaPelatihanPage({ params }) {
                   <Typography variant="h3" color="blue-gray" className="mb-4">
                     {pelatihan.nama_pelatihan}
                   </Typography>
-                  
+
                   {/* Metadata dalam bentuk Chip */}
                   <div className="flex flex-wrap gap-2 mb-4">
                     <Chip
                       variant="ghost"
-                      value={new Date(pelatihan.tanggal_pelatihan).toLocaleDateString("id-ID", {
+                      value={new Date(
+                        pelatihan.tanggal_pelatihan
+                      ).toLocaleDateString("id-ID", {
                         day: "numeric",
                         month: "long",
                         year: "numeric",
@@ -188,7 +185,11 @@ export default function PesertaPelatihanPage({ params }) {
                     </Button>
                   </Link>
                   <Link href="/admin/pelatihan">
-                    <Button variant="outlined" color="gray" className="flex items-center gap-2">
+                    <Button
+                      variant="outlined"
+                      color="gray"
+                      className="flex items-center gap-2"
+                    >
                       <ArrowLeftIcon className="h-5 w-5" /> Kembali
                     </Button>
                   </Link>
@@ -197,7 +198,9 @@ export default function PesertaPelatihanPage({ params }) {
             </div>
           ) : (
             <div className="flex items-center justify-center h-64">
-              <Typography color="gray">Data pelatihan tidak ditemukan.</Typography>
+              <Typography color="gray">
+                Data pelatihan tidak ditemukan.
+              </Typography>
             </div>
           )}
         </CardBody>
@@ -206,13 +209,17 @@ export default function PesertaPelatihanPage({ params }) {
       {/* 🔹 KARTU DESKRIPSI */}
       <Card className="border border-blue-gray-100 shadow-sm mb-8">
         <CardHeader floated={false} shadow={false} className="m-0 p-6 border-b">
-          <Typography variant="h6" color="blue-gray">Deskripsi Pelatihan</Typography>
+          <Typography variant="h6" color="blue-gray">
+            Deskripsi Pelatihan
+          </Typography>
         </CardHeader>
         <CardBody className="p-6">
           {pelatihan?.deskripsi_pelatihan ? (
-            <div 
+            <div
               className="prose prose-content max-w-none"
-              dangerouslySetInnerHTML={{ __html: pelatihan.deskripsi_pelatihan }} 
+              dangerouslySetInnerHTML={{
+                __html: pelatihan.deskripsi_pelatihan,
+              }}
             />
           ) : (
             <Typography color="gray">Tidak ada deskripsi tersedia.</Typography>
@@ -228,14 +235,18 @@ export default function PesertaPelatihanPage({ params }) {
           color="transparent"
           className="m-0 flex gap-y-4 flex-col md:flex-row md:items-center md:justify-between p-6 sticky top-0 bg-white z-10 border-b border-blue-gray-50"
         >
-          <Typography variant="h6" color="blue-gray">Daftar Peserta</Typography>
+          <Typography variant="h6" color="blue-gray">
+            Daftar Peserta
+          </Typography>
           <div className="w-full md:w-auto">
             <Input
               placeholder="Cari peserta..."
               value={search}
               onChange={handleSearch}
               className="!w-full md:!w-64 !border-t-blue-gray-200 focus:!border-t-gray-900"
-              labelProps={{ className: "before:content-none after:content-none" }}
+              labelProps={{
+                className: "before:content-none after:content-none",
+              }}
             />
           </div>
         </CardHeader>
@@ -247,9 +258,22 @@ export default function PesertaPelatihanPage({ params }) {
                 <table className="w-full min-w-[800px] table-auto">
                   <thead className="bg-gray-50">
                     <tr>
-                      {["No", "Nama", "Email", "No. HP", "Status"].map((head) => (
-                        <th key={head} className="border-b border-blue-gray-100 py-3 px-5 text-left">
-                          <Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">
+                      {[
+                        "No",
+                        "Nama",
+                        "Email",
+                        "No. HP",
+                        "Bukti Pembayaran",
+                        "Status",
+                      ].map((head) => (
+                        <th
+                          key={head}
+                          className="border-b border-blue-gray-100 py-3 px-5 text-left"
+                        >
+                          <Typography
+                            variant="small"
+                            className="text-[11px] font-bold uppercase text-blue-gray-400"
+                          >
                             {head}
                           </Typography>
                         </th>
@@ -259,33 +283,105 @@ export default function PesertaPelatihanPage({ params }) {
                   <tbody>
                     {pesertaList.length === 0 ? (
                       <tr>
-                        <td colSpan="5" className="text-center py-10 text-gray-500">
+                        <td
+                          colSpan="6"
+                          className="text-center py-10 text-gray-500"
+                        >
                           Tidak ada peserta terdaftar.
                         </td>
                       </tr>
                     ) : (
-                      pesertaList.map((peserta, index) => (
-                        <tr key={peserta.peserta_id} className="border-y">
-                          <td className="py-3 px-5">
-                            {(activePage - 1) * limit + index + 1}
-                          </td>
-                          <td className="py-3 px-5 font-medium">
-                            {peserta.nama_lengkap || "-"}
-                          </td>
-                          <td className="py-3 px-5">{peserta.email || "-"}</td>
-                          <td className="py-3 px-5">{peserta.no_hp || "-"}</td>
-                          <td className="py-3 px-5">
-                            <Chip
-                              variant="gradient"
-                              value={peserta.status_pendaftaran}
-                              color={peserta.status_pendaftaran === 'terdaftar'
-                                ? 'blue'
-                                : (peserta.status_pendaftaran === 'selesai' ? 'green' : 'gray')}
-                              className="py-0.5 px-2 text-[11px] font-medium w-fit"
-                            />
-                          </td>
-                        </tr>
-                      ))
+                      pesertaList.map((peserta, index) => {
+                        const bukti = peserta.bukti_pembayaran_filename;
+                        const isImage =
+                          bukti &&
+                          (bukti.endsWith(".jpg") ||
+                            bukti.endsWith(".jpeg") ||
+                            bukti.endsWith(".png"));
+                        const isPdf = bukti && bukti.endsWith(".pdf");
+
+                        return (
+                          <tr
+                            key={peserta.id || peserta.peserta_id}
+                            className="border-y"
+                          >
+                            <td className="py-3 px-5">
+                              {(activePage - 1) * limit + index + 1}
+                            </td>
+                            <td className="py-3 px-5 font-medium">
+                              {peserta.nama_lengkap || "-"}
+                            </td>
+                            <td className="py-3 px-5">
+                              {peserta.email || "-"}
+                            </td>
+                            <td className="py-3 px-5">
+                              {peserta.no_telp || "-"}
+                            </td>
+
+                            {/* 🔹 Kolom Bukti Pembayaran */}
+                            <td className="py-3 px-5">
+                              {bukti ? (
+                                isImage ? (
+                                  <a
+                                    href={bukti}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block w-20 h-20 rounded overflow-hidden border border-blue-gray-100 shadow-sm hover:shadow-md transition"
+                                  >
+                                    <img
+                                      src={bukti}
+                                      alt="Bukti Pembayaran"
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </a>
+                                ) : isPdf ? (
+                                  <div className="flex flex-col items-start">
+                                    <embed
+                                      src={bukti}
+                                      type="application/pdf"
+                                      className="w-32 h-20 border border-blue-gray-100 rounded"
+                                    />
+                                    <a
+                                      href={bukti}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-500 text-xs mt-1 hover:underline"
+                                    >
+                                      Lihat PDF
+                                    </a>
+                                  </div>
+                                ) : (
+                                  <Typography color="gray" className="text-xs">
+                                    File tidak dikenal
+                                  </Typography>
+                                )
+                              ) : (
+                                <Typography
+                                  color="gray"
+                                  className="text-xs italic"
+                                >
+                                  Tidak ada bukti pembayaran
+                                </Typography>
+                              )}
+                            </td>
+
+                            <td className="py-3 px-5">
+                              <Chip
+                                variant="gradient"
+                                value={peserta.status}
+                                color={
+                                  peserta.status === "terdaftar"
+                                    ? "blue"
+                                    : peserta.status === "selesai"
+                                    ? "green"
+                                    : "gray"
+                                }
+                                className="py-0.5 px-2 text-[11px] font-medium w-fit"
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
