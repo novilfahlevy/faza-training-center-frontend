@@ -316,7 +316,7 @@ export default function TambahPelatihan() {
                 >
                   {mitraList.length > 0 ? (
                     mitraList.map((m) => (
-                      <Option key={m.mitra_id} value={m.mitra_id}>
+                      <Option key={m.pengguna.pengguna_id} value={m.pengguna.pengguna_id}>
                         {m.nama_mitra}
                       </Option>
                     ))

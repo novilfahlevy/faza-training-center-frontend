@@ -1,59 +1,72 @@
 "use client";
 
-import "@/css/tailwind.css";
-import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
-import { fetchTrainingBySlug } from "@/mainHttpClient";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 import Link from "next/link";
 import {
-  CalendarDaysIcon,
-  MapPinIcon,
-  BuildingOfficeIcon,
-  ArrowLeftIcon,
-} from "@heroicons/react/24/outline";
-import { toast } from "react-hot-toast";
+  fetchTrainingBySlug,
+  getUserProfile,
+} from "@/mainHttpClient";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { Button } from "@material-tailwind/react";
 
-export default function TrainingDetailPage() {
+export default function PelatihanDetailPage() {
   const params = useParams();
-  const [training, setTraining] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  // inisialisasi imgSrc dengan fallback agar hook useState selalu dipanggil sama
-  const FALLBACK_IMG = "https://via.placeholder.com/1200x400.png?text=No+Image+Available";
-  const [imgSrc, setImgSrc] = useState(FALLBACK_IMG);
+  const [training, setTraining] = useState(null);
+  const [user, setUser] = useState(null);
+  const [file, setFile] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    let mounted = true;
-
     const getTraining = async () => {
-      setLoading(true);
       try {
         const detail = await fetchTrainingBySlug(params.slug);
-
-        if (mounted) {
-          setTraining(detail);
-          // update gambar jika ada, kalau tidak pakai fallback
-          setImgSrc(detail?.thumbnail_url || FALLBACK_IMG);
-        }
+        setTraining(detail);
       } catch (error) {
         console.error("Gagal memuat detail pelatihan:", error);
-        if (mounted) toast.error("Gagal memuat detail pelatihan.");
-      } finally {
-        if (mounted) setLoading(false);
+        toast.error("Gagal memuat detail pelatihan.");
       }
     };
-
     getTraining();
-
-    return () => {
-      mounted = false;
-    };
   }, [params.slug]);
 
-  if (loading)
-    return <p className="container mx-auto px-6 py-10">Memuat...</p>;
-  if (!training)
-    return <p className="container mx-auto px-6 py-10">Pelatihan tidak ditemukan.</p>;
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      try {
+        const data = await getUserProfile();
+        setUser(data);
+      } catch (error) {
+        toast.error("Gagal memuat profil pengguna.");
+      }
+    };
+    loadUserProfile();
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!file) {
+      toast.error("Silakan upload bukti pembayaran terlebih dahulu!");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      // TODO: kirim ke endpoint register pelatihan
+      toast.success("Pendaftaran berhasil dikirim!");
+      router.push("/profil");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Gagal mengirim pendaftaran.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (!training || !user)
+    return (
+      <p className="container mx-auto px-6 py-10 text-gray-600">Memuat...</p>
+    );
 
   return (
     <div className="container mx-auto px-6 py-10">
@@ -64,53 +77,127 @@ export default function TrainingDetailPage() {
         <ArrowLeftIcon className="h-5 w-5 mr-2" /> Kembali ke Daftar Pelatihan
       </Link>
 
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        {/* Banner Image dengan onError fallback */}
-        <img
-          src={imgSrc}
-          alt={training.nama_pelatihan}
-          className="w-full h-64 md:h-96 object-cover"
-          onError={() => {
-            if (imgSrc !== FALLBACK_IMG) setImgSrc(FALLBACK_IMG);
-          }}
-        />
-
-        <div className="p-6 md:p-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-            {training.nama_pelatihan}
-          </h1>
-
-          <div className="flex flex-wrap gap-3 mb-6">
-            <span className="flex items-center text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-              <CalendarDaysIcon className="h-4 w-4 mr-1" />
-              {new Date(training.tanggal_pelatihan).toLocaleDateString(
-                "id-ID",
-                {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                }
-              )}
-            </span>
-
-            <span className="flex items-center text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-              <MapPinIcon className="h-4 w-4 mr-1" />
-              {training.lokasi_pelatihan}
-            </span>
-
-            {training.mitra && (
-              <span className="flex items-center text-sm text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
-                <BuildingOfficeIcon className="h-4 w-4 mr-1" />
-                Bersama {training.mitra.nama_mitra}
-              </span>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        {/* === Panel Kiri: Detail Pelatihan (60%) === */}
+        <div className="lg:col-span-3">
+          <div className="bg-white rounded-xl shadow-md p-6 lg:p-8 border border-gray-200">
+            {training.thumbnail_url && (
+              <img
+                src={training.thumbnail_url}
+                alt={training.nama_pelatihan}
+                className="w-full h-64 object-cover rounded-lg mb-6 shadow-sm"
+              />
             )}
-          </div>
 
-          <div
-            className="prose prose-content max-w-none text-gray-700"
-            dangerouslySetInnerHTML={{ __html: training.deskripsi_pelatihan }}
-          />
+            <h1 className="text-3xl font-bold text-gray-800 mb-4">
+              {training.nama_pelatihan}
+            </h1>
+
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700 mb-6">
+              <p>
+                <span className="font-semibold">Tanggal Pelatihan:</span>{" "}
+                {training.tanggal_pelatihan
+                  ? new Date(training.tanggal_pelatihan).toLocaleDateString(
+                      "id-ID"
+                    )
+                  : "-"}
+              </p>
+              <p>
+                <span className="font-semibold">Durasi:</span>{" "}
+                {training.durasi_pelatihan || "-"}
+              </p>
+              <p>
+                <span className="font-semibold">Lokasi:</span>{" "}
+                {training.lokasi_pelatihan || "-"}
+              </p>
+              <p>
+                <span className="font-semibold">Mitra:</span>{" "}
+                {training?.mitra?.data_mitra?.nama_mitra || "-"}
+              </p>
+            </div>
+
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <div
+                className="prose max-w-none text-gray-700 leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html:
+                    training.deskripsi_pelatihan ||
+                    "<p>Tidak ada deskripsi.</p>",
+                }}
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        {/* === Panel Kanan: Profil Peserta + Upload (40%) === */}
+        <div className="lg:col-span-2">
+          <div className="sticky top-24">
+            <div className="bg-white rounded-xl shadow-md p-6 lg:p-8 border border-gray-200">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+                Daftar
+              </h2>
+
+              <div className="space-y-2 text-gray-700 text-sm mb-6">
+                <p>
+                  <span className="font-semibold">Nama:</span>{" "}
+                  {user.nama_lengkap}
+                </p>
+                <p>
+                  <span className="font-semibold">Email:</span> {user.email}
+                </p>
+                <p>
+                  <span className="font-semibold">Telepon:</span> {user.no_telp}
+                </p>
+                <p>
+                  <span className="font-semibold">Profesi:</span> {user.profesi}
+                </p>
+                <p>
+                  <span className="font-semibold">Instansi:</span> {user.instansi}
+                </p>
+                <p>
+                  <span className="font-semibold">Jenis Kelamin:</span>{" "}
+                  {user.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}
+                </p>
+                <p>
+                  <span className="font-semibold">Alamat:</span> {user.alamat}
+                </p>
+                <p>
+                  <span className="font-semibold">
+                    Surat Tanda Registrasi (STR):
+                  </span>{" "}
+                  {user.no_reg_kes || "-"}
+                </p>
+              </div>
+
+              <hr className="my-4" />
+
+              <form onSubmit={handleSubmit}>
+                <label className="block text-gray-700 font-medium mb-2">
+                  Upload Bukti Pembayaran
+                </label>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => setFile(e.target.files[0])}
+                  className="block w-full border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-700 cursor-pointer bg-white focus:ring focus:ring-blue-200"
+                />
+                {file && (
+                  <p className="text-gray-600 mt-2 text-sm truncate">
+                    File: <span className="font-medium">{file.name}</span>
+                  </p>
+                )}
+
+                <Button
+                  type="submit"
+                  className="mt-6 bg-blue-600"
+                  fullWidth
+                  disabled={submitting}
+                >
+                  {submitting ? "Mengirim..." : "Kirim Pendaftaran"}
+                </Button>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     </div>

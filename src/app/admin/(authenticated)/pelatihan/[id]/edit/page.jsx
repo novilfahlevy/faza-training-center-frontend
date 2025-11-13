@@ -152,7 +152,7 @@ export default function EditPelatihan() {
   useEffect(() => {
     const fetchMitra = async () => {
       try {
-        const res = await httpClient.get("/v1/mitra");
+        const res = await httpClient.get("/v1/data-mitra");
         setMitraList(res.data.records || []);
       } catch (err) {
         console.error("Gagal mengambil mitra:", err);
@@ -359,7 +359,7 @@ export default function EditPelatihan() {
                 >
                   {mitraList.length > 0 ? (
                     mitraList.map((m) => (
-                      <Option key={m.mitra_id} value={m.mitra_id.toString()}>
+                      <Option key={m.pengguna.pengguna_id} value={m.pengguna.pengguna_id.toString()}>
                         {m.nama_mitra}
                       </Option>
                     ))
