@@ -1,6 +1,5 @@
 "use client";
 
-import '@/css/tailwind.css';
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { fetchTrainings, fetchTrainingById, registerUser, loginUser, registerForTraining } from '@/mainHttpClient';

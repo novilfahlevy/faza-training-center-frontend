@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import {
   Input,
@@ -48,7 +48,7 @@ export default function ProfilPage() {
       setLoading(true);
       try {
         await updateUserProfile(values);
-        toast.success("Profil berhasil diperbarui!", { position: "top-right" });
+        toast.success("Profil berhasil diperbarui!", { position: "bottom-right" });
       } catch (error) {
         toast.error(error.message || "Gagal memperbarui profil.", {
           position: "top-right",
@@ -105,7 +105,6 @@ export default function ProfilPage() {
 
   return (
     <section className="m-8 min-h-screen">
-      <Toaster />
       <div className="w-full mt-8">
         <div className="text-center">
           <Typography variant="h3" className="font-bold mb-4 text-blue-600">

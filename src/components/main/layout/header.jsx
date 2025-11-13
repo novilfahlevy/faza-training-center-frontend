@@ -1,23 +1,16 @@
 "use client";
 
-import { clearAuthData, getUserData } from "@/authCredentials";
+import { useAuthStore } from "@/stores/useAuthStore";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const Header = () => {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const storedUser = getUserData();
-    if (storedUser) {
-      setUser(storedUser);
-    }
-  }, []);
+  const router = useRouter();
+  const { user, logout } = useAuthStore();
 
   const handleLogout = () => {
-    clearAuthData();
-    setUser(null);
-    window.location.href = "/"; // redirect ke beranda
+    logout();
+    router.replace('/');
   };
 
   return (

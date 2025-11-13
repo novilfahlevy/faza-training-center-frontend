@@ -3,7 +3,7 @@
 import "@/css/tailwind.css";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { fetchTrainings, fetchTrainingById, fetchTrainingBySlug } from "@/mainHttpClient";
+import { fetchTrainingBySlug } from "@/mainHttpClient";
 import Link from "next/link";
 import {
   CalendarDaysIcon,

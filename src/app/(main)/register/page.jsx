@@ -12,7 +12,7 @@ import {
   IconButton,
 } from "@material-tailwind/react";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useState } from "react";
 import { registerUser } from "@/mainHttpClient";
 import Link from "next/link";
@@ -69,9 +69,7 @@ export default function RegisterPage() {
         payload.role = "peserta";
         const data = await registerUser(payload);
 
-        toast.success(data.message || "Registrasi berhasil!", {
-          position: "top-right",
-        });
+        toast.success(data.message || "Registrasi berhasil!", { position: "bottom-right" });
 
         // Redirect ke halaman login setelah 1 detik
         setTimeout(() => router.push("/login"), 1200);
@@ -100,7 +98,6 @@ export default function RegisterPage() {
 
   return (
     <section className="m-8 min-h-screen">
-      <Toaster />
       <div className="w-full mt-8">
         <div className="text-center">
           <Typography variant="h3" className="font-bold mb-4 text-blue-600">

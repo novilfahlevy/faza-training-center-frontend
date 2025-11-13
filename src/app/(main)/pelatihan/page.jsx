@@ -5,7 +5,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { fetchTrainings } from '@/mainHttpClient';
 import { toast } from 'react-hot-toast';
 import TrainingCard from '@/components/main/training-card';
-// import Pagination from '@/components/main/ui/Pagination';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 // Utility: debounce function
