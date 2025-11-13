@@ -91,6 +91,20 @@ export const fetchTrainings = async (params = {}) => {
 
 export const fetchTrainingById = async (id) => api.get(`/v1/pelatihan/${id}`);
 export const fetchTrainingBySlug = async (slug) => api.get(`/v1/pelatihan/by-slug/${slug}`);
-export const registerForTraining = async (trainingId) => clientApi.post(`/v1/pelatihan/${trainingId}/register`);
+export const registerForTraining = async (slug) => clientApi.post(`/v1/pelatihan/${slug}/register`);
+export const registerForTrainingWithFile = async (slug, file) => {
+  const token = typeof window !== "undefined" ? getBearerToken() : null;
+
+  const formData = new FormData();
+  formData.append("bukti_pembayaran", file);
+
+  const response = await fetch(`${API_BASE_URL}/v1/pelatihan/${slug}/register`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+
+  return handleResponse(response);
+};
 export const getUserProfile = async () => clientApi.get("/v1/data-peserta");
 export const updateUserProfile = async (data) => clientApi.put("/v1/data-peserta", data);

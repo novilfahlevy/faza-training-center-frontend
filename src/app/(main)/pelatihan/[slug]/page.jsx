@@ -7,6 +7,7 @@ import Link from "next/link";
 import {
   fetchTrainingBySlug,
   getUserProfile,
+  registerForTrainingWithFile,
 } from "@/mainHttpClient";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { Button } from "@material-tailwind/react";
@@ -52,21 +53,35 @@ export default function PelatihanDetailPage() {
     loadUserProfile();
   }, [token, userStore]);
 
+  // ✅ Validasi & Kirim File ke API
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!file) {
       toast.error("Silakan upload bukti pembayaran terlebih dahulu!");
       return;
     }
+
+    // Validasi tipe file
+    const validTypes = ["application/pdf", "image/jpeg", "image/png"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("File harus berupa PDF atau gambar (JPG, PNG)!");
+      return;
+    }
+
+    // Validasi ukuran file (maks 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Ukuran file maksimal 5 MB!");
+      return;
+    }
+
     setSubmitting(true);
     try {
-      // TODO: kirim ke endpoint register pelatihan
+      await registerForTrainingWithFile(params.slug, file);
       toast.success("Pendaftaran berhasil dikirim!");
       router.push("/profil");
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Gagal mengirim pendaftaran."
-      );
+      toast.error(error.message || "Gagal mengirim pendaftaran.");
     } finally {
       setSubmitting(false);
     }
@@ -191,9 +206,7 @@ function TrainingDetailCard({ training, showLoginPrompt = false }) {
 function RegisterCard({ user, file, submitting, onFileChange, onSubmit }) {
   return (
     <div className="bg-white rounded-xl shadow-md p-6 lg:p-8 border border-gray-200">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-        Daftar
-      </h2>
+      <h2 className="text-2xl font-semibold text-gray-800 mb-4">Daftar</h2>
 
       <div className="space-y-2 text-gray-700 text-sm mb-6">
         <p>
@@ -219,9 +232,7 @@ function RegisterCard({ user, file, submitting, onFileChange, onSubmit }) {
           <span className="font-semibold">Alamat:</span> {user.alamat}
         </p>
         <p>
-          <span className="font-semibold">
-            Surat Tanda Registrasi (STR):
-          </span>{" "}
+          <span className="font-semibold">Surat Tanda Registrasi (STR):</span>{" "}
           {user.no_reg_kes || "-"}
         </p>
       </div>
