@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
 import {
+  fetchRegisterByTrainingSlug,
   fetchTrainingBySlug,
   getUserProfile,
   registerForTrainingWithFile,
@@ -20,6 +21,7 @@ export default function PelatihanDetailPage() {
   const { token, user: userStore } = useAuthStore();
 
   const [training, setTraining] = useState(null);
+  const [registerStatus, setRegisterStatus] = useState(null);
   const [user, setUser] = useState(null);
   const [file, setFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -33,6 +35,20 @@ export default function PelatihanDetailPage() {
       } catch (error) {
         console.error("Gagal memuat detail pelatihan:", error);
         toast.error("Gagal memuat detail pelatihan.");
+      }
+    };
+    getTraining();
+  }, [params.slug]);
+
+  // Ambil detail kepesertaan
+  useEffect(() => {
+    const getTraining = async () => {
+      try {
+        const data = await fetchRegisterByTrainingSlug(params.slug);
+        setRegisterStatus(data);
+      } catch (error) {
+        console.error("Gagal memuat detail kepesertaan:", error);
+        toast.error("Gagal memuat detail kepesertaan.");
       }
     };
     getTraining();
@@ -114,13 +130,17 @@ export default function PelatihanDetailPage() {
           {/* === Panel Kanan: Form Pendaftaran === */}
           <div className="lg:col-span-2">
             <div className="sticky top-24">
-              <RegisterCard
-                user={user}
-                file={file}
-                submitting={submitting}
-                onFileChange={setFile}
-                onSubmit={handleSubmit}
-              />
+              {registerStatus && registerStatus.status ? (
+                <RegisterStatusCard status={registerStatus} />
+              ) : (
+                <RegisterCard
+                  user={user}
+                  file={file}
+                  submitting={submitting}
+                  onFileChange={setFile}
+                  onSubmit={handleSubmit}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -196,6 +216,58 @@ function TrainingDetailCard({ training, showLoginPrompt = false }) {
           >
             Login Sekarang
           </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RegisterStatusCard({ status }) {
+  const statusInfo = {
+    pending: {
+      label: "Menunggu Validasi",
+      color: "bg-yellow-100 text-yellow-700 border-yellow-300",
+      desc: "Bukti pembayaran Anda telah diterima dan sedang divalidasi oleh admin.",
+    },
+    terdaftar: {
+      label: "Terdaftar",
+      color: "bg-blue-100 text-blue-700 border-blue-300",
+      desc: "Anda telah berhasil terdaftar dalam pelatihan ini.",
+    },
+    selesai: {
+      label: "Selesai",
+      color: "bg-green-100 text-green-700 border-green-300",
+      desc: "Pelatihan Anda sudah selesai. Terima kasih telah berpartisipasi!",
+    },
+  };
+
+  const info = statusInfo[status.status.toLowerCase()] || statusInfo["pending"];
+
+  return (
+    <div className="bg-white rounded-xl shadow-md p-6 lg:p-8 border border-gray-200">
+      <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+        Status Pendaftaran
+      </h2>
+
+      {/* Badge Status */}
+      <div
+        className={`px-4 py-2 rounded-lg border text-sm font-medium inline-block ${info.color}`}
+      >
+        {info.label}
+      </div>
+
+      <p className="mt-4 text-gray-700 leading-relaxed">{info.desc}</p>
+
+      {/* File Bukti Pembayaran */}
+      {status.bukti_pembayaran_url && (
+        <div className="mt-6">
+          <a
+            href={status.bukti_pembayaran_url}
+            target="_blank"
+            className="text-blue-600 hover:underline break-all text-sm"
+          >
+            Lihat Bukti Pembayaran
+          </a>
         </div>
       )}
     </div>

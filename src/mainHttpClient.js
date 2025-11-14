@@ -91,6 +91,7 @@ export const fetchTrainings = async (params = {}) => {
 
 export const fetchTrainingById = async (id) => api.get(`/v1/pelatihan/${id}`);
 export const fetchTrainingBySlug = async (slug) => api.get(`/v1/pelatihan/by-slug/${slug}`);
+export const fetchRegisterByTrainingSlug = async (slug) => clientApi.get(`/v1/pelatihan/${slug}/register`);
 export const registerForTraining = async (slug) => clientApi.post(`/v1/pelatihan/${slug}/register`);
 export const registerForTrainingWithFile = async (slug, file) => {
   const token = typeof window !== "undefined" ? getBearerToken() : null;

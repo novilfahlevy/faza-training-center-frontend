@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   Card,
   CardHeader,
@@ -9,6 +9,8 @@ import {
   Button,
   Input,
   Chip,
+  Select,
+  Option
 } from "@material-tailwind/react";
 import {
   ArrowLeftIcon,
@@ -110,9 +112,22 @@ export default function PesertaPelatihanPage({ params }) {
   const prev = () => {
     if (activePage > 1) setActivePage((prev) => prev - 1);
   };
+  
+  const handleStatusChange = async (pesertaId, newStatus) => {
+    try {
+      await httpClient.put(`/v1/pelatihan/peserta/${pesertaId}/status`, {
+        status_pendaftaran: newStatus,
+      });
+      
+      toast.dismiss();
+      toast.success("Status peserta berhasil diperbarui!");
 
-  const handleDelete = (pesertaId) => {
-    toast.info(`Fitur hapus peserta #${pesertaId} akan segera tersedia.`);
+      // Refresh data peserta
+      fetchPeserta(activePage, limit, search);
+    } catch (error) {
+      console.error("Gagal mengubah status:", error);
+      toast.error("Gagal memperbarui status peserta.");
+    }
   };
 
   return (
@@ -366,18 +381,14 @@ export default function PesertaPelatihanPage({ params }) {
                             </td>
 
                             <td className="py-3 px-5">
-                              <Chip
-                                variant="gradient"
+                              <Select
                                 value={peserta.status}
-                                color={
-                                  peserta.status === "terdaftar"
-                                    ? "blue"
-                                    : peserta.status === "selesai"
-                                    ? "green"
-                                    : "gray"
-                                }
-                                className="py-0.5 px-2 text-[11px] font-medium w-fit"
-                              />
+                                onChange={(value) => handleStatusChange(peserta.id, value)}
+                              >
+                                <Option value="pending">Pending</Option>
+                                <Option value="terdaftar">Terdaftar</Option>
+                                <Option value="selesai">Selesai</Option>
+                              </Select>
                             </td>
                           </tr>
                         );
