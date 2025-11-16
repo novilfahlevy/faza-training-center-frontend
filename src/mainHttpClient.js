@@ -24,7 +24,7 @@ const handleResponse = async (response) => {
     throw new Error(error.message || `HTTP error: ${status}`);
   }
 
-  return responseBody;
+  return await response.json();
 };
 
 const apiRequest = async (url, options = {}) => {
