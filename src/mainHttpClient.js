@@ -8,7 +8,9 @@ const handleResponse = async (response) => {
     const { logout, user } = useAuthStore.getState();
     const role = user?.role;
 
-    if ([401, 403].includes(status) && user) {
+    const responseBody = await response.json();
+
+    if ([401, 403].includes(status) && responseBody.state == "NOT_AUTHORIZED") {
       logout();
 
       if (role === "admin" || role === "mitra") {
@@ -22,7 +24,7 @@ const handleResponse = async (response) => {
     throw new Error(error.message || `HTTP error: ${status}`);
   }
 
-  return response.json();
+  return responseBody;
 };
 
 const apiRequest = async (url, options = {}) => {

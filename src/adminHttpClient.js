@@ -35,8 +35,9 @@ httpClient.interceptors.response.use(
 
     if (error.response) {
       const status = error.response.status;
+      const state = error.response.data.state;
 
-      if (status === 401 && auth?.user) {
+      if (status === 401 && state == "NOT_AUTHORIZED") {
         auth.logout();
         clearAuthCookies();
 
