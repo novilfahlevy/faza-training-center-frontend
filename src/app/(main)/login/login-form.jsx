@@ -6,14 +6,13 @@ import { Input, Button, Typography } from "@material-tailwind/react";
 import toast from "react-hot-toast";
 import React, { useState } from "react";
 import { loginPeserta } from "@/mainHttpClient";
-import { setBearerToken, setUserData } from "@/authCredentials";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function LoginForm() {
   const router = useRouter();
-  const { login } = useAuthStore();
+  const login = useAuthStore((state) => state.login);
   const [loading, setLoading] = useState(false);
 
   const validationSchema = Yup.object().shape({
@@ -33,16 +32,17 @@ export default function LoginForm() {
       try {
         const data = await loginPeserta(values);
 
+        // response diasumsikan: { token, user, message }
         login(data.token, data.user);
 
-        toast.success(data.message || "Login berhasil!", { position: 'bottom-right' });
+        toast.success(data.message || "Login berhasil!", { position: "bottom-right" });
+        
         // Redirect
         router.push("/");
       } catch (err) {
         console.error("Login Error:", err);
-        toast.error(err.message || "Login gagal. Silakan coba lagi.", {
-          position: "top-left",
-        });
+        toast.dismissAll();
+        toast.error(err.message || "Login gagal. Silakan coba lagi.", { position: "top-left" });
       } finally {
         setLoading(false);
       }
@@ -54,11 +54,7 @@ export default function LoginForm() {
       onSubmit={formik.handleSubmit}
       className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/3"
     >
-      <Typography
-        variant="small"
-        color="blue-gray"
-        className="mb-2 font-medium"
-      >
+      <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
         Email
       </Typography>
       <Input
@@ -76,11 +72,7 @@ export default function LoginForm() {
         </Typography>
       )}
 
-      <Typography
-        variant="small"
-        color="blue-gray"
-        className="my-2 font-medium"
-      >
+      <Typography variant="small" color="blue-gray" className="my-2 font-medium">
         Password
       </Typography>
       <Input
@@ -99,12 +91,7 @@ export default function LoginForm() {
         </Typography>
       )}
 
-      <Button
-        type="submit"
-        className="mt-6 bg-blue-600"
-        fullWidth
-        disabled={loading}
-      >
+      <Button type="submit" className="mt-6 bg-blue-600" fullWidth disabled={loading}>
         {loading ? "Memproses..." : "Masuk"}
       </Button>
 

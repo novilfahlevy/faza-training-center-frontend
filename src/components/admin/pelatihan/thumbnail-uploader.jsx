@@ -4,11 +4,11 @@ import React, { useState, useEffect } from "react";
 import ImageUploading from "react-images-uploading";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
-import httpClient from "@/adminHttpClient";
+import { uploadPelatihanThumbnail } from "@/adminHttpClient";
 
 import '@/css/admin/thumbnail-uploader.css';
 
-export default function ThumbnailUploader({ value, onChange }) {
+export default function ThumbnailUploader({ value, onChange, onFinished, onUploadingChange }) {
   const [uploading, setUploading] = useState(false);
   const [imageList, setImageList] = useState([]);
 
@@ -21,6 +21,13 @@ export default function ThumbnailUploader({ value, onChange }) {
     }
   }, [value]);
 
+  // 🔹 Notify parent when uploading state changes
+  useEffect(() => {
+    if (onUploadingChange) {
+      onUploadingChange(uploading);
+    }
+  }, [uploading, onUploadingChange]);
+
   // 🔹 Fungsi upload thumbnail ke server
   const handleUpload = async (file) => {
     if (!file) return;
@@ -29,11 +36,7 @@ export default function ThumbnailUploader({ value, onChange }) {
 
     try {
       setUploading(true);
-      const response = await httpClient.post(
-        "/v1/pelatihan/upload-thumbnail",
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      const response = await uploadPelatihanThumbnail(formData);
 
       const { thumbnail_id, url } = response.data;
       onChange({ id: thumbnail_id, url });
@@ -43,6 +46,7 @@ export default function ThumbnailUploader({ value, onChange }) {
       toast.error("Gagal mengunggah thumbnail.");
     } finally {
       setUploading(false);
+      if (onFinished) onFinished();
     }
   };
 

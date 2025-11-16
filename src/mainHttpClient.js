@@ -1,111 +1,140 @@
-import { getBearerToken, clearAuthData, getUserRole } from "./authCredentials";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
 const handleResponse = async (response) => {
   if (!response.ok) {
-    if ([401, 403].includes(response.status) && typeof window !== "undefined") {
-      console.warn("⚠️ Token tidak valid atau akses ditolak");
-      clearAuthData();
+    const status = response.status;
+    const { logout, user } = useAuthStore.getState();
+    const role = user?.role;
 
-      const role = getUserRole();
-      if (role && response.status === 401) {
-        if (role === "admin" || role === "mitra") {
-          window.location.href = "/admin/login";
-        } else if (role === "peserta") {
-          window.location.href = "/login";
-        } else {
-          window.location.href = "/";
-        }
-      } else if (role && response.status === 403) {
-        window.location.href = "/";
+    if ([401, 403].includes(status) && user) {
+      logout();
+
+      if (role === "admin" || role === "mitra") {
+        window.location.href = "/admin/login";
+      } else {
+        window.location.href = "/login";
       }
     }
 
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || `HTTP error! status: ${response.status}`);
+    throw new Error(error.message || `HTTP error: ${status}`);
   }
+
   return response.json();
 };
 
-const apiRequest = async (url, options = {}, token) => {
-  try {
-      const defaultHeaders = {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    };
+const apiRequest = async (url, options = {}) => {
+  const token = useAuthStore.getState().token;
 
-    if (token) {
-      defaultHeaders.Authorization = `Bearer ${token}`;
-    }
+  const headers = {
+    Accept: "application/json",
+    ...(options.headers || {}),
+  };
 
-    const config = {
-      ...options,
-      headers: {
-        ...defaultHeaders,
-        ...options.headers,
-      },
-    };
-
-    const response = await fetch(`${API_BASE_URL}${url}`, config);
-    return handleResponse(response);
-  } catch (error) {
-    throw error;
+  // Hanya tambahkan JSON content-type jika bukan FormData
+  if (!(options.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
   }
-};
 
-export const api = {
-  get: (url, token) => apiRequest(url, { method: "GET" }, token),
-  post: (url, data, token) => apiRequest(url, { method: "POST", body: JSON.stringify(data) }, token),
-  put: (url, data, token) => apiRequest(url, { method: "PUT", body: JSON.stringify(data) }, token),
-  delete: (url, token) => apiRequest(url, { method: "DELETE" }, token),
-};
+  if (token) headers.Authorization = `Bearer ${token}`;
 
-export const clientApi = {
-  get: (url) => api.get(url, typeof window !== "undefined" ? getBearerToken() : null),
-  post: (url, data) => api.post(url, data, typeof window !== "undefined" ? getBearerToken() : null),
-  put: (url, data) => api.put(url, data, typeof window !== "undefined" ? getBearerToken() : null),
-  delete: (url) => api.delete(url, typeof window !== "undefined" ? getBearerToken() : null),
-};
-
-// =========================================================================
-// --- API SPESIFIK APLIKASI ---
-// =========================================================================
-
-export const login = async (credentials) => {
-  return api.post("/v1/auth/login", credentials);
-};
-
-export const loginPeserta = async (credentials) => {
-  return api.post("/v1/auth/peserta/login", credentials);
-};
-
-export const registerUser = async (userData) => {
-  return api.post("/v1/auth/register", userData);
-};
-
-export const fetchTrainings = async (params = {}) => {
-  const queryString = new URLSearchParams(params).toString();
-  return api.get(`/v1/pelatihan?${queryString}`);
-};
-
-export const fetchTrainingById = async (id) => api.get(`/v1/pelatihan/${id}`);
-export const fetchTrainingBySlug = async (slug) => api.get(`/v1/pelatihan/by-slug/${slug}`);
-export const fetchRegisterByTrainingSlug = async (slug) => clientApi.get(`/v1/pelatihan/${slug}/register`);
-export const registerForTraining = async (slug) => clientApi.post(`/v1/pelatihan/${slug}/register`);
-export const registerForTrainingWithFile = async (slug, file) => {
-  const token = typeof window !== "undefined" ? getBearerToken() : null;
-
-  const formData = new FormData();
-  formData.append("bukti_pembayaran", file);
-
-  const response = await fetch(`${API_BASE_URL}/v1/pelatihan/${slug}/register`, {
-    method: "POST",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-    body: formData,
+  const response = await fetch(`${API_BASE_URL}${url}`, {
+    ...options,
+    headers,
   });
 
   return handleResponse(response);
 };
-export const getUserProfile = async () => clientApi.get("/v1/data-peserta");
-export const updateUserProfile = async (data) => clientApi.put("/v1/data-peserta", data);
+
+export const api = {
+  get: (url) => apiRequest(url, { method: "GET" }),
+  post: (url, data) => apiRequest(url, { method: "POST", body: JSON.stringify(data) }),
+  put: (url, data) => apiRequest(url, { method: "PUT", body: JSON.stringify(data) }),
+  delete: (url) => apiRequest(url, { method: "DELETE" }),
+};
+
+// ----------------------------------------------------------------------
+// AUTH
+// ----------------------------------------------------------------------
+
+export const login = (credentials) => api.post("/auth/admin/login", credentials);
+export const loginPeserta = (credentials) => api.post("/auth/login", credentials);
+export const registerUser = (data) => api.post("/auth/register", data);
+
+// ----------------------------------------------------------------------
+// PELATIHAN (main/pelatihanRoutes.js)
+// ----------------------------------------------------------------------
+
+// GET /pelatihan
+export const fetchTrainings = (params = {}) => {
+  const query = new URLSearchParams(params).toString();
+  return api.get(`/pelatihan?${query}`);
+};
+
+// GET /pelatihan/:slug
+export const fetchTrainingBySlug = (slug) => api.get(`/pelatihan/${slug}`);
+
+// GET /pelatihan/:slug/status
+export const fetchTrainingStatus = (slug) => api.get(`/pelatihan/${slug}/status`);
+
+// POST /pelatihan/:slug/register
+export const registerForTraining = (slug) =>
+  api.post(`/pelatihan/${slug}/register`);
+
+// POST /pelatihan/:slug/register (dengan file)
+export const registerForTrainingWithFile = async (slug, file) => {
+  const formData = new FormData();
+  formData.append("bukti_pembayaran", file);
+
+  return apiRequest(`/pelatihan/${slug}/register`, {
+    method: "POST",
+    body: formData,
+  });
+};
+
+// PUT /pelatihan/:slug/bukti-pembayaran
+export const updatePaymentProof = (slug, file) => {
+  const formData = new FormData();
+  formData.append("bukti_pembayaran", file);
+
+  return apiRequest(`/pelatihan/${slug}/bukti-pembayaran`, {
+    method: "PUT",
+    body: formData,
+  });
+};
+
+// DELETE /pelatihan/:slug/register
+export const cancelTrainingRegistration = (slug) =>
+  api.delete(`/pelatihan/${slug}/register`);
+
+// POST /pelatihan/upload-bukti-pembayaran
+export const uploadPaymentProof = (file) => {
+  const formData = new FormData();
+  formData.append("bukti_pembayaran", file);
+
+  return apiRequest(`/pelatihan/upload-bukti-pembayaran`, {
+    method: "POST",
+    body: formData,
+  });
+};
+
+// GET /pelatihan/riwayat
+export const fetchTrainingHistory = () => api.get("/pelatihan/riwayat");
+
+// ----------------------------------------------------------------------
+// PROFILE (main/profileRoutes.js)
+// ----------------------------------------------------------------------
+
+// GET /profile
+export const getUserProfile = () => api.get("/profile");
+
+// PUT /profile/email
+export const updateEmail = (data) => api.put("/profile/email", data);
+
+// PUT /profile/password
+export const updatePassword = (data) => api.put("/profile/password", data);
+
+// PUT /profile/profile  (update profil peserta)
+export const updateProfilePeserta = (data) => api.put("/profile", data);

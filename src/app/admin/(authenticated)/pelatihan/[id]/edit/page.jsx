@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useRef, useEffect } from "react";
 import {
   Card,
@@ -18,7 +19,11 @@ import "react-day-picker/dist/style.css";
 import { XMarkIcon, CalendarDaysIcon } from "@heroicons/react/24/outline";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import httpClient from "@/adminHttpClient";
+import { 
+  fetchPelatihanById, 
+  updatePelatihan, 
+  fetchMitraOptions 
+} from "@/adminHttpClient";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
 import ThumbnailUploader from "@/components/admin/pelatihan/thumbnail-uploader";
@@ -34,11 +39,13 @@ export default function EditPelatihan() {
 
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [mitraList, setMitraList] = useState([]);
-  const [isMitraListLoaded, setMitraListLoaded] = useState(false);
+  const [mitraOptions, setMitraOptions] = useState([]);
+  const [isMitraOptionsLoaded, setMitraOptionsLoaded] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const [thumbnail, setThumbnail] = useState(null);
 
   const dateRef = useRef(null);
   const calendarRef = useRef(null);
@@ -80,7 +87,7 @@ export default function EditPelatihan() {
             : values.tanggal_pelatihan,
         };
 
-        const response = await httpClient.put(`/v1/pelatihan/${pelatihanId}`, payload);
+        const response = await updatePelatihan(pelatihanId, payload);
 
         toast.success(response.data.message || "Pelatihan berhasil diperbarui!", {
           position: "top-right",
@@ -100,8 +107,6 @@ export default function EditPelatihan() {
       }
     },
   });
-
-  const [thumbnail, setThumbnail] = useState(null);
 
   // 📅 Tutup kalender saat klik di luar
   useEffect(() => {
@@ -148,16 +153,21 @@ export default function EditPelatihan() {
     formik.setFieldValue("mitra_id", "");
   };
 
-  // 🔹 Fetch Mitra
+  // Function to handle thumbnail upload state change
+  const handleThumbnailUploadingChange = (isUploading) => {
+    setUploadingThumbnail(isUploading);
+  };
+
+  // 🔹 Fetch Mitra Options
   useEffect(() => {
     const fetchMitra = async () => {
       try {
-        const res = await httpClient.get("/v1/data-mitra");
-        setMitraList(res.data.records || []);
+        const res = await fetchMitraOptions();
+        setMitraOptions(res.data || []);
       } catch (err) {
         console.error("Gagal mengambil mitra:", err);
       } finally {
-        setMitraListLoaded(true);
+        setMitraOptionsLoaded(true);
       }
     };
     fetchMitra();
@@ -167,27 +177,27 @@ export default function EditPelatihan() {
   useEffect(() => {
     const fetchPelatihan = async () => {
       try {
-        const res = await httpClient.get(`/v1/pelatihan/${pelatihanId}`);
+        const res = await fetchPelatihanById(pelatihanId);
         const data = res.data;
 
-        if (res.data.thumbnail_url) {
-          setThumbnail({ id: null, url: res.data.thumbnail_url });
+        if (data.thumbnail_url) {
+          setThumbnail({ id: null, url: data.thumbnail_url });
         }
 
         let parsedDate = null;
-        if (data.tanggal_pelatihan) {
-          parsedDate = new Date(data.tanggal_pelatihan);
+        if (data.tanggal) {
+          parsedDate = new Date(data.tanggal);
         }
 
         formik.setValues({
-          nama_pelatihan: data.nama_pelatihan || "",
-          deskripsi_pelatihan: data.deskripsi_pelatihan || "",
+          nama_pelatihan: data.nama || "",
+          deskripsi_pelatihan: data.deskripsi || "",
           tanggal_pelatihan: parsedDate
             ? format(parsedDate, "EEEE, dd MMMM yyyy", { locale: id })
             : "",
-          durasi_pelatihan: data.durasi_pelatihan || "",
-          lokasi_pelatihan: data.lokasi_pelatihan || "",
-          mitra_id: data.mitra_id ? String(data.mitra_id) : "",
+          durasi_pelatihan: data.durasi || "",
+          lokasi_pelatihan: data.lokasi || "",
+          mitra_id: data.mitra ? String(data.mitra.id) : "",
         });
 
         if (parsedDate) {
@@ -231,7 +241,11 @@ export default function EditPelatihan() {
               >
                 Poster/Sampul
               </Typography>
-              <ThumbnailUploader value={thumbnail} onChange={setThumbnail} />
+              <ThumbnailUploader 
+                value={thumbnail} 
+                onChange={setThumbnail} 
+                onUploadingChange={handleThumbnailUploadingChange}
+              />
             </div>
 
             {/* Nama */}
@@ -349,7 +363,7 @@ export default function EditPelatihan() {
 
             {/* Mitra */}
             <div className="relative">
-              {!isMitraListLoaded ? (
+              {!isMitraOptionsLoaded ? (
                 <Input label="Memuat daftar mitra..." disabled />
               ) : (
                 <Select
@@ -357,10 +371,10 @@ export default function EditPelatihan() {
                   value={formik.values.mitra_id}
                   onChange={(value) => formik.setFieldValue("mitra_id", value)}
                 >
-                  {mitraList.length > 0 ? (
-                    mitraList.map((m) => (
-                      <Option key={m.pengguna.pengguna_id} value={m.pengguna.pengguna_id.toString()}>
-                        {m.nama_mitra}
+                  {mitraOptions.length > 0 ? (
+                    mitraOptions.map((m) => (
+                      <Option key={m.id} value={m.id.toString()}>
+                        {m.nama}
                       </Option>
                     ))
                   ) : (
@@ -390,7 +404,11 @@ export default function EditPelatihan() {
               >
                 Batal
               </Button>
-              <Button type="submit" color="blue" disabled={submitting}>
+              <Button 
+                type="submit" 
+                color="blue" 
+                disabled={submitting || uploadingThumbnail}
+              >
                 {submitting ? "Menyimpan..." : "Simpan"}
               </Button>
             </div>

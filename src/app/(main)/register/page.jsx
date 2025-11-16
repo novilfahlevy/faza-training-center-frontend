@@ -71,13 +71,12 @@ export default function RegisterPage() {
 
         toast.success(data.message || "Registrasi berhasil!", { position: "bottom-right" });
 
-        // Redirect ke halaman login setelah 1 detik
-        setTimeout(() => router.push("/login"), 1200);
+        // Redirect ke halaman login
+        router.push("/login");
       } catch (err) {
         console.error("Register Error:", err);
-        toast.error(err.message || "Gagal registrasi. Silakan coba lagi.", {
-          position: "top-right",
-        });
+        toast.dismissAll();
+        toast.error(err.message || "Gagal registrasi. Silakan coba lagi.", { position: "top-right" });
       } finally {
         setLoading(false);
       }

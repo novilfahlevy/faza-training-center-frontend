@@ -30,25 +30,22 @@ import {
 } from "@/context";
 import { clearAuthData } from "@/authCredentials";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function DashboardNavbar() {
-  const [controller, dispatch] = useMaterialTailwindController();
-  const { fixedNavbar, openSidenav } = controller;
+  const [controller] = useMaterialTailwindController();
+  const { fixedNavbar } = controller;
   const pathname = usePathname();
 
   const pathSegments = pathname.split("/").filter(Boolean);
   const layout = pathSegments[0] || "dashboard";
   const page = pathSegments[1] || "home";
 
+  const logout = useAuthStore((s) => s.logout);
   const router = useRouter();
 
-  const logout = () => {
-    clearAuthData();
-
-    // Hapus cookies juga agar middleware mendeteksi logout
-    document.cookie = "token=; path=/; max-age=0";
-    document.cookie = "user=; path=/; max-age=0";
-    
+  const handleLogout = () => {
+    logout();
     router.push('/admin/login');
   }
 
@@ -104,7 +101,7 @@ export default function DashboardNavbar() {
             variant="text"
             color="blue-gray"
             className="hidden items-center gap-1 px-4 xl:flex normal-case"
-            onClick={logout}
+            onClick={handleLogout}
           >
             <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
             Keluar

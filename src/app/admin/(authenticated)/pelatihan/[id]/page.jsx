@@ -20,7 +20,11 @@ import {
   BuildingOfficeIcon,
 } from "@heroicons/react/24/solid";
 import Link from "next/link";
-import httpClient from "@/adminHttpClient";
+import { 
+  fetchPelatihanById, 
+  fetchPelatihanParticipants, 
+  updatePesertaStatus 
+} from "@/adminHttpClient";
 import { toast } from "react-toastify";
 import Pagination from "@/components/admin/pagination";
 import LoadingOverlay from "@/components/admin/loading-overlay";
@@ -53,7 +57,7 @@ export default function PesertaPelatihanPage({ params }) {
   const fetchPelatihanDetail = async () => {
     try {
       setIsPelatihanLoading(true);
-      const res = await httpClient.get(`/v1/pelatihan/${id}`);
+      const res = await fetchPelatihanById(id);
       setPelatihan(res.data);
     } catch (error) {
       console.error("Gagal mengambil detail pelatihan:", error);
@@ -67,9 +71,10 @@ export default function PesertaPelatihanPage({ params }) {
   const fetchPeserta = async (page = 1, perPage = 5, query = "") => {
     try {
       setIsLoading(true);
-      const res = await httpClient.get(`/v1/pelatihan/${id}/peserta`, {
-        params: { page: page - 1, size: perPage, search: query || undefined },
-      });
+
+      const params = { page: page, size: perPage };
+      if (query) params.search = query;
+      const res = await fetchPelatihanParticipants(id, params);
 
       const { records, totalPages } = res.data;
 
@@ -115,9 +120,7 @@ export default function PesertaPelatihanPage({ params }) {
   
   const handleStatusChange = async (pesertaId, newStatus) => {
     try {
-      await httpClient.put(`/v1/pelatihan/peserta/${pesertaId}/status`, {
-        status_pendaftaran: newStatus,
-      });
+      await updatePesertaStatus(pesertaId, { status: newStatus });
       
       toast.dismiss();
       toast.success("Status peserta berhasil diperbarui!");
@@ -148,7 +151,7 @@ export default function PesertaPelatihanPage({ params }) {
                     pelatihan.thumbnail_url ||
                     "https://via.placeholder.com/400x300.png?text=No+Image"
                   }
-                  alt={pelatihan.nama_pelatihan}
+                  alt={pelatihan.nama}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -157,7 +160,7 @@ export default function PesertaPelatihanPage({ params }) {
               <div className="w-full lg:w-2/3 p-6 lg:p-8 flex flex-col justify-between">
                 <div>
                   <Typography variant="h3" color="blue-gray" className="mb-4">
-                    {pelatihan.nama_pelatihan}
+                    {pelatihan.nama}
                   </Typography>
 
                   {/* Metadata dalam bentuk Chip */}
@@ -165,7 +168,7 @@ export default function PesertaPelatihanPage({ params }) {
                     <Chip
                       variant="ghost"
                       value={new Date(
-                        pelatihan.tanggal_pelatihan
+                        pelatihan.tanggal
                       ).toLocaleDateString("id-ID", {
                         day: "numeric",
                         month: "long",
@@ -176,7 +179,7 @@ export default function PesertaPelatihanPage({ params }) {
                     />
                     <Chip
                       variant="ghost"
-                      value={pelatihan.lokasi_pelatihan}
+                      value={pelatihan.lokasi}
                       icon={<MapPinIcon className="h-4 w-4" />}
                       className="rounded-full"
                     />
@@ -184,7 +187,7 @@ export default function PesertaPelatihanPage({ params }) {
                       <Chip
                         variant="ghost"
                         color="blue"
-                        value={pelatihan.mitra.data_mitra.nama_mitra}
+                        value={pelatihan.mitra}
                         icon={<BuildingOfficeIcon className="h-4 w-4" />}
                         className="rounded-full"
                       />
@@ -229,11 +232,11 @@ export default function PesertaPelatihanPage({ params }) {
           </Typography>
         </CardHeader>
         <CardBody className="p-6">
-          {pelatihan?.deskripsi_pelatihan ? (
+          {pelatihan?.deskripsi ? (
             <div
               className="prose prose-content max-w-none"
               dangerouslySetInnerHTML={{
-                __html: pelatihan.deskripsi_pelatihan,
+                __html: pelatihan.deskripsi,
               }}
             />
           ) : (
@@ -317,7 +320,7 @@ export default function PesertaPelatihanPage({ params }) {
 
                         return (
                           <tr
-                            key={peserta.id || peserta.peserta_id}
+                            key={peserta.id}
                             className="border-y"
                           >
                             <td className="py-3 px-5">

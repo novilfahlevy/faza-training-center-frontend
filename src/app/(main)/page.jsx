@@ -1,6 +1,9 @@
+"use client";
+
 import { Inter } from 'next/font/google';
 import '@/css/tailwind.css';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { fetchTrainings } from '@/mainHttpClient';
 import TrainingCard from '@/components/main/training-card';
 import { ArrowRightIcon } from '@heroicons/react/24/solid';
@@ -8,15 +11,24 @@ import { AcademicCapIcon, UserGroupIcon, ShieldCheckIcon } from '@heroicons/reac
 
 const inter = Inter({ subsets: ['latin'] });
 
-export default async function HomePage() {
-  let trainings = [];
+export default function HomePage() {
+  const [trainings, setTrainings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  try {
-    const data = await fetchTrainings({ limit: 6 });
-    trainings = data.records || [];
-  } catch (error) {
-    console.error("Gagal memuat pelatihan di server:", error);
-  }
+  useEffect(() => {
+    const loadTrainings = async () => {
+      try {
+        const data = await fetchTrainings({ size: 6 });
+        setTrainings(data.records || []);
+      } catch (error) {
+        console.error("Gagal memuat pelatihan di server:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTrainings();
+  }, []);
 
   return (
     <div className={inter.className}>
@@ -78,9 +90,11 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          {/* 🔹 Tidak perlu loading state, data sudah ada saat render */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {trainings.length > 0 ? (
+          {/* List pelatihan */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {loading ? (
+              <p className="col-span-full text-center text-gray-500">Memuat...</p>
+            ) : trainings.length > 0 ? (
               trainings.map((training) => (
                 <TrainingCard key={training.pelatihan_id} training={training} />
               ))

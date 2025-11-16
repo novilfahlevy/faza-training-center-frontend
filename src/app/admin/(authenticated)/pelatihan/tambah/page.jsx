@@ -20,7 +20,10 @@ import "react-day-picker/dist/style.css";
 import { XMarkIcon, CalendarDaysIcon } from "@heroicons/react/24/outline";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import httpClient from "@/adminHttpClient";
+import { 
+  fetchMitraOptions, 
+  createPelatihan 
+} from "@/adminHttpClient";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
 import ThumbnailUploader from "@/components/admin/pelatihan/thumbnail-uploader";
@@ -34,20 +37,21 @@ export default function TambahPelatihan() {
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
 
-  const [mitraList, setMitraList] = useState([]);
-  const [isMitraListLoaded, setMitraListLoaded] = useState(false);
+  const [mitraOptions, setMitraOptions] = useState([]);
+  const [isMitraOptionsLoaded, setMitraOptionsLoaded] = useState(false);
 
   const dateRef = useRef(null);
   const calendarRef = useRef(null);
 
-  // 🔹 Fetch daftar mitra dari backend
+  // 🔹 Fetch daftar opsi mitra dari backend
   useEffect(() => {
     const fetchMitra = async () => {
       try {
-        const response = await httpClient.get("/v1/data-mitra");
-        setMitraList(response.data.records || []);
-        setMitraListLoaded(true);
+        const response = await fetchMitraOptions();
+        setMitraOptions(response.data || []);
+        setMitraOptionsLoaded(true);
       } catch (error) {
         toast.error("Gagal mengambil daftar mitra.", { position: "top-right" });
         console.error("Gagal mengambil daftar mitra:", error);
@@ -78,8 +82,6 @@ export default function TambahPelatihan() {
       durasi_pelatihan: "",
       lokasi_pelatihan: "",
       mitra_id: "",
-      user_id: 1,
-      role: "admin",
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -92,7 +94,7 @@ export default function TambahPelatihan() {
           tanggal_pelatihan: format(selectedDate, "yyyy-MM-dd"),
         };
 
-        const response = await httpClient.post("/v1/pelatihan", payload);
+        const response = await createPelatihan(payload);
 
         toast.success(
           response.data.message || "Pelatihan berhasil ditambahkan!",
@@ -162,6 +164,11 @@ export default function TambahPelatihan() {
 
   const [thumbnail, setThumbnail] = useState(null);
 
+  // Function to handle thumbnail upload state change
+  const handleThumbnailUploadingChange = (isUploading) => {
+    setUploadingThumbnail(isUploading);
+  };
+
   return (
     <div className="mt-12 flex justify-center">
       <Card className="w-full max-w-3xl border border-blue-gray-100 shadow-sm">
@@ -182,7 +189,11 @@ export default function TambahPelatihan() {
               >
                 Poster/Sampul
               </Typography>
-              <ThumbnailUploader value={thumbnail} onChange={setThumbnail} />
+              <ThumbnailUploader 
+                value={thumbnail} 
+                onChange={setThumbnail} 
+                onUploadingChange={handleThumbnailUploadingChange}
+              />
             </div>
 
             {/* Nama */}
@@ -308,16 +319,16 @@ export default function TambahPelatihan() {
 
             {/* Mitra */}
             <div className="relative">
-              {isMitraListLoaded && (
+              {isMitraOptionsLoaded && (
                 <Select
                   label="Pilih Mitra (opsional)"
                   value={formik.values.mitra_id}
                   onChange={(value) => formik.setFieldValue("mitra_id", value)}
                 >
-                  {mitraList.length > 0 ? (
-                    mitraList.map((m) => (
-                      <Option key={m.pengguna.pengguna_id} value={m.pengguna.pengguna_id}>
-                        {m.nama_mitra}
+                  {mitraOptions.length > 0 ? (
+                    mitraOptions.map((m) => (
+                      <Option key={m.id} value={m.id}>
+                        {m.nama}
                       </Option>
                     ))
                   ) : (
@@ -347,7 +358,11 @@ export default function TambahPelatihan() {
               >
                 Batal
               </Button>
-              <Button type="submit" color="blue" disabled={loading}>
+              <Button 
+                type="submit" 
+                color="blue" 
+                disabled={loading || uploadingThumbnail}
+              >
                 {loading ? "Menyimpan..." : "Simpan"}
               </Button>
             </div>

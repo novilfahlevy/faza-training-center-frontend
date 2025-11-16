@@ -8,7 +8,9 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
 const Header = () => {
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -49,20 +51,12 @@ const Header = () => {
           onClick={() => setMenuOpen(!menuOpen)}
           className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none"
         >
-          {menuOpen ? (
-            <XMarkIcon className="w-6 h-6" />
-          ) : (
-            <Bars3Icon className="w-6 h-6" />
-          )}
+          {menuOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
         </button>
 
         {/* === Menu Utama (Desktop) === */}
         <div className="hidden md:flex items-center space-x-8">
-          {[
-            { href: "/", label: "Beranda" },
-            { href: "/pelatihan", label: "Pelatihan" },
-            { href: "/kontak", label: "Kontak" },
-          ].map((item) => (
+          {[{ href: "/", label: "Beranda" }, { href: "/pelatihan", label: "Pelatihan" }, { href: "/kontak", label: "Kontak" }].map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -74,9 +68,7 @@ const Header = () => {
 
           {user ? (
             <div className="flex items-center space-x-4 border-l pl-4 border-gray-300">
-              <span className="text-gray-700 font-semibold">
-                Halo, {user?.nama_lengkap?.split(' ')[0]}
-              </span>
+              <span className="text-gray-700 font-semibold">Halo, {user?.nama_lengkap?.split(" ")[0]}</span>
               <Link href="/profil">
                 <button className="px-3 py-1.5 rounded-md border border-gray-300 text-gray-700 hover:bg-blue-600 hover:text-white transition-colors text-sm font-medium">
                   Profil
@@ -90,10 +82,7 @@ const Header = () => {
               </button>
             </div>
           ) : (
-            <Link
-              href="/login"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors"
-            >
+            <Link href="/login" className="px-4 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors">
               Login
             </Link>
           )}
@@ -104,17 +93,8 @@ const Header = () => {
       {menuOpen && (
         <div className="md:hidden bg-white border-t border-gray-200 shadow-md">
           <div className="px-6 py-4 flex flex-col space-y-3">
-            {[
-              { href: "/", label: "Beranda" },
-              { href: "/pelatihan", label: "Pelatihan" },
-              { href: "/kontak", label: "Kontak" },
-            ].map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMenuOpen(false)}
-                className="text-gray-700 hover:text-blue-600 transition-colors"
-              >
+            {[{ href: "/", label: "Beranda" }, { href: "/pelatihan", label: "Pelatihan" }, { href: "/kontak", label: "Kontak" }].map((item) => (
+              <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} className="text-gray-700 hover:text-blue-600 transition-colors">
                 {item.label}
               </Link>
             ))}
@@ -122,14 +102,8 @@ const Header = () => {
             {user ? (
               <>
                 <hr className="border-gray-200" />
-                <span className="text-gray-700 font-medium">
-                  Halo, {user?.nama_lengkap?.split(' ')[0]}
-                </span>
-                <Link
-                  href="/profil"
-                  onClick={() => setMenuOpen(false)}
-                  className="text-gray-700 hover:text-blue-600 transition-colors"
-                >
+                <span className="text-gray-700 font-medium">Halo, {user?.nama_lengkap?.split(" ")[0]}</span>
+                <Link href="/profil" onClick={() => setMenuOpen(false)} className="text-gray-700 hover:text-blue-600 transition-colors">
                   Profil
                 </Link>
                 <button
@@ -143,11 +117,7 @@ const Header = () => {
                 </button>
               </>
             ) : (
-              <Link
-                href="/login"
-                onClick={() => setMenuOpen(false)}
-                className="text-gray-700 hover:text-blue-600 transition-colors"
-              >
+              <Link href="/login" onClick={() => setMenuOpen(false)} className="text-gray-700 hover:text-blue-600 transition-colors">
                 Login
               </Link>
             )}

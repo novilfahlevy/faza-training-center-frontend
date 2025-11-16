@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useState, useCallback } from "react";
 import {
   Card,
@@ -21,12 +22,16 @@ import TambahPenggunaModal from "@/components/admin/pengguna/tambah-pengguna-mod
 import EditPenggunaModal from "@/components/admin/pengguna/edit-pengguna-modal";
 import HapusPenggunaModal from "@/components/admin/pengguna/hapus-pengguna-modal";
 import DetailPenggunaModal from "@/components/admin/pengguna/detail-pengguna-modal";
-import httpClient from "@/adminHttpClient";
+import {
+  fetchPenggunaList,
+  fetchPenggunaById,
+  deletePengguna,
+} from "@/adminHttpClient";
 import { toast } from "react-toastify";
 import Pagination from "@/components/admin/pagination";
 import LoadingOverlay from "@/components/admin/loading-overlay";
 
-// 🧠 Utility: debounce function
+// 🧠 Utility: debounce function untuk mencegah panggilan API berlebihan saat mengetik
 const debounce = (func, delay) => {
   let timer;
   return (...args) => {
@@ -36,31 +41,33 @@ const debounce = (func, delay) => {
 };
 
 export default function PenggunaPage() {
+  // --- STATE MANAGEMENT ---
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingDetail, setLoadingDetail] = useState(false);
   const [search, setSearch] = useState("");
 
   const [activePage, setActivePage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
 
+  // State untuk mengontrol visibilitas modal
   const [openTambah, setOpenTambah] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openHapus, setOpenHapus] = useState(false);
   const [openDetail, setOpenDetail] = useState(false);
+
+  // State untuk menyimpan data pengguna yang sedang dipilih/diedit
   const [selectedUser, setSelectedUser] = useState(null);
 
-  // 🚀 Fetch data pengguna dari backend
+  // 🚀 Fungsi untuk mengambil daftar pengguna
   const fetchUsers = async (page = 1, perPage = 5, query = "") => {
     try {
       setIsLoading(true);
-      const response = await httpClient.get("/v1/pengguna", {
-        params: {
-          page: page - 1, // backend mulai dari 0
-          size: perPage,
-          search: query || undefined,
-        },
-      });
+
+      const params = { page: page, size: perPage };
+      if (query) params.search = query;
+      const response = await fetchPenggunaList(params);
 
       const { records, totalPages } = response.data;
       setUsers(records || []);
@@ -77,6 +84,25 @@ export default function PenggunaPage() {
     }
   };
 
+  // 🔍 Fungsi untuk mengambil detail satu pengguna
+  const fetchUserDetail = async (userId) => {
+    try {
+      setLoadingDetail(true);
+      const response = await fetchPenggunaById(userId);
+      setSelectedUser(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Gagal mengambil detail pengguna:", error);
+      toast.error("Gagal memuat detail pengguna.", {
+        position: "top-right",
+        autoClose: 2500,
+      });
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
+  
+  // --- EVENT HANDLERS ---
   // ⚡️ Debounced search handler
   const debouncedFetch = useCallback(
     debounce((query) => {
@@ -85,19 +111,19 @@ export default function PenggunaPage() {
     [limit]
   );
 
-  // Trigger setiap kali halaman atau limit berubah
+  // Trigger fetch data saat halaman atau limit berubah
   useEffect(() => {
     fetchUsers(activePage, limit, search);
   }, [activePage, limit]);
 
-  // Trigger setiap kali search berubah
+  // Trigger fetch data saat search berubah (dengan debounce)
   useEffect(() => {
     debouncedFetch(search);
   }, [search, debouncedFetch]);
 
   const handleSearch = (e) => {
     setSearch(e.target.value);
-    setActivePage(1);
+    setActivePage(1); // Reset ke halaman pertama saat pencarian berubah
   };
 
   const next = () => {
@@ -108,10 +134,41 @@ export default function PenggunaPage() {
     if (activePage > 1) setActivePage((prev) => prev - 1);
   };
 
+  const handleDelete = async (user) => {
+    try {
+      await deletePengguna(user.id);
+      toast.success("Pengguna berhasil dihapus!", {
+        position: "top-right",
+        autoClose: 2500,
+      });
+      
+      // Refresh daftar pengguna setelah hapus
+      fetchUsers(activePage, limit, search);
+    } catch (error) {
+      console.error("Gagal menghapus pengguna:", error);
+      toast.error(
+        error.response?.data?.message || "Gagal menghapus pengguna.",
+        { position: "top-right", autoClose: 3000 }
+      );
+    }
+  };
+
+  // 🔹 Fungsi untuk membuka modal detail dan mengambil data pengguna
+  const handleOpenDetailModal = async (user) => {
+    await fetchUserDetail(user.id);
+    setOpenDetail(true);
+  };
+
+  // 🔹 Fungsi untuk membuka modal edit dan mengambil data pengguna
+  const handleOpenEditModal = async (user) => {
+    await fetchUserDetail(user.id);
+    setOpenEdit(true);
+  };
+
   return (
     <div className="mt-12">
       <Card className="border border-blue-gray-100 shadow-sm">
-        {/* Header */}
+        {/* Header: Judul, Pencarian, dan Tombol Tambah */}
         <CardHeader
           floated={false}
           shadow={false}
@@ -121,7 +178,7 @@ export default function PenggunaPage() {
           <Typography variant="h6">Daftar Pengguna</Typography>
           <div className="flex flex-col gap-y-4 sm:flex-row sm:items-center sm:gap-x-4">
             <Input
-              placeholder="Cari pengguna (nama/email/mitra)"
+              placeholder="Cari pengguna (nama/email/role)"
               value={search}
               onChange={handleSearch}
               className="!w-full sm:!w-64 !border-t-blue-gray-200 focus:!border-t-gray-900"
@@ -140,7 +197,7 @@ export default function PenggunaPage() {
           </div>
         </CardHeader>
 
-        {/* Tabel */}
+        {/* Body: Tabel Data Pengguna */}
         <CardBody className="px-0 pt-0 pb-2">
           <LoadingOverlay active={isLoading}>
             <div className="overflow-x-auto">
@@ -148,27 +205,23 @@ export default function PenggunaPage() {
                 <table className="w-full min-w-[800px] table-auto">
                   <thead className="bg-gray-200">
                     <tr>
-                      {[
-                        "No",
-                        "Role",
-                        "Email",
-                        "Nama Lengkap / Mitra",
-                        "Aksi",
-                      ].map((head, index) => (
-                        <th
-                          key={head}
-                          className={`border-b border-blue-gray-50 py-3 px-5 text-left ${
-                            index != 0 ? "min-w-[200px]" : ""
-                          }`}
-                        >
-                          <Typography
-                            variant="small"
-                            className="text-[11px] font-bold uppercase text-blue-gray-400"
+                      {["No", "Role", "Email", "Nama Lengkap / Mitra", "Aksi"].map(
+                        (head, index) => (
+                          <th
+                            key={head}
+                            className={`border-b border-blue-gray-50 py-3 px-5 text-left ${
+                              index !== 0 ? "min-w-[200px]" : ""
+                            }`}
                           >
-                            {head}
-                          </Typography>
-                        </th>
-                      ))}
+                            <Typography
+                              variant="small"
+                              className="text-[11px] font-bold uppercase text-blue-gray-400"
+                            >
+                              {head}
+                            </Typography>
+                          </th>
+                        )
+                      )}
                     </tr>
                   </thead>
                   <tbody>
@@ -183,7 +236,7 @@ export default function PenggunaPage() {
                       </tr>
                     ) : (
                       users.map((user, index) => (
-                        <tr key={user.pengguna_id} className="border-y">
+                        <tr key={user.id} className="border-y">
                           <td className="py-3 px-5">
                             {(activePage - 1) * limit + index + 1}
                           </td>
@@ -191,40 +244,28 @@ export default function PenggunaPage() {
                             <Chip
                               variant="gradient"
                               color={
-                                user.role === "calon_peserta"
-                                  ? "green"
+                                user.role === "peserta"
+                                  ? "blue"
                                   : user.role === "mitra"
                                   ? "purple"
                                   : "blue-gray"
                               }
-                              value={
-                                user.role === "calon_peserta"
-                                  ? "Calon Peserta"
-                                  : user.role
-                              }
+                              value={user.role}
                               className="py-0.5 px-2 text-[11px] font-medium w-fit"
                             />
                           </td>
                           <td className="py-3 px-5">{user.email}</td>
                           <td className="py-3 px-5">
-                            {user.role === "calon_peserta"
-                              ? user.calon_peserta?.nama_lengkap
-                              : user.role === "mitra"
-                              ? user.mitra?.nama_mitra
-                              : "-"}
+                            {user.nama_lengkap || "-"}
                           </td>
                           <td className="py-3 px-5 flex gap-2">
                             <Tooltip content="Detail">
                               <IconButton
                                 variant="outlined"
                                 color="green"
-                                onClick={() => {
-                                  setSelectedUser(user);
-                                  setOpenDetail(true);
-                                }}
+                                onClick={() => handleOpenDetailModal(user)}
                                 className={
-                                  user.role === "calon_peserta" ||
-                                  user.role === "mitra"
+                                  user.role === "peserta" || user.role === "mitra"
                                     ? ""
                                     : "opacity-0 pointer-events-none"
                                 }
@@ -232,18 +273,13 @@ export default function PenggunaPage() {
                                 <EyeIcon className="h-4 w-4" />
                               </IconButton>
                             </Tooltip>
-                            <Tooltip content="Edit Mitra">
+                            <Tooltip content="Edit">
                               <IconButton
                                 variant="outlined"
                                 color="amber"
-                                onClick={() => {
-                                  setSelectedUser(user);
-                                  setOpenEdit(true);
-                                }}
+                                onClick={() => handleOpenEditModal(user)}
                                 className={
-                                  user.role === "mitra"
-                                    ? ""
-                                    : "opacity-0 pointer-events-none"
+                                  user.role === "mitra" ? "" : "opacity-0 pointer-events-none"
                                 }
                               >
                                 <PencilIcon className="h-4 w-4" />
@@ -271,7 +307,7 @@ export default function PenggunaPage() {
             </div>
           </LoadingOverlay>
 
-          {/* Pagination */}
+          {/* Pagination Controls */}
           <Pagination
             limit={limit}
             setLimit={setLimit}
@@ -288,12 +324,13 @@ export default function PenggunaPage() {
       <TambahPenggunaModal
         open={openTambah}
         onClose={() => setOpenTambah(false)}
-        onSuccess={() => fetchUsers(activePage, limit, search)} // 🔁 Refresh daftar pengguna setelah tambah
+        onSuccess={() => fetchUsers(activePage, limit, search)}
       />
       <EditPenggunaModal
         open={openEdit}
         onClose={() => setOpenEdit(false)}
         user={selectedUser}
+        onSuccess={() => fetchUsers(activePage, limit, search)}
       />
       <HapusPenggunaModal
         open={openHapus}
@@ -303,7 +340,10 @@ export default function PenggunaPage() {
       />
       <DetailPenggunaModal
         open={openDetail}
-        onClose={() => setOpenDetail(false)}
+        onClose={() => {
+          setOpenDetail(false);
+          setSelectedUser(null);
+        }}
         user={selectedUser}
       />
     </div>

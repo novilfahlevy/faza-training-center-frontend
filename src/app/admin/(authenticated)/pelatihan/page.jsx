@@ -19,7 +19,10 @@ import {
 } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import HapusPelatihanModal from "@/components/admin/pelatihan/hapus-pelatihan-modal";
-import httpClient from "@/adminHttpClient";
+import { 
+  fetchPelatihanList, 
+  deletePelatihan 
+} from "@/adminHttpClient";
 import { toast } from "react-toastify";
 import Pagination from "@/components/admin/pagination";
 import LoadingOverlay from "@/components/admin/loading-overlay";
@@ -48,13 +51,10 @@ export default function Pelatihan() {
   const fetchPelatihan = async (page = 1, perPage = 5, query = "") => {
     try {
       setIsLoading(true);
-      const response = await httpClient.get("/v1/pelatihan", {
-        params: {
-          page: page - 1,
-          size: perPage,
-          search: query || undefined,
-        },
-      });
+      
+      const params = { page: page, size: perPage };
+      if (query) params.search = query;
+      const response = await fetchPelatihanList(params);
 
       const { records, totalPages } = response.data;
       setPelatihanList(records || []);
@@ -99,9 +99,7 @@ export default function Pelatihan() {
     if (!selectedPelatihan) return;
 
     try {
-      const response = await httpClient.delete(
-        `/v1/pelatihan/${selectedPelatihan.pelatihan_id}`
-      );
+      const response = await deletePelatihan(selectedPelatihan.id);
 
       toast.success(response.data.message || "Pelatihan berhasil dihapus!", {
         position: "top-right",
@@ -204,7 +202,7 @@ export default function Pelatihan() {
                     ) : (
                       pelatihanList.map((item, index) => (
                         <tr
-                          key={item.pelatihan_id}
+                          key={item.id}
                           className="border-y-2 hover:bg-gray-50 transition"
                         >
                           {/* Nomor urut */}
@@ -228,12 +226,12 @@ export default function Pelatihan() {
                           </td>
 
                           {/* Nama pelatihan */}
-                          <td className="py-3 px-5">{item.nama_pelatihan}</td>
+                          <td className="py-3 px-5">{item.nama}</td>
 
                           {/* Tanggal */}
                           <td className="py-3 px-5">
                             {new Date(
-                              item.tanggal_pelatihan
+                              item.tanggal
                             ).toLocaleDateString("id-ID", {
                               day: "2-digit",
                               month: "long",
@@ -242,16 +240,16 @@ export default function Pelatihan() {
                           </td>
 
                           {/* Durasi */}
-                          <td className="py-3 px-5">{item.durasi_pelatihan}</td>
+                          <td className="py-3 px-5">{item.durasi}</td>
 
                           {/* Lokasi */}
-                          <td className="py-3 px-5">{item.lokasi_pelatihan}</td>
+                          <td className="py-3 px-5">{item.lokasi}</td>
 
                           {/* Aksi */}
                           <td className="py-3 px-5 flex gap-2">
                             <Tooltip content="Lihat Detail">
                               <Link
-                                href={`/admin/pelatihan/${item.pelatihan_id}`}
+                                href={`/admin/pelatihan/${item.id}`}
                               >
                                 <IconButton variant="outlined" color="green">
                                   <EyeIcon className="h-4 w-4" />
@@ -260,7 +258,7 @@ export default function Pelatihan() {
                             </Tooltip>
                             <Tooltip content="Edit">
                               <Link
-                                href={`/admin/pelatihan/${item.pelatihan_id}/edit`}
+                                href={`/admin/pelatihan/${item.id}/edit`}
                               >
                                 <IconButton variant="outlined" color="blue">
                                   <PencilIcon className="h-4 w-4" />
@@ -303,7 +301,7 @@ export default function Pelatihan() {
         open={openModal}
         onClose={() => setOpenModal(false)}
         onConfirm={handleConfirmDelete}
-        namaPelatihan={selectedPelatihan?.nama_pelatihan}
+        namaPelatihan={selectedPelatihan?.nama}
       />
     </div>
   );

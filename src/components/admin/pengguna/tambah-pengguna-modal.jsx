@@ -1,3 +1,4 @@
+// /home/novilfahlevy/Projects/faza-training-center/src/components/admin/pengguna/tambah-pengguna-modal.jsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -15,7 +16,7 @@ import {
 } from "@material-tailwind/react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import httpClient from "@/adminHttpClient";
+import { createPengguna } from "@/adminHttpClient"; // 🔹 Gunakan fungsi baru
 import { toast } from "react-toastify";
 
 export default function TambahPenggunaModal({ open, onClose, onSuccess }) {
@@ -26,6 +27,7 @@ export default function TambahPenggunaModal({ open, onClose, onSuccess }) {
     password: Yup.string().min(6, "Password minimal 6 karakter").required("Password wajib diisi"),
     role: Yup.string().oneOf(["admin", "mitra"]).required("Role wajib dipilih"),
 
+    // Validasi khusus untuk mitra
     nama_mitra: Yup.string().when("role", {
       is: "mitra",
       then: (schema) => schema.required("Nama Mitra wajib diisi"),
@@ -54,6 +56,7 @@ export default function TambahPenggunaModal({ open, onClose, onSuccess }) {
       email: "",
       password: "",
       role: "admin",
+      // Field untuk mitra
       nama_mitra: "",
       deskripsi_mitra: "",
       alamat_mitra: "",
@@ -62,10 +65,10 @@ export default function TambahPenggunaModal({ open, onClose, onSuccess }) {
     },
     validationSchema,
     onSubmit: async (values, { resetForm }) => {
-      console.log(values);
       setIsAdding(true);
       try {
-        const response = await httpClient.post("/v1/pengguna", values);
+        // 🔹 Gunakan fungsi createPengguna dari adminHttpClient
+        const response = await createPengguna(values);
         toast.success(response.data.message || "Pengguna berhasil dibuat!");
         resetForm();
         onClose();
@@ -79,12 +82,12 @@ export default function TambahPenggunaModal({ open, onClose, onSuccess }) {
     },
   });
 
+  // Reset field mitra jika role berubah
   useEffect(() => {
     if (formik.values.role !== "mitra") {
       formik.setValues({
         ...formik.values,
         nama_mitra: "",
-        email_mitra: "",
         deskripsi_mitra: "",
         alamat_mitra: "",
         telepon_mitra: "",
@@ -182,6 +185,7 @@ export default function TambahPenggunaModal({ open, onClose, onSuccess }) {
                   name="deskripsi_mitra"
                   value={formik.values.deskripsi_mitra}
                   onChange={formik.handleChange}
+                  rows={3}
                   error={Boolean(formik.touched.deskripsi_mitra && formik.errors.deskripsi_mitra)}
                 />
                 {formik.touched.deskripsi_mitra && formik.errors.deskripsi_mitra && (

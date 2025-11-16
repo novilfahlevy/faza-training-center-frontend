@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
 import {
-  fetchRegisterByTrainingSlug,
+  fetchTrainingStatus,
   fetchTrainingBySlug,
   getUserProfile,
   registerForTrainingWithFile,
@@ -18,11 +18,11 @@ export default function PelatihanDetailPage() {
   const params = useParams();
   const router = useRouter();
 
-  const { token, user: userStore } = useAuthStore();
+  const { token, isHydrated } = useAuthStore();
 
   const [training, setTraining] = useState(null);
   const [registerStatus, setRegisterStatus] = useState(null);
-  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [file, setFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -41,33 +41,33 @@ export default function PelatihanDetailPage() {
   }, [params.slug]);
 
   // Ambil detail kepesertaan
-  useEffect(() => {
-    const getTraining = async () => {
+  useEffect(() => { 
+    const getRegistrationStatus = async () => {
       try {
-        const data = await fetchRegisterByTrainingSlug(params.slug);
+        const data = await fetchTrainingStatus(params.slug);
         setRegisterStatus(data);
       } catch (error) {
         console.error("Gagal memuat detail kepesertaan:", error);
-        toast.error("Gagal memuat detail kepesertaan.");
       }
     };
-    getTraining();
+    getRegistrationStatus();
   }, [params.slug]);
 
-  // Ambil profil user jika login
+  // Ambil profil user jika login (tunggu rehydrate)
   useEffect(() => {
     const loadUserProfile = async () => {
-      if (token && userStore) {
-        try {
-          const data = await getUserProfile();
-          setUser(data);
-        } catch (error) {
-          toast.error("Gagal memuat profil pengguna.");
-        }
+      try {
+        const data = await getUserProfile();
+        setProfile(data);
+      } catch (error) {
+        toast.error("Gagal memuat profil pengguna.");
       }
     };
-    loadUserProfile();
-  }, [token, userStore]);
+
+    if (token && isHydrated) {
+      loadUserProfile();
+    }
+  }, [token, isHydrated]);
 
   // ✅ Validasi & Kirim File ke API
   const handleSubmit = async (e) => {
@@ -103,12 +103,12 @@ export default function PelatihanDetailPage() {
     }
   };
 
-  if (!training)
+  if (!isHydrated || !training)
     return (
       <p className="container mx-auto px-6 py-10 text-gray-600">Memuat...</p>
     );
 
-  const isLoggedIn = token && user;
+  const isLoggedIn = Boolean(token && profile);
 
   return (
     <div className="container mx-auto px-6 py-10">
@@ -134,7 +134,7 @@ export default function PelatihanDetailPage() {
                 <RegisterStatusCard status={registerStatus} />
               ) : (
                 <RegisterCard
-                  user={user}
+                  user={profile}
                   file={file}
                   submitting={submitting}
                   onFileChange={setFile}
