@@ -40,8 +40,10 @@ export default function PelatihanDetailPage() {
     getTraining();
   }, [params.slug]);
 
+  const isLoggedIn = Boolean(token && profile);
+
   // Ambil detail kepesertaan
-  useEffect(() => { 
+  useEffect(() => {
     const getRegistrationStatus = async () => {
       try {
         const data = await fetchTrainingStatus(params.slug);
@@ -50,8 +52,11 @@ export default function PelatihanDetailPage() {
         console.error("Gagal memuat detail kepesertaan:", error);
       }
     };
-    getRegistrationStatus();
-  }, [params.slug]);
+
+    if (token) {
+      getRegistrationStatus();
+    }
+  }, [params.slug, token]);
 
   // Ambil profil user jika login (tunggu rehydrate)
   useEffect(() => {
@@ -64,10 +69,10 @@ export default function PelatihanDetailPage() {
       }
     };
 
-    if (token && isHydrated) {
+    if (token) {
       loadUserProfile();
     }
-  }, [token, isHydrated]);
+  }, [token]);
 
   // ✅ Validasi & Kirim File ke API
   const handleSubmit = async (e) => {
@@ -103,31 +108,27 @@ export default function PelatihanDetailPage() {
     }
   };
 
-  if (!isHydrated || !training)
+  if (!training) {
     return (
       <p className="container mx-auto px-6 py-10 text-gray-600">Memuat...</p>
     );
-
-  const isLoggedIn = Boolean(token && profile);
+  }
 
   return (
     <div className="container mx-auto px-6 py-10">
-      <Link
-        href="/pelatihan"
-        className="flex items-center text-blue-600 hover:underline mb-6"
-      >
-        <ArrowLeftIcon className="h-5 w-5 mr-2" /> Kembali ke Daftar Pelatihan
-      </Link>
-
       {isLoggedIn ? (
         // === Layout 60:40 jika login ===
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* === Panel Kiri: Detail Pelatihan === */}
           <div className="lg:col-span-3">
+            <Link
+              href="/pelatihan"
+              className="flex items-center text-blue-600 hover:underline mb-6"
+            >
+              <ArrowLeftIcon className="h-5 w-5 mr-2" /> Kembali ke Daftar Pelatihan
+            </Link>
             <TrainingDetailCard training={training} />
           </div>
 
-          {/* === Panel Kanan: Form Pendaftaran === */}
           <div className="lg:col-span-2">
             <div className="sticky top-24">
               {registerStatus && registerStatus.status ? (
@@ -145,11 +146,15 @@ export default function PelatihanDetailPage() {
           </div>
         </div>
       ) : (
-        // === Layout Center jika belum login ===
-        <div className="flex justify-center">
-          <div className="w-full lg:w-3/5">
-            <TrainingDetailCard training={training} showLoginPrompt={true} />
-          </div>
+        // === Hanya tampilkan detail pelatihan (tanpa prompt, tanpa form)
+        <div className="w-full lg:w-3/5 mx-auto">
+          <Link
+            href="/pelatihan"
+            className="flex items-center text-blue-600 hover:underline mb-6"
+          >
+            <ArrowLeftIcon className="h-5 w-5 mr-2" /> Kembali ke Daftar Pelatihan
+          </Link>
+          <TrainingDetailCard training={training} showLoginPrompt={!isLoggedIn} />
         </div>
       )}
     </div>
