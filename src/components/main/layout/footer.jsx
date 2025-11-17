@@ -1,4 +1,4 @@
-import { BeakerIcon } from '@heroicons/react/24/solid';
+import Link from 'next/link';
 
 const Footer = () => {
   return (
@@ -6,8 +6,13 @@ const Footer = () => {
       <div className="container mx-auto px-6 py-8">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center space-x-2 mb-4 md:mb-0">
-            <BeakerIcon className="h-6 w-6" />
-            <span className="text-xl font-bold">Faza Training Center</span>
+            <Link href="/" className="flex items-center space-x-2">
+              <img
+                src="/img/LOGO1.png"
+                className="w-32 md:w-40 object-contain"
+                alt="Logo"
+              />
+            </Link>
           </div>
           <p className="text-sm text-gray-400">
             &copy; {new Date().getFullYear()} FTC. All rights reserved.
