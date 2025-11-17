@@ -98,9 +98,12 @@ export default function PelatihanDetailPage() {
 
     setSubmitting(true);
     try {
-      await registerForTrainingWithFile(params.slug, file);
+      const data = await registerForTrainingWithFile(params.slug, file);
       toast.success("Pendaftaran berhasil dikirim!");
-      router.push("/profil");
+      setRegisterStatus({
+        status: data.data.status_pendaftaran,
+        bukti_pembayaran_url: data.data.bukti_url
+      });
     } catch (error) {
       toast.error(error.message || "Gagal mengirim pendaftaran.");
     } finally {
@@ -118,14 +121,16 @@ export default function PelatihanDetailPage() {
     <div className="container mx-auto px-6 py-10">
       {isLoggedIn ? (
         // === Layout 60:40 jika login ===
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-y-8 gap-x-4">
           <div className="lg:col-span-3">
             <Link
               href="/pelatihan"
-              className="flex items-center text-blue-600 hover:underline mb-6"
+              className="flex items-center text-blue-600 hover:underline"
             >
               <ArrowLeftIcon className="h-5 w-5 mr-2" /> Kembali ke Daftar Pelatihan
             </Link>
+          </div>
+          <div className="lg:col-span-3">
             <TrainingDetailCard training={training} />
           </div>
 
