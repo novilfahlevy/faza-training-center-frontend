@@ -17,6 +17,7 @@
     "date-fns": "^4.1.0",
     "formik": "^2.4.6",
     "google": "link:next/font/google",
+    "jose": "^6.1.2",
     "next": "14.2.33",
     "nextjs-toploader": "^3.9.17",
     "prop-types": "15.8.1",

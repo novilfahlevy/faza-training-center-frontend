@@ -18,6 +18,9 @@ import {
   CalendarDaysIcon,
   MapPinIcon,
   BuildingOfficeIcon,
+  CurrencyDollarIcon,
+  ComputerDesktopIcon,
+  CreditCardIcon,
 } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { 
@@ -133,6 +136,14 @@ export default function PesertaPelatihanPage({ params }) {
     }
   };
 
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
   return (
     <div className="mt-10 mb-10">
       {/* 🔹 HERO SECTION: Info Utama Pelatihan */}
@@ -181,6 +192,19 @@ export default function PesertaPelatihanPage({ params }) {
                       variant="ghost"
                       value={pelatihan.lokasi}
                       icon={<MapPinIcon className="h-4 w-4" />}
+                      className="rounded-full"
+                    />
+                    <Chip
+                      variant="ghost"
+                      value={formatCurrency(pelatihan.biaya || 0)}
+                      icon={<CurrencyDollarIcon className="h-4 w-4" />}
+                      className="rounded-full"
+                    />
+                    <Chip
+                      variant="ghost"
+                      color={pelatihan.daring ? "blue" : "green"}
+                      value={pelatihan.daring ? "Daring" : "Luring"}
+                      icon={pelatihan.daring ? <ComputerDesktopIcon className="h-4 w-4" /> : <BuildingOfficeIcon className="h-4 w-4" />}
                       className="rounded-full"
                     />
                     {pelatihan.mitra && (
@@ -242,6 +266,109 @@ export default function PesertaPelatihanPage({ params }) {
           ) : (
             <Typography color="gray">Tidak ada deskripsi tersedia.</Typography>
           )}
+        </CardBody>
+      </Card>
+
+      {/* 🔹 KARTU INFORMASI TAMBAHAN */}
+      <Card className="border border-blue-gray-100 shadow-sm mb-8">
+        <CardHeader floated={false} shadow={false} className="m-0 p-6 border-b">
+          <Typography variant="h6" color="blue-gray">
+            Informasi Pelatihan
+          </Typography>
+        </CardHeader>
+        <CardBody className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Biaya */}
+            <div className="flex items-start gap-3">
+              <CurrencyDollarIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
+              <div>
+                <Typography variant="small" className="font-medium text-blue-gray-700">
+                  Biaya Pelatihan
+                </Typography>
+                <Typography variant="h6" color="blue-gray">
+                  {pelatihan ? formatCurrency(pelatihan.biaya || 0) : "-"}
+                </Typography>
+              </div>
+            </div>
+
+            {/* Nomor Rekening - selalu ditampilkan */}
+            <div className="flex items-start gap-3">
+              <CreditCardIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
+              <div>
+                <Typography variant="small" className="font-medium text-blue-gray-700">
+                  Nomor Rekening
+                </Typography>
+                <Typography variant="h6" color="blue-gray">
+                  {pelatihan?.nomor_rekening || "-"}
+                </Typography>
+              </div>
+            </div>
+
+            {/* Nama Bank - selalu ditampilkan */}
+            <div className="flex items-start gap-3">
+              <CreditCardIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
+              <div>
+                <Typography variant="small" className="font-medium text-blue-gray-700">
+                  Nama Bank
+                </Typography>
+                <Typography variant="h6" color="blue-gray">
+                  {pelatihan?.nama_bank || "-"}
+                </Typography>
+              </div>
+            </div>
+
+            {/* Jenis Pelatihan */}
+            <div className="flex items-start gap-3">
+              <ComputerDesktopIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
+              <div>
+                <Typography variant="small" className="font-medium text-blue-gray-700">
+                  Jenis Pelatihan
+                </Typography>
+                <Typography variant="h6" color="blue-gray">
+                  {pelatihan ? (pelatihan.daring ? "Daring (Online)" : "Luring (Offline)") : "-"}
+                </Typography>
+              </div>
+            </div>
+
+            {/* Link Daring - hanya muncul jika pelatihan daring */}
+            {pelatihan?.daring && (
+              <div className="flex items-start gap-3">
+                <ComputerDesktopIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
+                <div>
+                  <Typography variant="small" className="font-medium text-blue-gray-700">
+                    Link Daring
+                  </Typography>
+                  <Typography variant="h6" color="blue-gray">
+                    {pelatihan.link_daring ? (
+                      <a
+                        href={pelatihan.link_daring}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:underline"
+                      >
+                        {pelatihan.link_daring}
+                      </a>
+                    ) : (
+                      "-"
+                    )}
+                  </Typography>
+                </div>
+              </div>
+            )}
+
+            {/* Durasi */}
+            <div className="flex items-start gap-3">
+              <CalendarDaysIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
+              <div>
+                <Typography variant="small" className="font-medium text-blue-gray-700">
+                  Durasi Pelatihan
+                </Typography>
+                <Typography variant="h6" color="blue-gray">
+                  {pelatihan?.durasi || "-"}
+                </Typography>
+              </div>
+            </div>
+          </div>
         </CardBody>
       </Card>
 

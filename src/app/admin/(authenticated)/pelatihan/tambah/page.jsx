@@ -11,6 +11,7 @@ import {
   Typography,
   Select,
   Option,
+  Checkbox,
 } from "@material-tailwind/react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
@@ -71,6 +72,17 @@ export default function TambahPelatihan() {
     tanggal_pelatihan: Yup.string().required("Tanggal wajib dipilih"),
     durasi_pelatihan: Yup.string().required("Durasi wajib diisi"),
     lokasi_pelatihan: Yup.string().required("Lokasi wajib diisi"),
+    biaya: Yup.number()
+      .typeError("Biaya harus berupa angka")
+      .min(0, "Biaya tidak boleh negatif"),
+    link_daring: Yup.string().when("daring", {
+      is: true,
+      then: (schema) => schema.required("Link daring wajib diisi jika pelatihan daring"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+    // Nomor rekening tidak lagi bergantung pada status daring/luring
+    nomor_rekening: Yup.string().notRequired(),
+    nama_bank: Yup.string().notRequired(),
   });
 
   // ✅ Formik setup
@@ -82,6 +94,11 @@ export default function TambahPelatihan() {
       durasi_pelatihan: "",
       lokasi_pelatihan: "",
       mitra_id: "",
+      biaya: "",
+      daring: false,
+      link_daring: "",
+      nomor_rekening: "",
+      nama_bank: "",
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -316,6 +333,88 @@ export default function TambahPelatihan() {
                   </Typography>
                 )}
             </div>
+
+            {/* Biaya */}
+            <div>
+              <Input
+                label="Biaya Pelatihan (dalam Rupiah)"
+                name="biaya"
+                type="number"
+                value={formik.values.biaya}
+                onChange={formik.handleChange}
+              />
+              {formik.touched.biaya && formik.errors.biaya && (
+                <Typography variant="small" color="red">
+                  {formik.errors.biaya}
+                </Typography>
+              )}
+            </div>
+
+            {/* Nomor Rekening - selalu ditampilkan */}
+            <div>
+              <Input
+                label="Nomor Rekening untuk Pembayaran"
+                name="nomor_rekening"
+                value={formik.values.nomor_rekening}
+                onChange={formik.handleChange}
+              />
+              {formik.touched.nomor_rekening && formik.errors.nomor_rekening && (
+                <Typography variant="small" color="red">
+                  {formik.errors.nomor_rekening}
+                </Typography>
+              )}
+            </div>
+
+            {/* Nama Bank - selalu ditampilkan */}
+            <div>
+              <Input
+                label="Nama Bank untuk Pembayaran"
+                name="nama_bank"
+                value={formik.values.nama_bank}
+                onChange={formik.handleChange}
+              />
+              {formik.touched.nama_bank && formik.errors.nama_bank && (
+                <Typography variant="small" color="red">
+                  {formik.errors.nama_bank}
+                </Typography>
+              )}
+            </div>
+
+            {/* Jenis Pelatihan (Daring/Luring) */}
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="daring"
+                name="daring"
+                checked={formik.values.daring}
+                onChange={(e) => {
+                  formik.setFieldValue("daring", e.target.checked);
+                  // Reset link daring when toggling
+                  if (!e.target.checked) {
+                    formik.setFieldValue("link_daring", "");
+                  }
+                }}
+              />
+              <label htmlFor="daring" className="text-sm font-medium text-blue-gray-700">
+                Pelatihan Daring (Online)
+              </label>
+            </div>
+
+            {/* Link Daring - hanya muncul jika checkbox dicentang */}
+            {formik.values.daring && (
+              <div>
+                <Input
+                  label="Link Daring (URL Meeting/Platform)"
+                  name="link_daring"
+                  value={formik.values.link_daring}
+                  onChange={formik.handleChange}
+                />
+                {formik.touched.link_daring && formik.errors.link_daring && (
+                  <Typography variant="small" color="red">
+                    {formik.errors.link_daring}
+                  </Typography>
+                )}
+              </div>
+            )}
 
             {/* Mitra */}
             <div className="relative">

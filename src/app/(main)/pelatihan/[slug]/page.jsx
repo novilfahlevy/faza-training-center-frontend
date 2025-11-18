@@ -10,7 +10,13 @@ import {
   getUserProfile,
   registerForTrainingWithFile,
 } from "@/mainHttpClient";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { 
+  ArrowLeftIcon, 
+  CurrencyDollarIcon, 
+  ComputerDesktopIcon, 
+  CreditCardIcon,
+  GlobeAltIcon 
+} from "@heroicons/react/24/outline";
 import { Button } from "@material-tailwind/react";
 import { useAuthStore } from "@/stores/useAuthStore";
 
@@ -111,6 +117,15 @@ export default function PelatihanDetailPage() {
     }
   };
 
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
   if (!training) {
     return (
       <p className="container mx-auto px-6 py-10 text-gray-600">Memuat...</p>
@@ -145,6 +160,7 @@ export default function PelatihanDetailPage() {
                   submitting={submitting}
                   onFileChange={setFile}
                   onSubmit={handleSubmit}
+                  training={training}
                 />
               )}
             </div>
@@ -169,6 +185,15 @@ export default function PelatihanDetailPage() {
 // === KOMPONEN: Card Detail Pelatihan ===
 function TrainingDetailCard({ training, showLoginPrompt = false }) {
   const router = useRouter();
+
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-md p-6 lg:p-8 border border-gray-200">
@@ -200,9 +225,51 @@ function TrainingDetailCard({ training, showLoginPrompt = false }) {
           {training.lokasi_pelatihan || "-"}
         </p>
         <p>
+          <span className="font-semibold">Biaya:</span>{" "}
+          {formatCurrency(training.biaya || 0)}
+        </p>
+        <p>
+          <span className="font-semibold">Jenis Pelatihan:</span>{" "}
+          {training.daring ? "Daring (Online)" : "Luring (Offline)"}
+        </p>
+        <p>
           <span className="font-semibold">Mitra:</span>{" "}
           {training?.mitra?.data_mitra?.nama_mitra || "-"}
         </p>
+      </div>
+
+      {/* Informasi tambahan untuk pelatihan daring */}
+      {training.daring && training.link_daring && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center mb-2">
+            <GlobeAltIcon className="h-5 w-5 text-blue-600 mr-2" />
+            <span className="font-semibold text-blue-900">Link Daring:</span>
+          </div>
+          <a
+            href={training.link_daring}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline break-all"
+          >
+            {training.link_daring}
+          </a>
+        </div>
+      )}
+
+      {/* Informasi pembayaran */}
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+        <div className="flex items-center mb-2">
+          <CreditCardIcon className="h-5 w-5 text-gray-600 mr-2" />
+          <span className="font-semibold text-gray-900">Informasi Pembayaran:</span>
+        </div>
+        <p className="text-sm text-gray-700">
+          <span className="font-medium">Nomor Rekening:</span> {training.nomor_rekening || "-"}
+        </p>
+        {training.nama_bank && (
+          <p className="text-sm text-gray-700">
+            <span className="font-medium">Bank:</span> {training.nama_bank}
+          </p>
+        )}
       </div>
 
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
@@ -285,10 +352,29 @@ function RegisterStatusCard({ status }) {
 }
 
 // === KOMPONEN: Card Form Pendaftaran ===
-function RegisterCard({ user, file, submitting, onFileChange, onSubmit }) {
+function RegisterCard({ user, file, submitting, onFileChange, onSubmit, training }) {
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-md p-6 lg:p-8 border border-gray-200">
       <h2 className="text-2xl font-semibold text-gray-800 mb-4">Daftar</h2>
+
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div className="flex items-center mb-2">
+          <CurrencyDollarIcon className="h-5 w-5 text-blue-600 mr-2" />
+          <span className="font-semibold text-blue-900">Biaya Pelatihan:</span>
+        </div>
+        <p className="text-lg font-bold text-blue-900">
+          {formatCurrency(training.biaya || 0)}
+        </p>
+      </div>
 
       <div className="space-y-2 text-gray-700 text-sm mb-6">
         <p>
