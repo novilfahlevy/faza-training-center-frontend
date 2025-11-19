@@ -10,7 +10,7 @@ import {
   Input,
   Chip,
   Select,
-  Option
+  Option,
 } from "@material-tailwind/react";
 import {
   ArrowLeftIcon,
@@ -23,10 +23,10 @@ import {
   CreditCardIcon,
 } from "@heroicons/react/24/solid";
 import Link from "next/link";
-import { 
-  fetchPelatihanById, 
-  fetchPelatihanParticipants, 
-  updatePesertaStatus 
+import {
+  fetchPelatihanById,
+  fetchPelatihanParticipants,
+  updatePesertaStatus,
 } from "@/adminHttpClient";
 import { toast } from "react-toastify";
 import Pagination from "@/components/admin/pagination";
@@ -120,11 +120,11 @@ export default function PesertaPelatihanPage({ params }) {
   const prev = () => {
     if (activePage > 1) setActivePage((prev) => prev - 1);
   };
-  
+
   const handleStatusChange = async (pesertaId, newStatus) => {
     try {
       await updatePesertaStatus(pesertaId, { status: newStatus });
-      
+
       toast.dismiss();
       toast.success("Status peserta berhasil diperbarui!");
 
@@ -178,22 +178,35 @@ export default function PesertaPelatihanPage({ params }) {
                   <div className="flex flex-wrap gap-2 mb-4">
                     <Chip
                       variant="ghost"
-                      value={new Date(
-                        pelatihan.tanggal
-                      ).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
+                      value={new Date(pelatihan.tanggal).toLocaleDateString(
+                        "id-ID",
+                        {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        }
+                      )}
                       icon={<CalendarDaysIcon className="h-4 w-4" />}
                       className="rounded-full"
                     />
-                    <Chip
-                      variant="ghost"
-                      value={pelatihan.lokasi}
-                      icon={<MapPinIcon className="h-4 w-4" />}
-                      className="rounded-full"
-                    />
+                    {pelatihan.lokasi && (
+                      <Chip
+                        variant="ghost"
+                        value={pelatihan.lokasi}
+                        icon={<MapPinIcon className="h-4 w-4" />}
+                        className="rounded-full"
+                      />
+                    )}
+                    {pelatihan.link_daring && (
+                      <a href={pelatihan.link_daring} target="_blank">
+                        <Chip
+                          variant="ghost"
+                          value={pelatihan.link_daring}
+                          icon={<ComputerDesktopIcon className="h-4 w-4" />}
+                          className="rounded-full"
+                        />
+                      </a>
+                    )}
                     <Chip
                       variant="ghost"
                       value={formatCurrency(pelatihan.biaya || 0)}
@@ -204,7 +217,13 @@ export default function PesertaPelatihanPage({ params }) {
                       variant="ghost"
                       color={pelatihan.daring ? "blue" : "green"}
                       value={pelatihan.daring ? "Daring" : "Luring"}
-                      icon={pelatihan.daring ? <ComputerDesktopIcon className="h-4 w-4" /> : <BuildingOfficeIcon className="h-4 w-4" />}
+                      icon={
+                        pelatihan.daring ? (
+                          <ComputerDesktopIcon className="h-4 w-4" />
+                        ) : (
+                          <BuildingOfficeIcon className="h-4 w-4" />
+                        )
+                      }
                       className="rounded-full"
                     />
                     {pelatihan.mitra && (
@@ -282,7 +301,10 @@ export default function PesertaPelatihanPage({ params }) {
             <div className="flex items-start gap-3">
               <CurrencyDollarIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
               <div>
-                <Typography variant="small" className="font-medium text-blue-gray-700">
+                <Typography
+                  variant="small"
+                  className="font-medium text-blue-gray-700"
+                >
                   Biaya Pelatihan
                 </Typography>
                 <Typography variant="h6" color="blue-gray">
@@ -295,7 +317,10 @@ export default function PesertaPelatihanPage({ params }) {
             <div className="flex items-start gap-3">
               <CreditCardIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
               <div>
-                <Typography variant="small" className="font-medium text-blue-gray-700">
+                <Typography
+                  variant="small"
+                  className="font-medium text-blue-gray-700"
+                >
                   Nomor Rekening
                 </Typography>
                 <Typography variant="h6" color="blue-gray">
@@ -308,7 +333,10 @@ export default function PesertaPelatihanPage({ params }) {
             <div className="flex items-start gap-3">
               <CreditCardIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
               <div>
-                <Typography variant="small" className="font-medium text-blue-gray-700">
+                <Typography
+                  variant="small"
+                  className="font-medium text-blue-gray-700"
+                >
                   Nama Bank
                 </Typography>
                 <Typography variant="h6" color="blue-gray">
@@ -321,11 +349,18 @@ export default function PesertaPelatihanPage({ params }) {
             <div className="flex items-start gap-3">
               <ComputerDesktopIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
               <div>
-                <Typography variant="small" className="font-medium text-blue-gray-700">
+                <Typography
+                  variant="small"
+                  className="font-medium text-blue-gray-700"
+                >
                   Jenis Pelatihan
                 </Typography>
                 <Typography variant="h6" color="blue-gray">
-                  {pelatihan ? (pelatihan.daring ? "Daring (Online)" : "Luring (Offline)") : "-"}
+                  {pelatihan
+                    ? pelatihan.daring
+                      ? "Daring (Online)"
+                      : "Luring (Offline)"
+                    : "-"}
                 </Typography>
               </div>
             </div>
@@ -335,7 +370,10 @@ export default function PesertaPelatihanPage({ params }) {
               <div className="flex items-start gap-3">
                 <ComputerDesktopIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
                 <div>
-                  <Typography variant="small" className="font-medium text-blue-gray-700">
+                  <Typography
+                    variant="small"
+                    className="font-medium text-blue-gray-700"
+                  >
                     Link Daring
                   </Typography>
                   <Typography variant="h6" color="blue-gray">
@@ -360,7 +398,10 @@ export default function PesertaPelatihanPage({ params }) {
             <div className="flex items-start gap-3">
               <CalendarDaysIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
               <div>
-                <Typography variant="small" className="font-medium text-blue-gray-700">
+                <Typography
+                  variant="small"
+                  className="font-medium text-blue-gray-700"
+                >
                   Durasi Pelatihan
                 </Typography>
                 <Typography variant="h6" color="blue-gray">
@@ -446,10 +487,7 @@ export default function PesertaPelatihanPage({ params }) {
                         const isPdf = bukti && bukti.endsWith(".pdf");
 
                         return (
-                          <tr
-                            key={peserta.id}
-                            className="border-y"
-                          >
+                          <tr key={peserta.id} className="border-y">
                             <td className="py-3 px-5">
                               {(activePage - 1) * limit + index + 1}
                             </td>
@@ -513,7 +551,9 @@ export default function PesertaPelatihanPage({ params }) {
                             <td className="py-3 px-5">
                               <Select
                                 value={peserta.status}
-                                onChange={(value) => handleStatusChange(peserta.id, value)}
+                                onChange={(value) =>
+                                  handleStatusChange(peserta.id, value)
+                                }
                               >
                                 <Option value="pending">Pending</Option>
                                 <Option value="terdaftar">Terdaftar</Option>
