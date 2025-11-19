@@ -11,11 +11,8 @@ import {
   registerForTrainingWithFile,
 } from "@/mainHttpClient";
 import { 
-  ArrowLeftIcon, 
-  CurrencyDollarIcon, 
-  ComputerDesktopIcon, 
-  CreditCardIcon,
-  GlobeAltIcon 
+  ArrowLeftIcon,
+  GlobeAltIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "@material-tailwind/react";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -31,15 +28,18 @@ export default function PelatihanDetailPage() {
   const [profile, setProfile] = useState(null);
   const [file, setFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   // Ambil detail pelatihan
   useEffect(() => {
     const getTraining = async () => {
       try {
+        setError(null);
         const detail = await fetchTrainingBySlug(params.slug);
         setTraining(detail);
       } catch (error) {
         console.error("Gagal memuat detail pelatihan:", error);
+        setError("Gagal memuat detail pelatihan. Silakan coba lagi nanti.");
         toast.error("Gagal memuat detail pelatihan.");
       }
     };
@@ -56,6 +56,7 @@ export default function PelatihanDetailPage() {
         setRegisterStatus(data);
       } catch (error) {
         console.error("Gagal memuat detail kepesertaan:", error);
+        // Jangan tampilkan error untuk status kepesertaan, ini bukan error kritis
       }
     };
 
@@ -83,6 +84,24 @@ export default function PelatihanDetailPage() {
   // ✅ Validasi & Kirim File ke API
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Jika pelatihan gratis, tidak perlu upload bukti pembayaran
+    if (training.biaya === 0 || training.biaya === "0") {
+      setSubmitting(true);
+      try {
+        const data = await registerForTrainingWithFile(params.slug, null);
+        toast.success("Pendaftaran berhasil dikirim!");
+        setRegisterStatus({
+          status: data.data.status_pendaftaran,
+          bukti_pembayaran_url: data.data.bukti_url
+        });
+      } catch (error) {
+        toast.error(error.message || "Gagal mengirim pendaftaran.");
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
 
     if (!file) {
       toast.error("Silakan upload bukti pembayaran terlebih dahulu!");
@@ -119,6 +138,9 @@ export default function PelatihanDetailPage() {
 
   // Format currency
   const formatCurrency = (amount) => {
+    // Handle case when amount is 0 or undefined
+    if (!amount || amount === 0) return "Gratis";
+    
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
       currency: "IDR",
@@ -126,11 +148,36 @@ export default function PelatihanDetailPage() {
     }).format(amount);
   };
 
+  if (error) {
+    return (
+      <div className="container mx-auto px-6 py-10">
+        <div className="bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-lg">
+          <p className="font-medium">Terjadi kesalahan</p>
+          <p>{error}</p>
+          <Button
+            variant="text"
+            color="red"
+            className="mt-2"
+            onClick={() => router.push("/pelatihan")}
+          >
+            Kembali ke Daftar Pelatihan
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (!training) {
     return (
       <p className="container mx-auto px-6 py-10 text-gray-600">Memuat...</p>
     );
   }
+
+  // Check if user is registered
+  const isRegistered = registerStatus && registerStatus.status && 
+    (registerStatus.status.toLowerCase() === "terdaftar" || 
+     registerStatus.status.toLowerCase() === "selesai" || 
+     registerStatus.status.toLowerCase() === "pending");
 
   return (
     <div className="container mx-auto px-6 py-10">
@@ -146,13 +193,16 @@ export default function PelatihanDetailPage() {
             </Link>
           </div>
           <div className="lg:col-span-3">
-            <TrainingDetailCard training={training} />
+            <TrainingDetailCard 
+              training={training} 
+              isRegistered={isRegistered}
+            />
           </div>
 
           <div className="lg:col-span-2">
             <div className="sticky top-24">
               {registerStatus && registerStatus.status ? (
-                <RegisterStatusCard status={registerStatus} />
+                <RegisterStatusCard status={registerStatus} isFree={training.biaya === 0 || training.biaya === "0"} />
               ) : (
                 <RegisterCard
                   user={profile}
@@ -175,7 +225,11 @@ export default function PelatihanDetailPage() {
           >
             <ArrowLeftIcon className="h-5 w-5 mr-2" /> Kembali ke Daftar Pelatihan
           </Link>
-          <TrainingDetailCard training={training} showLoginPrompt={!isLoggedIn} />
+          <TrainingDetailCard 
+            training={training} 
+            showLoginPrompt={!isLoggedIn}
+            isRegistered={false}
+          />
         </div>
       )}
     </div>
@@ -183,17 +237,22 @@ export default function PelatihanDetailPage() {
 }
 
 // === KOMPONEN: Card Detail Pelatihan ===
-function TrainingDetailCard({ training, showLoginPrompt = false }) {
+function TrainingDetailCard({ training, showLoginPrompt = false, isRegistered = false }) {
   const router = useRouter();
 
   // Format currency
   const formatCurrency = (amount) => {
+    // Handle case when amount is 0 or undefined
+    if (!amount || amount === 0) return "Gratis";
+    
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
       currency: "IDR",
       minimumFractionDigits: 0,
     }).format(amount);
   };
+
+  const isFree = !training.biaya || training.biaya === 0 || training.biaya === "0";
 
   return (
     <div className="bg-white rounded-xl shadow-md p-6 lg:p-8 border border-gray-200">
@@ -210,36 +269,57 @@ function TrainingDetailCard({ training, showLoginPrompt = false }) {
       </h1>
 
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700 mb-6">
-        <p>
-          <span className="font-semibold">Tanggal Pelatihan:</span>{" "}
+        <p className="flex flex-col">
+          <span className="font-semibold mb-1">Tanggal Pelatihan:</span>{" "}
           {training.tanggal_pelatihan
             ? new Date(training.tanggal_pelatihan).toLocaleDateString("id-ID")
             : "-"}
         </p>
-        <p>
-          <span className="font-semibold">Durasi:</span>{" "}
+
+        <p className="flex flex-col">
+          <span className="font-semibold mb-1">Durasi:</span>{" "}
           {training.durasi_pelatihan || "-"}
         </p>
-        <p>
-          <span className="font-semibold">Lokasi:</span>{" "}
-          {training.lokasi_pelatihan || "-"}
+        
+        {/* Link daring hanya ditampilkan untuk pelatihan daring */}
+        {training.daring ? (
+          <p className="flex flex-col">
+            <span className="font-semibold mb-1">Pelaksanaan:</span>
+            <span>Daring (Online)</span>
+          </p>
+        ) : (
+          <p className="flex flex-col">
+            <span className="font-semibold mb-1">Pelaksanaan:</span>
+            <span>Luring (Offline)</span>
+          </p>
+        )}
+        
+        <p className="flex flex-col">
+          <span className="font-semibold mb-1">Biaya:</span>{" "}
+          <span className={isFree ? "text-green-600 font-medium" : ""}>
+            {formatCurrency(training.biaya || 0)}
+          </span>
         </p>
-        <p>
-          <span className="font-semibold">Biaya:</span>{" "}
-          {formatCurrency(training.biaya || 0)}
-        </p>
-        <p>
-          <span className="font-semibold">Jenis Pelatihan:</span>{" "}
-          {training.daring ? "Daring (Online)" : "Luring (Offline)"}
-        </p>
-        <p>
-          <span className="font-semibold">Mitra:</span>{" "}
-          {training?.mitra?.data_mitra?.nama_mitra || "-"}
-        </p>
+        
+        {/* Mitra hanya ditampilkan jika ada */}
+        {training?.mitra?.data_mitra?.nama_mitra && (
+          <p className="flex flex-col">
+            <span className="font-semibold mb-1">Mitra:</span>{" "}
+            {training.mitra.data_mitra.nama_mitra}
+          </p>
+        )}
+
+        {/* Lokasi hanya ditampilkan untuk pelatihan luring */}
+        {!training.daring && (
+          <p className="flex flex-col">
+            <span className="font-semibold mb-1">Lokasi:</span>{" "}
+            {training.lokasi_pelatihan || "-"}
+          </p>
+        )}
       </div>
 
-      {/* Informasi tambahan untuk pelatihan daring */}
-      {training.daring && training.link_daring && (
+      {/* Informasi tambahan untuk pelatihan daring - Hanya ditampilkan untuk pengguna yang sudah terdaftar */}
+      {training.daring && training.link_daring && isRegistered && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <div className="flex items-center mb-2">
             <GlobeAltIcon className="h-5 w-5 text-blue-600 mr-2" />
@@ -256,23 +336,29 @@ function TrainingDetailCard({ training, showLoginPrompt = false }) {
         </div>
       )}
 
-      {/* Informasi pembayaran */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
-        <div className="flex items-center mb-2">
-          <CreditCardIcon className="h-5 w-5 text-gray-600 mr-2" />
-          <span className="font-semibold text-gray-900">Informasi Pembayaran:</span>
-        </div>
-        <p className="text-sm text-gray-700">
-          <span className="font-medium">Nomor Rekening:</span> {training.nomor_rekening || "-"}
-        </p>
-        {training.nama_bank && (
+      {/* Informasi pembayaran hanya ditampilkan untuk pelatihan berbayar */}
+      {!isFree && (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center mb-2">
+            <span className="font-semibold text-gray-900">Informasi Pembayaran:</span>
+          </div>
           <p className="text-sm text-gray-700">
-            <span className="font-medium">Bank:</span> {training.nama_bank}
+            <span className="font-medium">Nomor Rekening:</span>
+            <span>{training.nomor_rekening || "-"}</span>
           </p>
-        )}
-      </div>
+          {training.nama_bank && (
+            <p className="text-sm text-gray-700 mt-1">
+              <span className="font-medium">Bank:</span>
+              <span>{training.nama_bank}</span>
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+        <div className="flex items-center mb-2">
+          <span className="font-semibold text-gray-900">Deskripsi Pelatihan:</span>
+        </div>
         <div
           className="prose max-w-none text-gray-700 leading-relaxed"
           dangerouslySetInnerHTML={{
@@ -299,12 +385,14 @@ function TrainingDetailCard({ training, showLoginPrompt = false }) {
   );
 }
 
-function RegisterStatusCard({ status }) {
+function RegisterStatusCard({ status, isFree }) {
   const statusInfo = {
     pending: {
-      label: "Menunggu Validasi",
+      label: isFree ? "Pendaftaran Diproses" : "Menunggu Validasi",
       color: "bg-yellow-100 text-yellow-700 border-yellow-300",
-      desc: "Bukti pembayaran Anda telah diterima dan sedang divalidasi oleh admin.",
+      desc: isFree 
+        ? "Pendaftaran Anda sedang diproses oleh admin." 
+        : "Bukti pembayaran Anda telah diterima dan sedang divalidasi oleh admin.",
     },
     terdaftar: {
       label: "Terdaftar",
@@ -335,8 +423,8 @@ function RegisterStatusCard({ status }) {
 
       <p className="mt-4 text-gray-700 leading-relaxed">{info.desc}</p>
 
-      {/* File Bukti Pembayaran */}
-      {status.bukti_pembayaran_url && (
+      {/* File Bukti Pembayaran hanya ditampilkan untuk pelatihan berbayar */}
+      {!isFree && status.bukti_pembayaran_url && (
         <div className="mt-6">
           <a
             href={status.bukti_pembayaran_url}
@@ -355,6 +443,9 @@ function RegisterStatusCard({ status }) {
 function RegisterCard({ user, file, submitting, onFileChange, onSubmit, training }) {
   // Format currency
   const formatCurrency = (amount) => {
+    // Handle case when amount is 0 or undefined
+    if (!amount || amount === 0) return "Gratis";
+    
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
       currency: "IDR",
@@ -362,18 +453,29 @@ function RegisterCard({ user, file, submitting, onFileChange, onSubmit, training
     }).format(amount);
   };
 
+  const isFree = !training.biaya || training.biaya === 0 || training.biaya === "0";
+
   return (
     <div className="bg-white rounded-xl shadow-md p-6 lg:p-8 border border-gray-200">
       <h2 className="text-2xl font-semibold text-gray-800 mb-4">Daftar</h2>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+      <div className={`border rounded-lg p-4 mb-6 ${isFree ? "bg-green-50 border-green-200" : "bg-blue-50 border-blue-200"}`}>
         <div className="flex items-center mb-2">
-          <CurrencyDollarIcon className="h-5 w-5 text-blue-600 mr-2" />
-          <span className="font-semibold text-blue-900">Biaya Pelatihan:</span>
+          <span className={`font-semibold ${isFree ? "text-green-900" : "text-blue-900"}`}>
+            Biaya Pelatihan:
+          </span>
         </div>
-        <p className="text-lg font-bold text-blue-900">
+        <p className={`text-lg font-bold mb-1 ${isFree ? "text-green-900" : "text-blue-900"}`}>
           {formatCurrency(training.biaya || 0)}
         </p>
+        <p className={`${isFree ? "text-green-900" : "text-blue-900"}`}>
+          {training.nomor_rekening} ({training.nama_bank})
+        </p>
+        {isFree && (
+          <p className="text-sm text-green-700 mt-1">
+            Pelatihan ini gratis, tidak perlu mengupload bukti pembayaran.
+          </p>
+        )}
       </div>
 
       <div className="space-y-2 text-gray-700 text-sm mb-6">
@@ -408,24 +510,29 @@ function RegisterCard({ user, file, submitting, onFileChange, onSubmit, training
       <hr className="my-4" />
 
       <form onSubmit={onSubmit}>
-        <label className="block text-gray-700 font-medium mb-2">
-          Upload Bukti Pembayaran
-        </label>
-        <input
-          type="file"
-          accept="image/*,application/pdf"
-          onChange={(e) => onFileChange(e.target.files[0])}
-          className="block w-full border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-700 cursor-pointer bg-white focus:ring focus:ring-blue-200"
-        />
-        {file && (
-          <p className="text-gray-600 mt-2 text-sm truncate">
-            File: <span className="font-medium">{file.name}</span>
-          </p>
+        {/* Upload bukti pembayaran hanya untuk pelatihan berbayar */}
+        {!isFree && (
+          <>
+            <label className="block text-gray-700 font-medium mb-2">
+              Upload Bukti Pembayaran
+            </label>
+            <input
+              type="file"
+              accept="image/*,application/pdf"
+              onChange={(e) => onFileChange(e.target.files[0])}
+              className="block w-full border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-700 cursor-pointer bg-white focus:ring focus:ring-blue-200"
+            />
+            {file && (
+              <p className="text-gray-600 mt-2 text-sm truncate">
+                File: <span className="font-medium">{file.name}</span>
+              </p>
+            )}
+          </>
         )}
 
         <Button
           type="submit"
-          className="mt-6 bg-blue-600"
+          className={`mt-6 ${isFree ? "bg-green-600 hover:bg-green-700" : "bg-blue-600"}`}
           fullWidth
           disabled={submitting}
         >
