@@ -11,8 +11,15 @@ import {
   registerForTrainingWithFile,
 } from "@/mainHttpClient";
 import { 
-  ArrowLeftIcon,
+  ArrowLeftIcon, 
   GlobeAltIcon,
+  CalendarIcon,
+  ClockIcon,
+  MapPinIcon,
+  BuildingOfficeIcon,
+  CreditCardIcon,
+  BanknotesIcon,
+  DocumentTextIcon
 } from "@heroicons/react/24/outline";
 import { Button } from "@material-tailwind/react";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -56,7 +63,6 @@ export default function PelatihanDetailPage() {
         setRegisterStatus(data);
       } catch (error) {
         console.error("Gagal memuat detail kepesertaan:", error);
-        // Jangan tampilkan error untuk status kepesertaan, ini bukan error kritis
       }
     };
 
@@ -65,7 +71,7 @@ export default function PelatihanDetailPage() {
     }
   }, [params.slug, token]);
 
-  // Ambil profil user jika login (tunggu rehydrate)
+  // Ambil profil user jika login
   useEffect(() => {
     const loadUserProfile = async () => {
       try {
@@ -81,7 +87,7 @@ export default function PelatihanDetailPage() {
     }
   }, [token]);
 
-  // ✅ Validasi & Kirim File ke API
+  // Validasi & Kirim File ke API
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -93,7 +99,7 @@ export default function PelatihanDetailPage() {
         toast.success("Pendaftaran berhasil dikirim!");
         setRegisterStatus({
           status: data.data.status_pendaftaran,
-          bukti_pembayaran_url: data.data.bukti_url
+          bukti_pembayaran_url: data.data.bukti_url,
         });
       } catch (error) {
         toast.error(error.message || "Gagal mengirim pendaftaran.");
@@ -127,25 +133,13 @@ export default function PelatihanDetailPage() {
       toast.success("Pendaftaran berhasil dikirim!");
       setRegisterStatus({
         status: data.data.status_pendaftaran,
-        bukti_pembayaran_url: data.data.bukti_url
+        bukti_pembayaran_url: data.data.bukti_url,
       });
     } catch (error) {
       toast.error(error.message || "Gagal mengirim pendaftaran.");
     } finally {
       setSubmitting(false);
     }
-  };
-
-  // Format currency
-  const formatCurrency = (amount) => {
-    // Handle case when amount is 0 or undefined
-    if (!amount || amount === 0) return "Gratis";
-    
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(amount);
   };
 
   if (error) {
@@ -174,27 +168,30 @@ export default function PelatihanDetailPage() {
   }
 
   // Check if user is registered
-  const isRegistered = registerStatus && registerStatus.status && 
-    (registerStatus.status.toLowerCase() === "terdaftar" || 
-     registerStatus.status.toLowerCase() === "selesai" || 
-     registerStatus.status.toLowerCase() === "pending");
+  const isRegistered =
+    registerStatus &&
+    registerStatus.status &&
+    (registerStatus.status.toLowerCase() === "terdaftar" ||
+      registerStatus.status.toLowerCase() === "selesai" ||
+      registerStatus.status.toLowerCase() === "pending");
 
   return (
     <div className="container mx-auto px-6 py-10">
       {isLoggedIn ? (
-        // === Layout 60:40 jika login ===
+        // Layout 60:40 jika login
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-y-8 gap-x-4">
           <div className="lg:col-span-3">
             <Link
               href="/pelatihan"
               className="flex items-center text-blue-600 hover:underline"
             >
-              <ArrowLeftIcon className="h-5 w-5 mr-2" /> Kembali ke Daftar Pelatihan
+              <ArrowLeftIcon className="h-5 w-5 mr-2" /> Kembali ke Daftar
+              Pelatihan
             </Link>
           </div>
           <div className="lg:col-span-3">
-            <TrainingDetailCard 
-              training={training} 
+            <TrainingDetailCard
+              training={training}
               isRegistered={isRegistered}
             />
           </div>
@@ -202,7 +199,10 @@ export default function PelatihanDetailPage() {
           <div className="lg:col-span-2">
             <div className="sticky top-24">
               {registerStatus && registerStatus.status ? (
-                <RegisterStatusCard status={registerStatus} isFree={training.biaya === 0 || training.biaya === "0"} />
+                <RegisterStatusCard
+                  status={registerStatus}
+                  isFree={training.biaya === 0 || training.biaya === "0"}
+                />
               ) : (
                 <RegisterCard
                   user={profile}
@@ -217,16 +217,17 @@ export default function PelatihanDetailPage() {
           </div>
         </div>
       ) : (
-        // === Hanya tampilkan detail pelatihan (tanpa prompt, tanpa form)
+        // Hanya tampilkan detail pelatihan untuk user yang belum login
         <div className="w-full lg:w-3/5 mx-auto">
           <Link
             href="/pelatihan"
             className="flex items-center text-blue-600 hover:underline mb-6"
           >
-            <ArrowLeftIcon className="h-5 w-5 mr-2" /> Kembali ke Daftar Pelatihan
+            <ArrowLeftIcon className="h-5 w-5 mr-2" /> Kembali ke Daftar
+            Pelatihan
           </Link>
-          <TrainingDetailCard 
-            training={training} 
+          <TrainingDetailCard
+            training={training}
             showLoginPrompt={!isLoggedIn}
             isRegistered={false}
           />
@@ -236,162 +237,242 @@ export default function PelatihanDetailPage() {
   );
 }
 
+// Helper function untuk format currency
+const formatCurrency = (amount) => {
+  if (!amount || amount === 0) return "Gratis";
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(amount);
+};
+
 // === KOMPONEN: Card Detail Pelatihan ===
-function TrainingDetailCard({ training, showLoginPrompt = false, isRegistered = false }) {
+function TrainingDetailCard({
+  training,
+  showLoginPrompt = false,
+  isRegistered = false,
+}) {
   const router = useRouter();
-
-  // Format currency
-  const formatCurrency = (amount) => {
-    // Handle case when amount is 0 or undefined
-    if (!amount || amount === 0) return "Gratis";
-    
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
-
   const isFree = !training.biaya || training.biaya === 0 || training.biaya === "0";
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 lg:p-8 border border-gray-200">
+    <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+      {/* Thumbnail */}
       {training.thumbnail_url && (
         <img
           src={training.thumbnail_url}
           alt={training.nama_pelatihan}
-          className="w-full h-64 object-cover rounded-lg mb-6 shadow-sm"
+          className="w-full h-64 object-cover"
         />
       )}
 
-      <h1 className="text-3xl font-bold text-gray-800 mb-4">
-        {training.nama_pelatihan}
-      </h1>
+      <div className="p-6 lg:p-8">
+        {/* Judul */}
+        <h1 className="text-3xl font-bold text-gray-800 mb-6">
+          {training.nama_pelatihan}
+        </h1>
 
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700 mb-6">
-        <p className="flex flex-col">
-          <span className="font-semibold mb-1">Tanggal Pelatihan:</span>{" "}
-          {training.tanggal_pelatihan
-            ? new Date(training.tanggal_pelatihan).toLocaleDateString("id-ID")
-            : "-"}
-        </p>
+        {/* INFORMASI PELATIHAN */}
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+            <CalendarIcon className="h-5 w-5 mr-2 text-blue-600" />
+            Informasi Pelatihan
+          </h2>
+          
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-5 space-y-4">
+            {/* Tanggal */}
+            <div className="flex items-start">
+              <CalendarIcon className="h-5 w-5 mr-2 text-gray-500 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">Tanggal Pelatihan</p>
+                <p className="text-gray-800 font-medium">
+                  {training.tanggal_pelatihan
+                    ? new Date(training.tanggal_pelatihan).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : "-"}
+                </p>
+              </div>
+            </div>
 
-        <p className="flex flex-col">
-          <span className="font-semibold mb-1">Durasi:</span>{" "}
-          {training.durasi_pelatihan || "-"}
-        </p>
-        
-        {/* Link daring hanya ditampilkan untuk pelatihan daring */}
-        {training.daring ? (
-          <p className="flex flex-col">
-            <span className="font-semibold mb-1">Pelaksanaan:</span>
-            <span>Daring (Online)</span>
-          </p>
-        ) : (
-          <p className="flex flex-col">
-            <span className="font-semibold mb-1">Pelaksanaan:</span>
-            <span>Luring (Offline)</span>
-          </p>
-        )}
-        
-        <p className="flex flex-col">
-          <span className="font-semibold mb-1">Biaya:</span>{" "}
-          <span className={isFree ? "text-green-600 font-medium" : ""}>
-            {formatCurrency(training.biaya || 0)}
-          </span>
-        </p>
-        
-        {/* Mitra hanya ditampilkan jika ada */}
-        {training?.mitra?.data_mitra?.nama_mitra && (
-          <p className="flex flex-col">
-            <span className="font-semibold mb-1">Mitra:</span>{" "}
-            {training.mitra.data_mitra.nama_mitra}
-          </p>
-        )}
+            {/* Durasi */}
+            <div className="flex items-start">
+              <ClockIcon className="h-5 w-5 mr-2 text-gray-500 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">Durasi</p>
+                <p className="text-gray-800 font-medium">{training.durasi_pelatihan || "-"}</p>
+              </div>
+            </div>
 
-        {/* Lokasi hanya ditampilkan untuk pelatihan luring */}
-        {!training.daring && (
-          <p className="flex flex-col">
-            <span className="font-semibold mb-1">Lokasi:</span>{" "}
-            {training.lokasi_pelatihan || "-"}
-          </p>
-        )}
-      </div>
+            {/* Pelaksanaan */}
+            <div className="flex items-start">
+              <GlobeAltIcon className="h-5 w-5 mr-2 text-gray-500 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">Pelaksanaan</p>
+                <p className="text-gray-800 font-medium">
+                  {training.daring ? "Daring (Online)" : "Luring (Offline)"}
+                </p>
+              </div>
+            </div>
 
-      {/* Informasi tambahan untuk pelatihan daring - Hanya ditampilkan untuk pengguna yang sudah terdaftar */}
-      {training.daring && training.link_daring && isRegistered && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <div className="flex items-center mb-2">
-            <GlobeAltIcon className="h-5 w-5 text-blue-600 mr-2" />
-            <span className="font-semibold text-blue-900">Link Daring:</span>
+            {/* Lokasi - hanya untuk luring */}
+            {!training.daring && (
+              <div className="flex items-start">
+                <MapPinIcon className="h-5 w-5 mr-2 text-gray-500 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Lokasi</p>
+                  <p className="text-gray-800 font-medium">{training.lokasi_pelatihan || "-"}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Mitra */}
+            {training?.mitra?.data_mitra?.nama_mitra && (
+              <div className="flex items-start">
+                <BuildingOfficeIcon className="h-5 w-5 mr-2 text-gray-500 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Mitra</p>
+                  <p className="text-gray-800 font-medium">
+                    {training.mitra.data_mitra.nama_mitra}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
-          <a
-            href={training.link_daring}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:underline break-all"
-          >
-            {training.link_daring}
-          </a>
         </div>
-      )}
 
-      {/* Informasi pembayaran hanya ditampilkan untuk pelatihan berbayar */}
-      {!isFree && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
-          <div className="flex items-center mb-2">
-            <span className="font-semibold text-gray-900">Informasi Pembayaran:</span>
+        {/* Link Daring - hanya untuk yang sudah terdaftar */}
+        {training.daring && training.link_daring && isRegistered && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center mb-2">
+              <GlobeAltIcon className="h-5 w-5 text-blue-600 mr-2" />
+              <span className="font-semibold text-blue-900">Link Pelatihan Daring</span>
+            </div>
+            <a
+              href={training.link_daring}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline break-all text-sm"
+            >
+              {training.link_daring}
+            </a>
           </div>
-          <p className="text-sm text-gray-700">
-            <span className="font-medium">Nomor Rekening:</span>
-            <span>{training.nomor_rekening || "-"}</span>
-          </p>
-          {training.nama_bank && (
-            <p className="text-sm text-gray-700 mt-1">
-              <span className="font-medium">Bank:</span>
-              <span>{training.nama_bank}</span>
+        )}
+
+        {/* DESKRIPSI PELATIHAN */}
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+            <DocumentTextIcon className="h-5 w-5 mr-2 text-blue-600" />
+            Deskripsi Pelatihan
+          </h2>
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-5">
+            <div
+              className="prose max-w-none text-gray-700 leading-relaxed"
+              dangerouslySetInnerHTML={{
+                __html:
+                  training.deskripsi_pelatihan || "<p>Tidak ada deskripsi.</p>",
+              }}
+            ></div>
+          </div>
+        </div>
+
+        {/* INFORMASI BIAYA & PEMBAYARAN */}
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+            <BanknotesIcon className="h-5 w-5 mr-2 text-blue-600" />
+            Informasi Biaya
+          </h2>
+          
+          <div className={`border rounded-lg p-5 ${
+            isFree 
+              ? "bg-green-50 border-green-200" 
+              : "bg-blue-50 border-blue-200"
+          }`}>
+            {/* Biaya */}
+            <div className="flex items-start mb-4">
+              <BanknotesIcon className={`h-5 w-5 mr-2 flex-shrink-0 ${
+                isFree ? "text-green-600" : "text-blue-600"
+              }`} />
+              <div>
+                <p className={`text-sm font-medium mb-1 ${
+                  isFree ? "text-green-700" : "text-blue-700"
+                }`}>
+                  Biaya Pelatihan
+                </p>
+                <p className={`text-2xl font-bold ${
+                  isFree ? "text-green-800" : "text-blue-800"
+                }`}>
+                  {formatCurrency(training.biaya || 0)}
+                </p>
+              </div>
+            </div>
+
+            {/* Info Pembayaran - hanya untuk berbayar */}
+            {!isFree && (
+              <>
+                <div className="border-t border-gray-300 my-4"></div>
+                <div className="flex items-start">
+                  <CreditCardIcon className="h-5 w-5 mr-2 text-blue-600 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-blue-700 mb-2">
+                      Informasi Rekening
+                    </p>
+                    <div className="space-y-1">
+                      <p className="text-gray-800">
+                        <span className="font-semibold">Nomor Rekening:</span>{" "}
+                        {training.nomor_rekening || "-"}
+                      </p>
+                      {training.nama_bank && (
+                        <p className="text-gray-800">
+                          <span className="font-semibold">Bank:</span>{" "}
+                          {training.nama_bank}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Catatan untuk gratis */}
+            {isFree && (
+              <p className="text-sm text-green-700 mt-2">
+                Pelatihan ini gratis dan tidak memerlukan pembayaran.
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Login Prompt */}
+        {showLoginPrompt && (
+          <div className="bg-yellow-50 border border-yellow-300 text-yellow-800 px-6 py-4 rounded-lg text-center shadow-sm">
+            <p className="mb-3 font-medium">
+              Anda harus login untuk mendaftar pelatihan ini.
             </p>
-          )}
-        </div>
-      )}
-
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
-        <div className="flex items-center mb-2">
-          <span className="font-semibold text-gray-900">Deskripsi Pelatihan:</span>
-        </div>
-        <div
-          className="prose max-w-none text-gray-700 leading-relaxed"
-          dangerouslySetInnerHTML={{
-            __html:
-              training.deskripsi_pelatihan || "<p>Tidak ada deskripsi.</p>",
-          }}
-        ></div>
+            <Button
+              className="bg-yellow-600 hover:bg-yellow-700"
+              onClick={() => router.push("/login")}
+            >
+              Login Sekarang
+            </Button>
+          </div>
+        )}
       </div>
-
-      {showLoginPrompt && (
-        <div className="bg-yellow-50 border border-yellow-300 text-yellow-800 px-6 py-4 rounded-lg text-center shadow-sm">
-          <p className="mb-2 font-medium">
-            Anda harus login untuk mendaftar pelatihan ini.
-          </p>
-          <Button
-            className="bg-yellow-600 hover:bg-yellow-700"
-            onClick={() => router.push("/login")}
-          >
-            Login Sekarang
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
 
+// === KOMPONEN: Card Status Pendaftaran ===
 function RegisterStatusCard({ status, isFree }) {
   const statusInfo = {
     pending: {
       label: isFree ? "Pendaftaran Diproses" : "Menunggu Validasi",
       color: "bg-yellow-100 text-yellow-700 border-yellow-300",
-      desc: isFree 
-        ? "Pendaftaran Anda sedang diproses oleh admin." 
+      desc: isFree
+        ? "Pendaftaran Anda sedang diproses oleh admin."
         : "Bukti pembayaran Anda telah diterima dan sedang divalidasi oleh admin.",
     },
     terdaftar: {
@@ -423,7 +504,7 @@ function RegisterStatusCard({ status, isFree }) {
 
       <p className="mt-4 text-gray-700 leading-relaxed">{info.desc}</p>
 
-      {/* File Bukti Pembayaran hanya ditampilkan untuk pelatihan berbayar */}
+      {/* File Bukti Pembayaran */}
       {!isFree && status.bukti_pembayaran_url && (
         <div className="mt-6">
           <a
@@ -440,81 +521,42 @@ function RegisterStatusCard({ status, isFree }) {
 }
 
 // === KOMPONEN: Card Form Pendaftaran ===
-function RegisterCard({ user, file, submitting, onFileChange, onSubmit, training }) {
-  // Format currency
-  const formatCurrency = (amount) => {
-    // Handle case when amount is 0 or undefined
-    if (!amount || amount === 0) return "Gratis";
-    
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
-
+function RegisterCard({
+  user,
+  file,
+  submitting,
+  onFileChange,
+  onSubmit,
+  training,
+}) {
   const isFree = !training.biaya || training.biaya === 0 || training.biaya === "0";
 
   return (
     <div className="bg-white rounded-xl shadow-md p-6 lg:p-8 border border-gray-200">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">Daftar</h2>
+      <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+        Formulir Pendaftaran
+      </h2>
 
-      <div className={`border rounded-lg p-4 mb-6 ${isFree ? "bg-green-50 border-green-200" : "bg-blue-50 border-blue-200"}`}>
-        <div className="flex items-center mb-2">
-          <span className={`font-semibold ${isFree ? "text-green-900" : "text-blue-900"}`}>
-            Biaya Pelatihan:
-          </span>
+      {/* Data Peserta */}
+      <div className="mb-6">
+        <div className="space-y-2 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <p><span className="font-medium">Nama:</span> {user.nama_lengkap}</p>
+          <p><span className="font-medium">Email:</span> {user.email}</p>
+          <p><span className="font-medium">Telepon:</span> {user.no_telp}</p>
+          <p><span className="font-medium">Profesi:</span> {user.profesi}</p>
+          <p><span className="font-medium">Instansi:</span> {user.instansi}</p>
+          <p><span className="font-medium">Jenis Kelamin:</span> {user.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}</p>
+          <p><span className="font-medium">Alamat:</span> {user.alamat}</p>
+          <p><span className="font-medium">STR:</span> {user.no_reg_kes || "-"}</p>
         </div>
-        <p className={`text-lg font-bold mb-1 ${isFree ? "text-green-900" : "text-blue-900"}`}>
-          {formatCurrency(training.biaya || 0)}
-        </p>
-        <p className={`${isFree ? "text-green-900" : "text-blue-900"}`}>
-          {training.nomor_rekening} ({training.nama_bank})
-        </p>
-        {isFree && (
-          <p className="text-sm text-green-700 mt-1">
-            Pelatihan ini gratis, tidak perlu mengupload bukti pembayaran.
-          </p>
-        )}
       </div>
 
-      <div className="space-y-2 text-gray-700 text-sm mb-6">
-        <p>
-          <span className="font-semibold">Nama:</span> {user.nama_lengkap}
-        </p>
-        <p>
-          <span className="font-semibold">Email:</span> {user.email}
-        </p>
-        <p>
-          <span className="font-semibold">Telepon:</span> {user.no_telp}
-        </p>
-        <p>
-          <span className="font-semibold">Profesi:</span> {user.profesi}
-        </p>
-        <p>
-          <span className="font-semibold">Instansi:</span> {user.instansi}
-        </p>
-        <p>
-          <span className="font-semibold">Jenis Kelamin:</span>{" "}
-          {user.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}
-        </p>
-        <p>
-          <span className="font-semibold">Alamat:</span> {user.alamat}
-        </p>
-        <p>
-          <span className="font-semibold">Surat Tanda Registrasi (STR):</span>{" "}
-          {user.no_reg_kes || "-"}
-        </p>
-      </div>
-
-      <hr className="my-4" />
-
+      {/* Form Upload */}
       <form onSubmit={onSubmit}>
-        {/* Upload bukti pembayaran hanya untuk pelatihan berbayar */}
         {!isFree && (
-          <>
+          <div className="mb-6">
             <label className="block text-gray-700 font-medium mb-2">
-              Upload Bukti Pembayaran
+              Upload Bukti Pembayaran <span className="text-red-500">*</span>
             </label>
             <input
               type="file"
@@ -522,17 +564,20 @@ function RegisterCard({ user, file, submitting, onFileChange, onSubmit, training
               onChange={(e) => onFileChange(e.target.files[0])}
               className="block w-full border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-700 cursor-pointer bg-white focus:ring focus:ring-blue-200"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Format: PDF, JPG, PNG (Maks. 5MB)
+            </p>
             {file && (
               <p className="text-gray-600 mt-2 text-sm truncate">
-                File: <span className="font-medium">{file.name}</span>
+                File terpilih: <span className="font-medium">{file.name}</span>
               </p>
             )}
-          </>
+          </div>
         )}
 
         <Button
           type="submit"
-          className={`mt-6 ${isFree ? "bg-green-600 hover:bg-green-700" : "bg-blue-600"}`}
+          className={isFree ? "bg-green-600 hover:bg-green-700" : "bg-blue-600"}
           fullWidth
           disabled={submitting}
         >
