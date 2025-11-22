@@ -263,7 +263,7 @@ function TrainingDetailCard({
         <img
           src={training.thumbnail_url}
           alt={training.nama_pelatihan}
-          className="w-full h-64 object-cover"
+          className="w-full object-contain"
         />
       )}
 

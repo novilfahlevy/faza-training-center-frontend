@@ -149,355 +149,375 @@ export default function PesertaPelatihanPage({ params }) {
     }).format(amount);
   };
 
-  const isFree = pelatihan && (pelatihan.biaya === 0 || pelatihan.biaya === "0");
+  const isFree =
+    pelatihan && (pelatihan.biaya === 0 || pelatihan.biaya === "0");
 
   return (
     <div className="mt-10 mb-10">
-      {/* HERO SECTION: Info Utama Pelatihan */}
-      <Card className="border border-blue-gray-100 shadow-lg mb-8 overflow-hidden">
-        <CardBody className="p-0">
-          {isPelatihanLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <Typography color="gray">Memuat detail pelatihan...</Typography>
-            </div>
-          ) : pelatihan ? (
-            <div className="flex flex-col lg:flex-row">
-              {/* Gambar Thumbnail */}
-              <div className="w-full lg:w-1/3 h-64 lg:h-auto">
+      <div className="flex flex-col gap-y-4 sm:flex-row sm:items-center gap-x-4 mb-6">
+        {/* Tombol Kembali */}
+        <Link href="/admin/pelatihan">
+          <Button
+            variant="outlined"
+            color="gray"
+            className="flex items-center gap-2"
+          >
+            <ArrowLeftIcon className="h-5 w-5" /> Kembali
+          </Button>
+        </Link>
+
+        {/* Tombol Edit */}
+        <Link href={`/admin/pelatihan/${id}/edit`}>
+          <Button color="blue" className="flex items-center gap-2">
+            <PencilIcon className="h-5 w-5" /> Edit Pelatihan
+          </Button>
+        </Link>
+      </div>
+
+      {isPelatihanLoading ? (
+        <div className="flex items-center justify-center h-64">
+          <Typography color="gray">Memuat detail pelatihan...</Typography>
+        </div>
+      ) : pelatihan ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* KOLOM KIRI - Informasi Pelatihan */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* CARD HEADER INFO */}
+            <Card className="border border-blue-gray-100 shadow-sm">
+              <CardBody className="p-6">
+                <Typography variant="h3" color="blue-gray" className="mb-4">
+                  {pelatihan.nama}
+                </Typography>
+
+                {/* Metadata dalam bentuk Chip */}
+                <div className="flex flex-wrap gap-2">
+                  <Chip
+                    variant="ghost"
+                    value={new Date(pelatihan.tanggal).toLocaleDateString(
+                      "id-ID",
+                      {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      }
+                    )}
+                    icon={<CalendarDaysIcon className="h-4 w-4" />}
+                    className="rounded-full"
+                  />
+                  <Chip
+                    variant="ghost"
+                    color={pelatihan.daring ? "blue" : "green"}
+                    value={pelatihan.daring ? "Daring" : "Luring"}
+                    icon={
+                      pelatihan.daring ? (
+                        <ComputerDesktopIcon className="h-4 w-4" />
+                      ) : (
+                        <BuildingOfficeIcon className="h-4 w-4" />
+                      )
+                    }
+                    className="rounded-full"
+                  />
+                  {!pelatihan.daring && pelatihan.lokasi && (
+                    <Chip
+                      variant="ghost"
+                      value={pelatihan.lokasi}
+                      icon={<MapPinIcon className="h-4 w-4" />}
+                      className="rounded-full"
+                    />
+                  )}
+                  {pelatihan.mitra && (
+                    <Chip
+                      variant="ghost"
+                      color="blue"
+                      value={pelatihan.mitra}
+                      icon={<BuildingOfficeIcon className="h-4 w-4" />}
+                      className="rounded-full"
+                    />
+                  )}
+                </div>
+              </CardBody>
+            </Card>
+
+            {/* KARTU INFORMASI PELATIHAN */}
+            <Card className="border border-blue-gray-100 shadow-sm">
+              <CardHeader
+                floated={false}
+                shadow={false}
+                className="m-0 p-6 border-b"
+              >
+                <div className="flex items-center">
+                  <CalendarDaysIcon className="h-5 w-5 text-blue-600 mr-2" />
+                  <Typography variant="h6" color="blue-gray">
+                    Informasi Pelatihan
+                  </Typography>
+                </div>
+              </CardHeader>
+              <CardBody className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Tanggal Pelatihan */}
+                  <div className="flex items-start gap-3">
+                    <CalendarDaysIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
+                    <div>
+                      <Typography
+                        variant="small"
+                        className="font-medium text-blue-gray-700"
+                      >
+                        Tanggal Pelatihan
+                      </Typography>
+                      <Typography variant="h6" color="blue-gray">
+                        {new Date(pelatihan.tanggal).toLocaleDateString(
+                          "id-ID",
+                          {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          }
+                        )}
+                      </Typography>
+                    </div>
+                  </div>
+
+                  {/* Durasi */}
+                  <div className="flex items-start gap-3">
+                    <ClockIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
+                    <div>
+                      <Typography
+                        variant="small"
+                        className="font-medium text-blue-gray-700"
+                      >
+                        Durasi
+                      </Typography>
+                      <Typography variant="h6" color="blue-gray">
+                        {pelatihan.durasi || "-"}
+                      </Typography>
+                    </div>
+                  </div>
+
+                  {/* Pelaksanaan */}
+                  <div className="flex items-start gap-3">
+                    <GlobeAltIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
+                    <div>
+                      <Typography
+                        variant="small"
+                        className="font-medium text-blue-gray-700"
+                      >
+                        Pelaksanaan
+                      </Typography>
+                      <Typography variant="h6" color="blue-gray">
+                        {pelatihan.daring
+                          ? "Daring (Online)"
+                          : "Luring (Offline)"}
+                      </Typography>
+                    </div>
+                  </div>
+
+                  {/* Mitra */}
+                  {pelatihan.mitra && (
+                    <div className="flex items-start gap-3">
+                      <BuildingOfficeIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
+                      <div>
+                        <Typography
+                          variant="small"
+                          className="font-medium text-blue-gray-700"
+                        >
+                          Mitra
+                        </Typography>
+                        <Typography variant="h6" color="blue-gray">
+                          {pelatihan.mitra}
+                        </Typography>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Lokasi - hanya untuk luring */}
+                  {!pelatihan.daring && (
+                    <div className="flex items-start gap-3">
+                      <MapPinIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
+                      <div>
+                        <Typography
+                          variant="small"
+                          className="font-medium text-blue-gray-700"
+                        >
+                          Lokasi
+                        </Typography>
+                        <Typography variant="h6" color="blue-gray">
+                          {pelatihan.lokasi || "-"}
+                        </Typography>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Link Daring - hanya untuk pelatihan daring */}
+                  {pelatihan.daring && pelatihan.link_daring && (
+                    <div className="flex items-start gap-3">
+                      <ComputerDesktopIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
+                      <div>
+                        <Typography
+                          variant="small"
+                          className="font-medium text-blue-gray-700"
+                        >
+                          Link Daring
+                        </Typography>
+                        <Typography variant="h6" color="blue-gray">
+                          <a
+                            href={pelatihan.link_daring}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:underline break-all"
+                          >
+                            {pelatihan.link_daring}
+                          </a>
+                        </Typography>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardBody>
+            </Card>
+
+            {/* KARTU DESKRIPSI */}
+            <Card className="border border-blue-gray-100 shadow-sm">
+              <CardHeader
+                floated={false}
+                shadow={false}
+                className="m-0 p-6 border-b"
+              >
+                <div className="flex items-center">
+                  <DocumentTextIcon className="h-5 w-5 text-blue-600 mr-2" />
+                  <Typography variant="h6" color="blue-gray">
+                    Deskripsi Pelatihan
+                  </Typography>
+                </div>
+              </CardHeader>
+              <CardBody className="p-6">
+                {pelatihan.deskripsi ? (
+                  <div
+                    className="prose prose-content max-w-none"
+                    dangerouslySetInnerHTML={{
+                      __html: pelatihan.deskripsi,
+                    }}
+                  />
+                ) : (
+                  <Typography color="gray">
+                    Tidak ada deskripsi tersedia.
+                  </Typography>
+                )}
+              </CardBody>
+            </Card>
+
+            {/* KARTU INFORMASI BIAYA */}
+            <Card className="border border-blue-gray-100 shadow-sm">
+              <CardHeader
+                floated={false}
+                shadow={false}
+                className="m-0 p-6 border-b"
+              >
+                <div className="flex items-center">
+                  <BanknotesIcon className="h-5 w-5 text-blue-600 mr-2" />
+                  <Typography variant="h6" color="blue-gray">
+                    Informasi Biaya
+                  </Typography>
+                </div>
+              </CardHeader>
+              <CardBody className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Biaya */}
+                  <div className="flex items-start gap-3">
+                    <BanknotesIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
+                    <div>
+                      <Typography
+                        variant="small"
+                        className="font-medium text-blue-gray-700"
+                      >
+                        Biaya Pelatihan
+                      </Typography>
+                      <Typography
+                        variant="h6"
+                        color={isFree ? "green" : "blue-gray"}
+                        className="font-bold"
+                      >
+                        {formatCurrency(pelatihan.biaya || 0)}
+                      </Typography>
+                    </div>
+                  </div>
+
+                  {/* Informasi Pembayaran - hanya untuk berbayar */}
+                  {!isFree && (
+                    <>
+                      {/* Nomor Rekening */}
+                      <div className="flex items-start gap-3">
+                        <CreditCardIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
+                        <div>
+                          <Typography
+                            variant="small"
+                            className="font-medium text-blue-gray-700"
+                          >
+                            Nomor Rekening
+                          </Typography>
+                          <Typography variant="h6" color="blue-gray">
+                            {pelatihan.nomor_rekening || "-"}
+                          </Typography>
+                        </div>
+                      </div>
+
+                      {/* Nama Bank */}
+                      <div className="flex items-start gap-3">
+                        <CreditCardIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
+                        <div>
+                          <Typography
+                            variant="small"
+                            className="font-medium text-blue-gray-700"
+                          >
+                            Nama Bank
+                          </Typography>
+                          <Typography variant="h6" color="blue-gray">
+                            {pelatihan.nama_bank || "-"}
+                          </Typography>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Catatan untuk gratis */}
+                {isFree && (
+                  <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <Typography
+                      variant="small"
+                      color="green"
+                      className="font-medium"
+                    >
+                      Pelatihan ini gratis dan tidak memerlukan pembayaran.
+                    </Typography>
+                  </div>
+                )}
+              </CardBody>
+            </Card>
+          </div>
+
+          {/* KOLOM KANAN - Thumbnail */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-4">
+              <Card className="border border-blue-gray-100 shadow-sm overflow-hidden">
                 <img
                   src={
                     pelatihan.thumbnail_url ||
                     "https://via.placeholder.com/400x300.png?text=No+Image"
                   }
                   alt={pelatihan.nama}
-                  className="w-full h-full object-cover"
+                  className="w-full h-64 lg:h-96 object-cover"
                 />
-              </div>
-
-              {/* Konten Utama */}
-              <div className="w-full lg:w-2/3 p-6 lg:p-8 flex flex-col justify-between">
-                <div>
-                  <Typography variant="h3" color="blue-gray" className="mb-4">
-                    {pelatihan.nama}
-                  </Typography>
-
-                  {/* Metadata dalam bentuk Chip */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <Chip
-                      variant="ghost"
-                      value={new Date(pelatihan.tanggal).toLocaleDateString(
-                        "id-ID",
-                        {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        }
-                      )}
-                      icon={<CalendarDaysIcon className="h-4 w-4" />}
-                      className="rounded-full"
-                    />
-                    <Chip
-                      variant="ghost"
-                      color={pelatihan.daring ? "blue" : "green"}
-                      value={pelatihan.daring ? "Daring" : "Luring"}
-                      icon={
-                        pelatihan.daring ? (
-                          <ComputerDesktopIcon className="h-4 w-4" />
-                        ) : (
-                          <BuildingOfficeIcon className="h-4 w-4" />
-                        )
-                      }
-                      className="rounded-full"
-                    />
-                    {!pelatihan.daring && pelatihan.lokasi && (
-                      <Chip
-                        variant="ghost"
-                        value={pelatihan.lokasi}
-                        icon={<MapPinIcon className="h-4 w-4" />}
-                        className="rounded-full"
-                      />
-                    )}
-                    {pelatihan.mitra && (
-                      <Chip
-                        variant="ghost"
-                        color="blue"
-                        value={pelatihan.mitra}
-                        icon={<BuildingOfficeIcon className="h-4 w-4" />}
-                        className="rounded-full"
-                      />
-                    )}
-                  </div>
-                </div>
-
-                {/* Tombol Aksi */}
-                <div className="flex gap-3 mt-4">
-                  <Link href={`/admin/pelatihan/${id}/edit`}>
-                    <Button color="blue" className="flex items-center gap-2">
-                      <PencilIcon className="h-5 w-5" /> Edit Pelatihan
-                    </Button>
-                  </Link>
-                  <Link href="/admin/pelatihan">
-                    <Button
-                      variant="outlined"
-                      color="gray"
-                      className="flex items-center gap-2"
-                    >
-                      <ArrowLeftIcon className="h-5 w-5" /> Kembali
-                    </Button>
-                  </Link>
-                </div>
-              </div>
+              </Card>
             </div>
-          ) : (
-            <div className="flex items-center justify-center h-64">
-              <Typography color="gray">
-                Data pelatihan tidak ditemukan.
-              </Typography>
-            </div>
-          )}
-        </CardBody>
-      </Card>
-
-      {/* KARTU INFORMASI PELATIHAN */}
-      <Card className="border border-blue-gray-100 shadow-sm mb-8">
-        <CardHeader floated={false} shadow={false} className="m-0 p-6 border-b">
-          <div className="flex items-center">
-            <CalendarDaysIcon className="h-5 w-5 text-blue-600 mr-2" />
-            <Typography variant="h6" color="blue-gray">
-              Informasi Pelatihan
-            </Typography>
           </div>
-        </CardHeader>
-        <CardBody className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Tanggal Pelatihan */}
-            <div className="flex items-start gap-3">
-              <CalendarDaysIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
-              <div>
-                <Typography
-                  variant="small"
-                  className="font-medium text-blue-gray-700"
-                >
-                  Tanggal Pelatihan
-                </Typography>
-                <Typography variant="h6" color="blue-gray">
-                  {pelatihan
-                    ? new Date(pelatihan.tanggal).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })
-                    : "-"}
-                </Typography>
-              </div>
-            </div>
+        </div>
+      ) : (
+        <div className="flex items-center justify-center h-64">
+          <Typography color="gray">Data pelatihan tidak ditemukan.</Typography>
+        </div>
+      )}
 
-            {/* Durasi */}
-            <div className="flex items-start gap-3">
-              <ClockIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
-              <div>
-                <Typography
-                  variant="small"
-                  className="font-medium text-blue-gray-700"
-                >
-                  Durasi
-                </Typography>
-                <Typography variant="h6" color="blue-gray">
-                  {pelatihan?.durasi || "-"}
-                </Typography>
-              </div>
-            </div>
-
-            {/* Pelaksanaan */}
-            <div className="flex items-start gap-3">
-              <GlobeAltIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
-              <div>
-                <Typography
-                  variant="small"
-                  className="font-medium text-blue-gray-700"
-                >
-                  Pelaksanaan
-                </Typography>
-                <Typography variant="h6" color="blue-gray">
-                  {pelatihan
-                    ? pelatihan.daring
-                      ? "Daring (Online)"
-                      : "Luring (Offline)"
-                    : "-"}
-                </Typography>
-              </div>
-            </div>
-
-            {/* Lokasi - hanya untuk luring */}
-            {pelatihan && !pelatihan.daring && (
-              <div className="flex items-start gap-3">
-                <MapPinIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
-                <div>
-                  <Typography
-                    variant="small"
-                    className="font-medium text-blue-gray-700"
-                  >
-                    Lokasi
-                  </Typography>
-                  <Typography variant="h6" color="blue-gray">
-                    {pelatihan.lokasi || "-"}
-                  </Typography>
-                </div>
-              </div>
-            )}
-
-            {/* Mitra */}
-            {pelatihan?.mitra && (
-              <div className="flex items-start gap-3">
-                <BuildingOfficeIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
-                <div>
-                  <Typography
-                    variant="small"
-                    className="font-medium text-blue-gray-700"
-                  >
-                    Mitra
-                  </Typography>
-                  <Typography variant="h6" color="blue-gray">
-                    {pelatihan.mitra}
-                  </Typography>
-                </div>
-              </div>
-            )}
-
-            {/* Link Daring - hanya untuk pelatihan daring */}
-            {pelatihan?.daring && pelatihan?.link_daring && (
-              <div className="flex items-start gap-3">
-                <ComputerDesktopIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
-                <div>
-                  <Typography
-                    variant="small"
-                    className="font-medium text-blue-gray-700"
-                  >
-                    Link Daring
-                  </Typography>
-                  <Typography variant="h6" color="blue-gray">
-                    <a
-                      href={pelatihan.link_daring}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 hover:underline break-all"
-                    >
-                      {pelatihan.link_daring}
-                    </a>
-                  </Typography>
-                </div>
-              </div>
-            )}
-          </div>
-        </CardBody>
-      </Card>
-
-      {/* KARTU DESKRIPSI */}
-      <Card className="border border-blue-gray-100 shadow-sm mb-8">
-        <CardHeader floated={false} shadow={false} className="m-0 p-6 border-b">
-          <div className="flex items-center">
-            <DocumentTextIcon className="h-5 w-5 text-blue-600 mr-2" />
-            <Typography variant="h6" color="blue-gray">
-              Deskripsi Pelatihan
-            </Typography>
-          </div>
-        </CardHeader>
-        <CardBody className="p-6">
-          {pelatihan?.deskripsi ? (
-            <div
-              className="prose prose-content max-w-none"
-              dangerouslySetInnerHTML={{
-                __html: pelatihan.deskripsi,
-              }}
-            />
-          ) : (
-            <Typography color="gray">Tidak ada deskripsi tersedia.</Typography>
-          )}
-        </CardBody>
-      </Card>
-
-      {/* KARTU INFORMASI BIAYA */}
-      <Card className="border border-blue-gray-100 shadow-sm mb-8">
-        <CardHeader floated={false} shadow={false} className="m-0 p-6 border-b">
-          <div className="flex items-center">
-            <BanknotesIcon className="h-5 w-5 text-blue-600 mr-2" />
-            <Typography variant="h6" color="blue-gray">
-              Informasi Biaya
-            </Typography>
-          </div>
-        </CardHeader>
-        <CardBody className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Biaya */}
-            <div className="flex items-start gap-3">
-              <BanknotesIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
-              <div>
-                <Typography
-                  variant="small"
-                  className="font-medium text-blue-gray-700"
-                >
-                  Biaya Pelatihan
-                </Typography>
-                <Typography 
-                  variant="h6" 
-                  color={isFree ? "green" : "blue-gray"}
-                  className="font-bold"
-                >
-                  {pelatihan ? formatCurrency(pelatihan.biaya || 0) : "-"}
-                </Typography>
-              </div>
-            </div>
-
-            {/* Informasi Pembayaran - hanya untuk berbayar */}
-            {!isFree && (
-              <>
-                {/* Nomor Rekening */}
-                <div className="flex items-start gap-3">
-                  <CreditCardIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
-                  <div>
-                    <Typography
-                      variant="small"
-                      className="font-medium text-blue-gray-700"
-                    >
-                      Nomor Rekening
-                    </Typography>
-                    <Typography variant="h6" color="blue-gray">
-                      {pelatihan?.nomor_rekening || "-"}
-                    </Typography>
-                  </div>
-                </div>
-
-                {/* Nama Bank */}
-                <div className="flex items-start gap-3">
-                  <CreditCardIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
-                  <div>
-                    <Typography
-                      variant="small"
-                      className="font-medium text-blue-gray-700"
-                    >
-                      Nama Bank
-                    </Typography>
-                    <Typography variant="h6" color="blue-gray">
-                      {pelatihan?.nama_bank || "-"}
-                    </Typography>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Catatan untuk gratis */}
-          {isFree && (
-            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <Typography variant="small" color="green" className="font-medium">
-                Pelatihan ini gratis dan tidak memerlukan pembayaran.
-              </Typography>
-            </div>
-          )}
-        </CardBody>
-      </Card>
-
-      {/* KARTU DAFTAR PESERTA */}
+      {/* KARTU DAFTAR PESERTA - Full Width */}
       <Card className="border border-blue-gray-100 shadow-sm">
         <CardHeader
           floated={false}
@@ -627,7 +647,9 @@ export default function PesertaPelatihanPage({ params }) {
                                   color="gray"
                                   className="text-xs italic"
                                 >
-                                  {isFree ? "Tidak perlu" : "Tidak ada bukti pembayaran"}
+                                  {isFree
+                                    ? "Tidak perlu"
+                                    : "Tidak ada bukti pembayaran"}
                                 </Typography>
                               )}
                             </td>
