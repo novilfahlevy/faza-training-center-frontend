@@ -10,8 +10,8 @@ import {
   getUserProfile,
   registerForTrainingWithFile,
 } from "@/mainHttpClient";
-import { 
-  ArrowLeftIcon, 
+import {
+  ArrowLeftIcon,
   GlobeAltIcon,
   CalendarIcon,
   ClockIcon,
@@ -19,7 +19,7 @@ import {
   BuildingOfficeIcon,
   CreditCardIcon,
   BanknotesIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "@material-tailwind/react";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -185,7 +185,8 @@ export default function PelatihanDetailPage() {
               href="/pelatihan"
               className="flex items-center text-blue-600 hover:underline"
             >
-              <ArrowLeftIcon className="h-5 w-5 mr-2" /> Kembali ke daftar pelatihan
+              <ArrowLeftIcon className="h-5 w-5 mr-2" /> Kembali ke daftar
+              pelatihan
             </Link>
           </div>
           <div className="lg:col-span-3">
@@ -201,6 +202,8 @@ export default function PelatihanDetailPage() {
                 <RegisterStatusCard
                   status={registerStatus}
                   isFree={training.biaya === 0 || training.biaya === "0"}
+                  training={training}
+                  isRegistered={isRegistered}
                 />
               ) : (
                 <RegisterCard
@@ -222,7 +225,8 @@ export default function PelatihanDetailPage() {
             href="/pelatihan"
             className="flex items-center text-blue-600 hover:underline mb-6"
           >
-            <ArrowLeftIcon className="h-5 w-5 mr-2" /> Kembali ke daftar pelatihan
+            <ArrowLeftIcon className="h-5 w-5 mr-2" /> Kembali ke daftar
+            pelatihan
           </Link>
           <TrainingDetailCard
             training={training}
@@ -252,7 +256,8 @@ function TrainingDetailCard({
   isRegistered = false,
 }) {
   const router = useRouter();
-  const isFree = !training.biaya || training.biaya === 0 || training.biaya === "0";
+  const isFree =
+    !training.biaya || training.biaya === 0 || training.biaya === "0";
 
   return (
     <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
@@ -277,20 +282,25 @@ function TrainingDetailCard({
             <CalendarIcon className="h-5 w-5 mr-2 text-blue-600" />
             Informasi Pelatihan
           </h2>
-          
+
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-5 space-y-4">
             {/* Tanggal */}
             <div className="flex items-start">
               <CalendarIcon className="h-5 w-5 mr-2 text-gray-500 flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Tanggal Pelatihan</p>
+                <p className="text-sm font-medium text-gray-600 mb-1">
+                  Tanggal Pelatihan
+                </p>
                 <p className="text-gray-800 font-medium">
                   {training.tanggal_pelatihan
-                    ? new Date(training.tanggal_pelatihan).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })
+                    ? new Date(training.tanggal_pelatihan).toLocaleDateString(
+                        "id-ID",
+                        {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        }
+                      )
                     : "-"}
                 </p>
               </div>
@@ -301,7 +311,9 @@ function TrainingDetailCard({
               <ClockIcon className="h-5 w-5 mr-2 text-gray-500 flex-shrink-0" />
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">Durasi</p>
-                <p className="text-gray-800 font-medium">{training.durasi_pelatihan || "-"}</p>
+                <p className="text-gray-800 font-medium">
+                  {training.durasi_pelatihan || "-"}
+                </p>
               </div>
             </div>
 
@@ -309,7 +321,9 @@ function TrainingDetailCard({
             <div className="flex items-start">
               <GlobeAltIcon className="h-5 w-5 mr-2 text-gray-500 flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Pelaksanaan</p>
+                <p className="text-sm font-medium text-gray-600 mb-1">
+                  Pelaksanaan
+                </p>
                 <p className="text-gray-800 font-medium">
                   {training.daring ? "Daring (Online)" : "Luring (Offline)"}
                 </p>
@@ -321,8 +335,12 @@ function TrainingDetailCard({
               <div className="flex items-start">
                 <MapPinIcon className="h-5 w-5 mr-2 text-gray-500 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">Lokasi</p>
-                  <p className="text-gray-800 font-medium">{training.lokasi_pelatihan || "-"}</p>
+                  <p className="text-sm font-medium text-gray-600 mb-1">
+                    Lokasi
+                  </p>
+                  <p className="text-gray-800 font-medium">
+                    {training.lokasi_pelatihan || "-"}
+                  </p>
                 </div>
               </div>
             )}
@@ -332,7 +350,9 @@ function TrainingDetailCard({
               <div className="flex items-start">
                 <BuildingOfficeIcon className="h-5 w-5 mr-2 text-gray-500 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">Mitra</p>
+                  <p className="text-sm font-medium text-gray-600 mb-1">
+                    Mitra
+                  </p>
                   <p className="text-gray-800 font-medium">
                     {training.mitra.data_mitra.nama_mitra}
                   </p>
@@ -341,24 +361,6 @@ function TrainingDetailCard({
             )}
           </div>
         </div>
-
-        {/* Link Daring - hanya untuk yang sudah terdaftar */}
-        {training.daring && training.link_daring && isRegistered && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <div className="flex items-center mb-2">
-              <GlobeAltIcon className="h-5 w-5 text-blue-600 mr-2" />
-              <span className="font-semibold text-blue-900">Link Pelatihan Daring</span>
-            </div>
-            <a
-              href={training.link_daring}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline break-all text-sm"
-            >
-              {training.link_daring}
-            </a>
-          </div>
-        )}
 
         {/* DESKRIPSI PELATIHAN */}
         <div className="mb-6">
@@ -383,26 +385,34 @@ function TrainingDetailCard({
             <BanknotesIcon className="h-5 w-5 mr-2 text-blue-600" />
             Informasi Biaya
           </h2>
-          
-          <div className={`border rounded-lg p-5 ${
-            isFree 
-              ? "bg-green-50 border-green-200" 
-              : "bg-blue-50 border-blue-200"
-          }`}>
+
+          <div
+            className={`border rounded-lg p-5 ${
+              isFree
+                ? "bg-green-50 border-green-200"
+                : "bg-blue-50 border-blue-200"
+            }`}
+          >
             {/* Biaya */}
             <div className="flex items-start mb-4">
-              <BanknotesIcon className={`h-5 w-5 mr-2 flex-shrink-0 ${
-                isFree ? "text-green-600" : "text-blue-600"
-              }`} />
+              <BanknotesIcon
+                className={`h-5 w-5 mr-2 flex-shrink-0 ${
+                  isFree ? "text-green-600" : "text-blue-600"
+                }`}
+              />
               <div>
-                <p className={`text-sm font-medium mb-1 ${
-                  isFree ? "text-green-700" : "text-blue-700"
-                }`}>
+                <p
+                  className={`text-sm font-medium mb-1 ${
+                    isFree ? "text-green-700" : "text-blue-700"
+                  }`}
+                >
                   Biaya Pelatihan
                 </p>
-                <p className={`text-2xl font-bold ${
-                  isFree ? "text-green-800" : "text-blue-800"
-                }`}>
+                <p
+                  className={`text-2xl font-bold ${
+                    isFree ? "text-green-800" : "text-blue-800"
+                  }`}
+                >
                   {formatCurrency(training.biaya || 0)}
                 </p>
               </div>
@@ -464,7 +474,7 @@ function TrainingDetailCard({
 }
 
 // === KOMPONEN: Card Status Pendaftaran ===
-function RegisterStatusCard({ status, isFree }) {
+function RegisterStatusCard({ status, isFree, training, isRegistered }) {
   const statusInfo = {
     pending: {
       label: isFree ? "Pendaftaran Diproses" : "Menunggu Validasi",
@@ -493,24 +503,46 @@ function RegisterStatusCard({ status, isFree }) {
         Status Pendaftaran
       </h2>
 
-      {/* Badge Status */}
-      <div
-        className={`px-4 py-2 rounded-lg border text-sm font-medium inline-block ${info.color}`}
-      >
-        {info.label}
+      <div className="flex flex-col md:flex-row md:items-center gap-3">
+        {/* Badge Status */}
+        <div
+          className={`px-4 py-2 rounded-lg border text-sm font-medium inline-block ${info.color}`}
+        >
+          {info.label}
+        </div>
+
+        {/* File Bukti Pembayaran */}
+        {!isFree && status.bukti_pembayaran_url && (
+          <div className={`px-4 py-2 rounded-lg border text-sm font-medium inline-block border-blue-600`}>
+            <a
+              href={status.bukti_pembayaran_url}
+              target="_blank"
+              className="text-blue-600 hover:underline break-all text-sm"
+            >
+              Lihat Bukti Pembayaran
+            </a>
+          </div>
+        )}
       </div>
 
       <p className="mt-4 text-gray-700 leading-relaxed">{info.desc}</p>
 
-      {/* File Bukti Pembayaran */}
-      {!isFree && status.bukti_pembayaran_url && (
-        <div className="mt-6">
+      {/* Link Daring - hanya untuk yang sudah terdaftar */}
+      {training.daring && training.link_daring && isRegistered && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+          <div className="flex items-center mb-2">
+            <GlobeAltIcon className="h-5 w-5 text-blue-600 mr-2" />
+            <span className="font-semibold text-blue-900">
+              Link Pelatihan Daring
+            </span>
+          </div>
           <a
-            href={status.bukti_pembayaran_url}
+            href={training.link_daring}
             target="_blank"
+            rel="noopener noreferrer"
             className="text-blue-600 hover:underline break-all text-sm"
           >
-            Lihat Bukti Pembayaran
+            {training.link_daring}
           </a>
         </div>
       )}
@@ -527,7 +559,8 @@ function RegisterCard({
   onSubmit,
   training,
 }) {
-  const isFree = !training.biaya || training.biaya === 0 || training.biaya === "0";
+  const isFree =
+    !training.biaya || training.biaya === 0 || training.biaya === "0";
 
   return (
     <div className="bg-white rounded-xl shadow-md p-6 lg:p-8 border border-gray-200">
@@ -538,14 +571,31 @@ function RegisterCard({
       {/* Data Peserta */}
       <div className="mb-6">
         <div className="space-y-2 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg p-4">
-          <p><span className="font-medium">Nama:</span> {user.nama_lengkap}</p>
-          <p><span className="font-medium">Email:</span> {user.email}</p>
-          <p><span className="font-medium">Telepon:</span> {user.no_telp}</p>
-          <p><span className="font-medium">Profesi:</span> {user.profesi}</p>
-          <p><span className="font-medium">Instansi:</span> {user.instansi}</p>
-          <p><span className="font-medium">Jenis Kelamin:</span> {user.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}</p>
-          <p><span className="font-medium">Alamat:</span> {user.alamat}</p>
-          <p><span className="font-medium">STR:</span> {user.no_reg_kes || "-"}</p>
+          <p>
+            <span className="font-medium">Nama:</span> {user.nama_lengkap}
+          </p>
+          <p>
+            <span className="font-medium">Email:</span> {user.email}
+          </p>
+          <p>
+            <span className="font-medium">Telepon:</span> {user.no_telp}
+          </p>
+          <p>
+            <span className="font-medium">Profesi:</span> {user.profesi}
+          </p>
+          <p>
+            <span className="font-medium">Instansi:</span> {user.instansi}
+          </p>
+          <p>
+            <span className="font-medium">Jenis Kelamin:</span>{" "}
+            {user.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}
+          </p>
+          <p>
+            <span className="font-medium">Alamat:</span> {user.alamat}
+          </p>
+          <p>
+            <span className="font-medium">STR:</span> {user.no_reg_kes || "-"}
+          </p>
         </div>
       </div>
 
