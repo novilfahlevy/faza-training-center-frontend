@@ -33,8 +33,8 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function DashboardNavbar() {
-  const [controller] = useMaterialTailwindController();
-  const { fixedNavbar } = controller;
+  const [controller, dispatch] = useMaterialTailwindController();
+  const { fixedNavbar, openSidenav } = controller;
   const pathname = usePathname();
 
   const pathSegments = pathname.split("/").filter(Boolean);
@@ -60,88 +60,59 @@ export default function DashboardNavbar() {
       fullWidth
       blurred={fixedNavbar}
     >
-      <div className="flex flex-col-reverse justify-between gap-6 md:flex-row md:items-center">
-        <div className="capitalize">
-          <Breadcrumbs
-            className={`bg-transparent p-0 transition-all ${
-              fixedNavbar ? "mt-1" : ""
-            }`}
-          >
-            <Link href={`/${layout}`}>
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className="font-normal opacity-50 transition-all hover:text-blue-500 hover:opacity-100"
-              >
-                {layout}
-              </Typography>
-            </Link>
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className="font-normal"
-            >
-              {page}
-            </Typography>
-          </Breadcrumbs>
-        </div>
-        <div className="flex items-center">
-          {/* <div className="mr-auto md:mr-4 md:w-56">
-            <Input label="Search" />
-          </div>
+      <div className="flex items-center justify-between gap-4">
+        {/* Left Section: Menu Toggle + Breadcrumbs */}
+        <div className="flex items-center gap-3">
+          {/* Mobile Menu Toggle */}
           <IconButton
             variant="text"
             color="blue-gray"
-            className="grid xl:hidden"
+            className="xl:hidden"
             onClick={() => setOpenSidenav(dispatch, !openSidenav)}
           >
             <Bars3Icon strokeWidth={3} className="h-6 w-6 text-blue-gray-500" />
-          </IconButton> */}
+          </IconButton>
+
+          {/* Breadcrumbs */}
+          <div className="capitalize">
+            <Breadcrumbs
+              className={`bg-transparent p-0 transition-all ${
+                fixedNavbar ? "mt-1" : ""
+              }`}
+            >
+              <Link href={`/${layout}`}>
+                <Typography
+                  variant="small"
+                  color="blue-gray"
+                  className="font-normal opacity-50 transition-all hover:text-blue-500 hover:opacity-100"
+                >
+                  <span className="hidden sm:inline">{layout}</span>
+                  <span className="sm:hidden">...</span>
+                </Typography>
+              </Link>
+              <Typography
+                variant="small"
+                color="blue-gray"
+                className="font-normal truncate max-w-[150px] sm:max-w-none"
+              >
+                {page}
+              </Typography>
+            </Breadcrumbs>
+          </div>
+        </div>
+
+        {/* Right Section: Logout Button */}
+        <div className="flex items-center">
+          {/* Desktop Button */}
           <Button
             variant="text"
             color="blue-gray"
-            className="hidden items-center gap-1 px-4 xl:flex normal-case"
+            className="flex items-center gap-x-1 normal-case"
             onClick={handleLogout}
           >
             <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
             Keluar
           </Button>
-          {/* <Menu>
-            <MenuHandler>
-              <IconButton variant="text" color="blue-gray">
-                <BellIcon className="h-5 w-5 text-blue-gray-500" />
-              </IconButton>
-            </MenuHandler>
-            <MenuList className="w-max border-0">
-              <MenuItem className="flex items-center gap-3">
-                <Avatar
-                  src="https://demos.creative-tim.com/material-dashboard/assets/img/team-2.jpg"
-                  alt="item-1"
-                  size="sm"
-                  variant="circular"
-                />
-                <div>
-                  <Typography variant="small" color="blue-gray">
-                    <strong>New message</strong> from Laur
-                  </Typography>
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="flex items-center gap-1 text-xs font-normal opacity-60"
-                  >
-                    <ClockIcon className="h-3.5 w-3.5" /> 13 minutes ago
-                  </Typography>
-                </div>
-              </MenuItem>
-            </MenuList>
-          </Menu> */}
-          {/* <IconButton
-            variant="text"
-            color="blue-gray"
-            onClick={() => setOpenConfigurator(dispatch, true)}
-          >
-            <Cog6ToothIcon className="h-5 w-5 text-blue-gray-500" />
-          </IconButton> */}
         </div>
       </div>
     </Navbar>

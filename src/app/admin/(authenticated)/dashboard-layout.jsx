@@ -15,6 +15,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import localFont from "next/font/local";
+import { useState, useEffect } from "react";
 
 const geistSans = localFont({
   src: "../../fonts/GeistVF.woff",
@@ -31,17 +32,40 @@ export default function DashboardLayout({ children }) {
   const [controller] = useMaterialTailwindController();
   const { sidenavType } = controller;
   const pathname = usePathname();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Listen to sidenav collapse state from localStorage or context
+  useEffect(() => {
+    const collapsed = localStorage.getItem("sidenavCollapsed") === "true";
+    setIsCollapsed(collapsed);
+
+    // Listen for storage events
+    const handleStorage = () => {
+      const collapsed = localStorage.getItem("sidenavCollapsed") === "true";
+      setIsCollapsed(collapsed);
+    };
+
+    window.addEventListener("storage", handleStorage);
+    
+    // Custom event for same-window updates
+    window.addEventListener("sidenavToggle", handleStorage);
+
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("sidenavToggle", handleStorage);
+    };
+  }, []);
 
   return (
     <div className={`min-h-screen bg-blue-gray-50/50 ${geistSans.variable} ${geistMono.variable} antialiased`}>
       <ToastContainer />
 
-      {/* 🔵 Loading bar di atas halaman */}
+      {/* Loading bar di atas halaman */}
       <NextTopLoader
-        color="#171717"       // biru elegan
-        height={3}            // tinggi bar
-        showSpinner={false}   // hilangkan spinner kecil
-        crawlSpeed={200}      // efek animasi halus
+        color="#171717"
+        height={3}
+        showSpinner={false}
+        crawlSpeed={200}
       />
 
       <Sidenav
@@ -50,12 +74,16 @@ export default function DashboardLayout({ children }) {
           sidenavType === "dark" ? "/img/logo-ct.png" : "/img/logo-ct-dark.png"
         }
         brandName="Faza Training Center"
+        onCollapse={setIsCollapsed}
       />
 
-      <div className="p-4 xl:ml-80 flex flex-col justify-between min-h-screen">
+      <div 
+        className={`p-4 flex flex-col justify-between min-h-screen transition-all duration-300 ${
+          isCollapsed ? "xl:ml-24" : "xl:ml-80"
+        }`}
+      >
         <div>
           <DashboardNavbar currentPath={pathname} />
-          {/* Render halaman anak */}
           <main>{children}</main>
         </div>
 
