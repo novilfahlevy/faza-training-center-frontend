@@ -154,7 +154,7 @@ export default function PelatihanDetailPage() {
             className="mt-2"
             onClick={() => router.push("/pelatihan")}
           >
-            Kembali ke Daftar Pelatihan
+            Kembali ke daftar pelatihan
           </Button>
         </div>
       </div>
@@ -185,8 +185,7 @@ export default function PelatihanDetailPage() {
               href="/pelatihan"
               className="flex items-center text-blue-600 hover:underline"
             >
-              <ArrowLeftIcon className="h-5 w-5 mr-2" /> Kembali ke Daftar
-              Pelatihan
+              <ArrowLeftIcon className="h-5 w-5 mr-2" /> Kembali ke daftar pelatihan
             </Link>
           </div>
           <div className="lg:col-span-3">
@@ -223,8 +222,7 @@ export default function PelatihanDetailPage() {
             href="/pelatihan"
             className="flex items-center text-blue-600 hover:underline mb-6"
           >
-            <ArrowLeftIcon className="h-5 w-5 mr-2" /> Kembali ke Daftar
-            Pelatihan
+            <ArrowLeftIcon className="h-5 w-5 mr-2" /> Kembali ke daftar pelatihan
           </Link>
           <TrainingDetailCard
             training={training}
