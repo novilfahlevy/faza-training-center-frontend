@@ -69,7 +69,7 @@ export default function RegisterPage() {
         payload.role = "peserta";
         const data = await registerUser(payload);
 
-        toast.success(data.message || "Registrasi berhasil!", { position: "bottom-right" });
+        toast.success(data.message || "Registrasi berhasil!", { position: "top-right" });
 
         // Redirect ke halaman login
         router.push("/login");

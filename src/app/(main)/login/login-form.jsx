@@ -35,14 +35,14 @@ export default function LoginForm() {
         // response diasumsikan: { token, user, message }
         login(data.token, data.user);
 
-        toast.success(data.message || "Login berhasil!", { position: "bottom-right" });
+        toast.success(data.message || "Login berhasil!", { position: "top-right" });
         
         // Redirect
         router.push("/");
       } catch (err) {
         console.error("Login Error:", err);
         toast.dismissAll();
-        toast.error(err.message || "Login gagal. Silakan coba lagi.", { position: "top-left" });
+        toast.error(err.message || "Login gagal. Silakan coba lagi.", { position: "top-right" });
       } finally {
         setLoading(false);
       }

@@ -3,14 +3,21 @@ import { useAuthStore } from "@/stores/useAuthStore";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
 const handleResponse = async (response) => {
+  // Parse response body terlebih dahulu
+  let responseBody;
+  try {
+    responseBody = await response.json();
+  } catch (e) {
+    responseBody = {};
+  }
+
   if (!response.ok) {
     const status = response.status;
     const { logout, user } = useAuthStore.getState();
     const role = user?.role;
 
-    const responseBody = await response.json();
-
-    if ([401, 403].includes(status) && responseBody.state == "NOT_AUTHORIZED") {
+    // Handle unauthorized
+    if ([401, 403].includes(status) && responseBody.state === "NOT_AUTHORIZED") {
       logout();
 
       if (role === "admin" || role === "mitra") {
@@ -20,11 +27,19 @@ const handleResponse = async (response) => {
       }
     }
 
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || `HTTP error: ${status}`);
+    // Throw error dengan message dari server atau default
+    const errorMessage = responseBody.message || 
+                        responseBody.error || 
+                        `HTTP error: ${status}`;
+    
+    const error = new Error(errorMessage);
+    error.status = status;
+    error.response = responseBody;
+    
+    throw error;
   }
 
-  return await response.json();
+  return responseBody;
 };
 
 const apiRequest = async (url, options = {}) => {
@@ -42,12 +57,17 @@ const apiRequest = async (url, options = {}) => {
 
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const response = await fetch(`${API_BASE_URL}${url}`, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}${url}`, {
+      ...options,
+      headers,
+    });
 
-  return handleResponse(response);
+    return await handleResponse(response);
+  } catch (error) {
+    // Re-throw error agar bisa di-catch oleh caller
+    throw error;
+  }
 };
 
 export const api = {
@@ -88,7 +108,9 @@ export const registerForTraining = (slug) =>
 // POST /pelatihan/:slug/register (dengan file)
 export const registerForTrainingWithFile = async (slug, file) => {
   const formData = new FormData();
-  formData.append("bukti_pembayaran", file);
+  if (file) {
+    formData.append("bukti_pembayaran", file);
+  }
 
   return apiRequest(`/pelatihan/${slug}/register`, {
     method: "POST",

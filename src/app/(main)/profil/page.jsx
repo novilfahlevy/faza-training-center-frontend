@@ -70,7 +70,7 @@ export default function ProfilPage() {
       try {
         await updateProfilePeserta(values);
         toast.success("Profil berhasil diperbarui", {
-          position: "bottom-right",
+          position: "top-right",
         });
       } catch (err) {
         toast.error(err.message || "Gagal memperbarui profil");
@@ -88,7 +88,7 @@ export default function ProfilPage() {
       try {
         await updateEmail(values);
         toast.success("Email berhasil diperbarui", {
-          position: "bottom-right",
+          position: "top-right",
         });
       } catch (err) {
         toast.error(err.message || "Gagal memperbarui email");
@@ -106,7 +106,7 @@ export default function ProfilPage() {
       try {
         await updatePassword(values);
         toast.success("Password berhasil diperbarui", {
-          position: "bottom-right",
+          position: "top-right",
         });
         passwordForm.resetForm();
       } catch (err) {

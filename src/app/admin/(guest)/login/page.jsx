@@ -38,7 +38,7 @@ export default function Login() {
         router.push("/admin");
       } catch (err) {
         console.error("Login Error:", err);
-        toast.error(err?.response?.data?.message || "Login gagal. Silakan coba lagi.", { position: "top-left" });
+        toast.error(err?.response?.data?.message || "Login gagal. Silakan coba lagi.", { position: "top-right" });
       } finally {
         setLoading(false);
       }
