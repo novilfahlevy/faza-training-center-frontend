@@ -10,7 +10,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Button, IconButton, Typography } from "@material-tailwind/react";
 import { useMaterialTailwindController, setOpenSidenav } from "@/context";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Sidenav({ brandName, routes, onCollapse }) {
   const [controller, dispatch] = useMaterialTailwindController();
@@ -24,12 +24,12 @@ export default function Sidenav({ brandName, routes, onCollapse }) {
     transparent: "bg-transparent",
   };
 
-  // Load collapsed state from localStorage on mount
-  useState(() => {
+  // ✅ FIX: Ganti useState dengan useEffect
+  useEffect(() => {
     const collapsed = localStorage.getItem("sidenavCollapsed") === "true";
     setIsCollapsed(collapsed);
     if (onCollapse) onCollapse(collapsed);
-  }, []);
+  }, []); // Hanya jalan sekali saat mount
 
   const toggleCollapse = () => {
     const newState = !isCollapsed;
