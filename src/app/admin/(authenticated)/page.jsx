@@ -289,217 +289,221 @@ export default function DashboardPage() {
       {/* Tables */}
       <div className="mb-4 grid grid-cols-1 gap-6 xl:grid-cols-2">
         {/* Pelatihan Terbaru */}
-        <Card className="overflow-hidden border border-blue-gray-100 shadow-sm">
-          <CardHeader
-            floated={false}
-            shadow={false}
-            color="transparent"
-            className="m-0 flex items-center justify-between p-6"
-          >
-            <div>
-              <Typography variant="h6" color="blue-gray" className="mb-1">
-                Pelatihan Terbaru
-              </Typography>
-              <Typography
-                variant="small"
-                className="flex items-center gap-1 font-normal text-blue-gray-600"
-              >
-                <AcademicCapIcon strokeWidth={3} className="h-4 w-4 text-blue-gray-200" />
-                5 pelatihan terbaru
-              </Typography>
-            </div>
-            <Link href="/admin/pelatihan">
-              <Typography
-                variant="small"
-                color="blue"
-                className="font-medium cursor-pointer hover:underline"
-              >
-                Lihat Semua
-              </Typography>
-            </Link>
-          </CardHeader>
-          <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
-            <table className="w-full min-w-[640px] table-auto">
-              <thead>
-                <tr>
-                  {["Pelatihan", "Tanggal", "Peserta", "Status"].map((el) => (
-                    <th
-                      key={el}
-                      className="border-b border-blue-gray-50 py-3 px-6 text-left"
-                    >
-                      <Typography
-                        variant="small"
-                        className="text-[11px] font-medium uppercase text-blue-gray-400"
-                      >
-                        {el}
-                      </Typography>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {pelatihanTerbaru.length === 0 ? (
-                  <tr>
-                    <td colSpan="4" className="text-center py-6 text-gray-500">
-                      Belum ada pelatihan
-                    </td>
-                  </tr>
-                ) : (
-                  pelatihanTerbaru.map((pelatihan, key) => {
-                    const className = `py-3 px-5 ${
-                      key === pelatihanTerbaru.length - 1
-                        ? ""
-                        : "border-b border-blue-gray-50"
-                    }`;
-
-                    return (
-                      <tr key={pelatihan.pelatihan_id}>
-                        <td className={className}>
-                          <div className="flex items-center gap-4">
-                            {/* <Avatar
-                              src={pelatihan.thumbnail_url || "/img/placeholder.png"}
-                              alt={pelatihan.nama}
-                              size="sm"
-                              variant="rounded"
-                            /> */}
-                            <div>
-                              <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className="font-bold"
-                              >
-                                {pelatihan.nama}
-                              </Typography>
-                              <Typography
-                                variant="small"
-                                className="text-xs font-normal text-blue-gray-500"
-                              >
-                                {pelatihan.mitra || "Tanpa Mitra"}
-                              </Typography>
-                            </div>
-                          </div>
-                        </td>
-                        <td className={className}>
-                          <Typography
-                            variant="small"
-                            className="text-xs font-medium text-blue-gray-600"
-                          >
-                            {new Date(pelatihan.tanggal).toLocaleDateString("id-ID", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            })}
-                          </Typography>
-                        </td>
-                        <td className={className}>
-                          <Typography
-                            variant="small"
-                            className="text-xs font-medium text-blue-gray-600"
-                          >
-                            {pelatihan.jumlah_peserta} peserta
-                          </Typography>
-                        </td>
-                        <td className={className}>
-                          <Chip
-                            variant="gradient"
-                            color={pelatihan.daring ? "blue" : "green"}
-                            value={pelatihan.daring ? "Daring" : "Luring"}
-                            className="py-0.5 px-2 text-[11px] font-medium text-center"
-                          />
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </CardBody>
-        </Card>
-
-        {/* Peserta Pending */}
-        <Card className="border border-blue-gray-100 shadow-sm">
-          <CardHeader
-            floated={false}
-            shadow={false}
-            color="transparent"
-            className="m-0 p-6"
-          >
-            <div className="flex items-center justify-between">
+        <div>
+          <Card className="overflow-hidden border border-blue-gray-100 shadow-sm">
+            <CardHeader
+              floated={false}
+              shadow={false}
+              color="transparent"
+              className="m-0 flex items-center justify-between p-6"
+            >
               <div>
-                <Typography variant="h6" color="blue-gray" className="mb-2">
-                  Peserta Pending
+                <Typography variant="h6" color="blue-gray" className="mb-1">
+                  Pelatihan Terbaru
                 </Typography>
                 <Typography
                   variant="small"
                   className="flex items-center gap-1 font-normal text-blue-gray-600"
                 >
-                  <ExclamationCircleIcon
-                    strokeWidth={3}
-                    className="h-4 w-4 text-orange-500"
-                  />
-                  <strong>{pesertaPending.length}</strong> peserta menunggu verifikasi
+                  <AcademicCapIcon strokeWidth={3} className="h-4 w-4 text-blue-gray-200" />
+                  5 pelatihan terbaru
                 </Typography>
               </div>
-            </div>
-          </CardHeader>
-          <CardBody className="pt-0">
-            {pesertaPending.length === 0 ? (
-              <div className="text-center py-6">
-                <CheckCircleIcon className="h-12 w-12 text-green-500 mx-auto mb-2" />
-                <Typography color="gray" variant="small">
-                  Tidak ada peserta pending
-                </Typography>
-              </div>
-            ) : (
-              pesertaPending.map((peserta, key) => (
-                <div
-                  key={peserta.id}
-                  className={`flex items-start gap-4 py-3 ${
-                    key === pesertaPending.length - 1
-                      ? ""
-                      : "border-b border-blue-gray-50"
-                  }`}
+              <Link href="/admin/pelatihan">
+                <Typography
+                  variant="small"
+                  color="blue"
+                  className="font-medium cursor-pointer hover:underline"
                 >
-                  <div className="relative p-1">
-                    <ExclamationCircleIcon className="!w-5 !h-5 text-orange-500" />
-                  </div>
-                  <div className="flex-1">
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="block font-medium"
-                    >
-                      {peserta.nama_lengkap}
-                    </Typography>
-                    <Typography
-                      as="span"
-                      variant="small"
-                      className="text-xs font-medium text-blue-gray-500"
-                    >
-                      {peserta.pelatihan_nama}
-                    </Typography>
-                    <Typography
-                      as="div"
-                      variant="small"
-                      className="text-xs text-blue-gray-400 mt-1"
-                    >
-                      {new Date(peserta.tanggal_pendaftaran).toLocaleDateString("id-ID")}
-                    </Typography>
-                  </div>
-                  <Link href={`/admin/pelatihan/${peserta.pelatihan_id}`}>
-                    <Typography
-                      variant="small"
-                      color="blue"
-                      className="font-medium cursor-pointer hover:underline"
-                    >
-                      Verifikasi
-                    </Typography>
-                  </Link>
+                  Lihat Semua
+                </Typography>
+              </Link>
+            </CardHeader>
+            <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
+              <table className="w-full min-w-[640px] table-auto">
+                <thead>
+                  <tr>
+                    {["Pelatihan", "Tanggal", "Peserta", "Status"].map((el) => (
+                      <th
+                        key={el}
+                        className="border-b border-blue-gray-50 py-3 px-6 text-left"
+                      >
+                        <Typography
+                          variant="small"
+                          className="text-[11px] font-medium uppercase text-blue-gray-400"
+                        >
+                          {el}
+                        </Typography>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {pelatihanTerbaru.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" className="text-center py-6 text-gray-500">
+                        Belum ada pelatihan
+                      </td>
+                    </tr>
+                  ) : (
+                    pelatihanTerbaru.map((pelatihan, key) => {
+                      const className = `py-3 px-5 ${
+                        key === pelatihanTerbaru.length - 1
+                          ? ""
+                          : "border-b border-blue-gray-50"
+                      }`;
+
+                      return (
+                        <tr key={pelatihan.pelatihan_id}>
+                          <td className={className}>
+                            <div className="flex items-center gap-4">
+                              {/* <Avatar
+                                src={pelatihan.thumbnail_url || "/img/placeholder.png"}
+                                alt={pelatihan.nama}
+                                size="sm"
+                                variant="rounded"
+                              /> */}
+                              <div>
+                                <Typography
+                                  variant="small"
+                                  color="blue-gray"
+                                  className="font-bold"
+                                >
+                                  {pelatihan.nama}
+                                </Typography>
+                                <Typography
+                                  variant="small"
+                                  className="text-xs font-normal text-blue-gray-500"
+                                >
+                                  {pelatihan.mitra || "Tanpa Mitra"}
+                                </Typography>
+                              </div>
+                            </div>
+                          </td>
+                          <td className={className}>
+                            <Typography
+                              variant="small"
+                              className="text-xs font-medium text-blue-gray-600"
+                            >
+                              {new Date(pelatihan.tanggal).toLocaleDateString("id-ID", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}
+                            </Typography>
+                          </td>
+                          <td className={className}>
+                            <Typography
+                              variant="small"
+                              className="text-xs font-medium text-blue-gray-600"
+                            >
+                              {pelatihan.jumlah_peserta} peserta
+                            </Typography>
+                          </td>
+                          <td className={className}>
+                            <Chip
+                              variant="gradient"
+                              color={pelatihan.daring ? "blue" : "green"}
+                              value={pelatihan.daring ? "Daring" : "Luring"}
+                              className="py-0.5 px-2 text-[11px] font-medium text-center"
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </CardBody>
+          </Card>
+        </div>
+
+        {/* Peserta Pending */}
+        <div>
+          <Card className="border border-blue-gray-100 shadow-sm">
+            <CardHeader
+              floated={false}
+              shadow={false}
+              color="transparent"
+              className="m-0 p-6"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <Typography variant="h6" color="blue-gray" className="mb-2">
+                    Peserta Pending
+                  </Typography>
+                  <Typography
+                    variant="small"
+                    className="flex items-center gap-1 font-normal text-blue-gray-600"
+                  >
+                    <ExclamationCircleIcon
+                      strokeWidth={3}
+                      className="h-4 w-4 text-orange-500"
+                    />
+                    <strong>{pesertaPending.length}</strong> peserta menunggu verifikasi
+                  </Typography>
                 </div>
-              ))
-            )}
-          </CardBody>
-        </Card>
+              </div>
+            </CardHeader>
+            <CardBody className="pt-0">
+              {pesertaPending.length === 0 ? (
+                <div className="text-center py-6">
+                  <CheckCircleIcon className="h-12 w-12 text-green-500 mx-auto mb-2" />
+                  <Typography color="gray" variant="small">
+                    Tidak ada peserta pending
+                  </Typography>
+                </div>
+              ) : (
+                pesertaPending.map((peserta, key) => (
+                  <div
+                    key={peserta.id}
+                    className={`flex items-start gap-4 py-3 ${
+                      key === pesertaPending.length - 1
+                        ? ""
+                        : "border-b border-blue-gray-50"
+                    }`}
+                  >
+                    <div className="relative p-1">
+                      <ExclamationCircleIcon className="!w-5 !h-5 text-orange-500" />
+                    </div>
+                    <div className="flex-1">
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="block font-medium"
+                      >
+                        {peserta.nama_lengkap}
+                      </Typography>
+                      <Typography
+                        as="span"
+                        variant="small"
+                        className="text-xs font-medium text-blue-gray-500"
+                      >
+                        {peserta.pelatihan_nama}
+                      </Typography>
+                      <Typography
+                        as="div"
+                        variant="small"
+                        className="text-xs text-blue-gray-400 mt-1"
+                      >
+                        {new Date(peserta.tanggal_pendaftaran).toLocaleDateString("id-ID")}
+                      </Typography>
+                    </div>
+                    <Link href={`/admin/pelatihan/${peserta.pelatihan_id}`}>
+                      <Typography
+                        variant="small"
+                        color="blue"
+                        className="font-medium cursor-pointer hover:underline"
+                      >
+                        Verifikasi
+                      </Typography>
+                    </Link>
+                  </div>
+                ))
+              )}
+            </CardBody>
+          </Card>
+        </div>
       </div>
     </div>
   );
