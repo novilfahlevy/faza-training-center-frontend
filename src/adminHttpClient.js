@@ -61,11 +61,49 @@ export default httpClient;
 
 
 // =============================================================================
-// ROUTES
+// AUTH ROUTES
 // =============================================================================
 
 export const login = (credentials) =>
   httpClient.post("/auth/admin/login", credentials);
+
+
+// =============================================================================
+// DASHBOARD ROUTES
+// =============================================================================
+
+/**
+ * Fetch dashboard statistics
+ * @returns {Promise} Statistics data (totalPelatihan, totalPeserta, totalMitra, pendapatanBulanIni)
+ */
+export const fetchDashboardStatistics = () =>
+  httpClient.get("/admin/dashboard/statistics");
+
+/**
+ * Fetch dashboard charts data
+ * @returns {Promise} Charts data (pendaftaranPerBulan, statusPendaftaran, pelatihanDaringLuring)
+ */
+export const fetchDashboardCharts = () =>
+  httpClient.get("/admin/dashboard/charts");
+
+/**
+ * Fetch recent trainings
+ * @returns {Promise} Recent trainings data (5 pelatihan terbaru)
+ */
+export const fetchRecentTrainings = () =>
+  httpClient.get("/admin/dashboard/recent-trainings");
+
+/**
+ * Fetch pending participants
+ * @returns {Promise} Pending participants data (peserta dengan status pending)
+ */
+export const fetchPendingParticipants = () =>
+  httpClient.get("/admin/dashboard/pending-participants");
+
+
+// =============================================================================
+// PELATIHAN ROUTES
+// =============================================================================
 
 export const fetchPelatihanList = (params = {}) => {
   const queryString = new URLSearchParams(params).toString();
@@ -100,6 +138,11 @@ export const fetchPelatihanParticipants = (id, params = {}) => {
 
 export const updatePesertaStatus = (id, data) =>
   httpClient.put(`/admin/pelatihan/peserta/${id}/status`, data);
+
+
+// =============================================================================
+// PENGGUNA ROUTES
+// =============================================================================
 
 export const fetchPenggunaList = (params = {}) => {
   const queryString = new URLSearchParams(params).toString();
