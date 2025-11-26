@@ -70,14 +70,18 @@ export default function RegisterPage() {
         payload.role = "peserta";
         const data = await registerUser(payload);
 
-        toast.success(data.message || "Registrasi berhasil!", { position: "top-right" });
+        toast.success(data.message || "Registrasi berhasil!", {
+          position: "top-right",
+        });
 
         // Redirect ke halaman login
         router.push("/login");
       } catch (err) {
         console.error("Register Error:", err);
         toast.dismissAll();
-        toast.error(err.message || "Gagal registrasi. Silakan coba lagi.", { position: "top-right" });
+        toast.error(err.message || "Gagal registrasi. Silakan coba lagi.", {
+          position: "top-right",
+        });
       } finally {
         setLoading(false);
       }
@@ -99,7 +103,9 @@ export default function RegisterPage() {
   return (
     <section className="m-8 min-h-screen">
       <div className="w-full mt-8">
-        <VerificationAlert searchParams={searchParams} />
+        <div className="mx-auto w-80 max-w-screen-lg lg:w-1/3">
+          <VerificationAlert searchParams={searchParams} />
+        </div>
 
         <div className="text-center">
           <Typography variant="h3" className="font-bold mb-4 text-blue-600">
@@ -190,11 +196,12 @@ export default function RegisterPage() {
               )}
             </IconButton>
           </div>
-          {formik.touched.confirm_password && formik.errors.confirm_password && (
-            <Typography variant="small" color="red" className="mt-2">
-              {formik.errors.confirm_password}
-            </Typography>
-          )}
+          {formik.touched.confirm_password &&
+            formik.errors.confirm_password && (
+              <Typography variant="small" color="red" className="mt-2">
+                {formik.errors.confirm_password}
+              </Typography>
+            )}
 
           {/* Nama lengkap */}
           <Label>Nama Lengkap</Label>
@@ -349,11 +356,7 @@ export default function RegisterPage() {
             {loading ? "Mendaftarkan..." : "Daftar"}
           </Button>
 
-          <Typography
-            variant="small"
-            color="gray"
-            className="mt-4 text-center"
-          >
+          <Typography variant="small" color="gray" className="mt-4 text-center">
             Sudah punya akun?{" "}
             <Link href="/login" className="text-blue-600 hover:underline">
               Masuk sekarang

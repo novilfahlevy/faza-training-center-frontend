@@ -10,7 +10,9 @@ export default function LoginPage({ searchParams }) {
   return (
     <section className="m-8 min-h-screen">
       <div className="w-full mt-16">
-        <VerificationAlert searchParams={searchParams} />
+        <div className="mx-auto w-80 max-w-screen-lg lg:w-1/3">
+          <VerificationAlert searchParams={searchParams} />
+        </div>
 
         <div className="text-center">
           <h3 className="font-bold mb-4 text-blue-600">
