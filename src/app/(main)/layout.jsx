@@ -1,3 +1,5 @@
+import "@/css/tailwind.css";
+
 import Footer from "@/components/main/layout/footer";
 import Header from "@/components/main/layout/header";
 import { Toaster } from 'react-hot-toast';

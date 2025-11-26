@@ -1,7 +1,6 @@
 "use client";
 
 import { Inter } from "next/font/google";
-import "@/css/tailwind.css";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fetchTrainings } from "@/mainHttpClient";
