@@ -18,7 +18,7 @@ import { registerUser } from "@/mainHttpClient";
 import Link from "next/link";
 import VerificationAlert from "@/components/main/auth/verification-alert";
 
-export default function RegisterPage() {
+export default function RegisterPage({ searchParams }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
