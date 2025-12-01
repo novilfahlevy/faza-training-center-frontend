@@ -1,13 +1,16 @@
+// /home/novilfahlevy/Projects/faza-training-center/src/app/admin/(guest)/login/page.jsx
 "use client";
 
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
-import { Input, Button, Typography } from "@material-tailwind/react";
+import { Input, Button, Typography, Card, CardBody } from "@material-tailwind/react";
 import { toast } from "react-toastify";
 import { useState } from "react";
 import { login as loginRequest } from "@/adminHttpClient";
 import { useAuthStore } from "@/stores/useAuthStore";
+import Link from "next/link";
+import VerificationAlert from "@/components/admin/auth/verification-alert";
 
 export default function Login() {
   const router = useRouter();
@@ -46,67 +49,68 @@ export default function Login() {
   });
 
   return (
-    <section className="m-8 flex gap-4">
-      <div className="w-full lg:w-3/5 mt-24">
-        <div className="text-center">
-          <Typography variant="h2" className="font-bold mb-4">
+    <section className="flex gap-4 max-h-screen">
+      <div className="w-full lg:w-2/5 mx-auto mt-20">
+        <div className="text-center mb-8">
+          <Typography variant="h2" className="font-bold mb-4 text-blue-600">
             Faza Training Center
+          </Typography>
+          <Typography variant="h4" className="font-bold mb-4 text-gray-800">
+            Portal Admin
           </Typography>
         </div>
 
-        <form
-          onSubmit={formik.handleSubmit}
-          className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2"
-        >
-          <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
-            Email
-          </Typography>
-          <Input
-            name="email"
-            size="lg"
-            placeholder="name@mail.com"
-            value={formik.values.email}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={formik.touched.email && Boolean(formik.errors.email)}
-          />
-          {formik.touched.email && formik.errors.email && (
-            <Typography variant="small" color="red" className="mt-2">
-              {formik.errors.email}
-            </Typography>
-          )}
+        <VerificationAlert />
 
-          <Typography variant="small" color="blue-gray" className="my-2 font-medium">
-            Password
-          </Typography>
-          <Input
-            name="password"
-            type="password"
-            size="lg"
-            placeholder="********"
-            value={formik.values.password}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={formik.touched.password && Boolean(formik.errors.password)}
-          />
-          {formik.touched.password && formik.errors.password && (
-            <Typography variant="small" color="red" className="mt-2">
-              {formik.errors.password}
-            </Typography>
-          )}
+        <Card className="shadow-lg border border-blue-gray-100">
+          <CardBody className="p-8">
+            <form
+              onSubmit={formik.handleSubmit}
+              className="mx-auto w-full max-w-screen-lg"
+            >
+              <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
+                Email
+              </Typography>
+              <Input
+                name="email"
+                size="lg"
+                placeholder="name@mail.com"
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.email && Boolean(formik.errors.email)}
+              />
+              {formik.touched.email && formik.errors.email && (
+                <Typography variant="small" color="red" className="mt-2">
+                  {formik.errors.email}
+                </Typography>
+              )}
 
-          <Button type="submit" className="mt-6" fullWidth disabled={loading}>
-            {loading ? "Memproses..." : "Masuk"}
-          </Button>
-        </form>
-      </div>
+              <Typography variant="small" color="blue-gray" className="my-4 font-medium">
+                Password
+              </Typography>
+              <Input
+                name="password"
+                type="password"
+                size="lg"
+                placeholder="********"
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.password && Boolean(formik.errors.password)}
+              />
+              {formik.touched.password && formik.errors.password && (
+                <Typography variant="small" color="red" className="mt-2">
+                  {formik.errors.password}
+                </Typography>
+              )}
 
-      <div className="w-2/5 h-screen hidden lg:block">
-        <img
-          src="/img/pattern.png"
-          className="h-screen w-full object-cover rounded-3xl"
-          alt="Sign in background"
-        />
+              <Button type="submit" className="mt-6 bg-blue-600 hover:bg-blue-700" fullWidth disabled={loading}>
+                {loading ? "Memproses..." : "Masuk"}
+              </Button>
+            </form>
+          </CardBody>
+        </Card>
       </div>
     </section>
   );
