@@ -10,6 +10,7 @@ import {
   IconButton,
   Tooltip,
   Input,
+  Chip,
 } from "@material-tailwind/react";
 import {
   PlusIcon,
@@ -170,6 +171,7 @@ export default function Pelatihan() {
                         "Tanggal",
                         "Durasi",
                         "Lokasi",
+                        "Mitra",
                         "Aksi",
                       ].map((head, index) => (
                         <th
@@ -193,7 +195,7 @@ export default function Pelatihan() {
                     {pelatihanList.length === 0 ? (
                       <tr>
                         <td
-                          colSpan="7"
+                          colSpan="8"
                           className="text-center py-6 text-gray-500"
                         >
                           Tidak ada data pelatihan.
@@ -244,6 +246,37 @@ export default function Pelatihan() {
 
                           {/* Lokasi */}
                           <td className="py-3 px-5">{item.lokasi}</td>
+
+                          {/* Mitra */}
+                          <td className="py-3 px-5">
+                            {item.mitra && item.mitra.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {item.mitra.slice(0, 2).map((mitra, idx) => (
+                                  <Chip
+                                    key={idx}
+                                    variant="ghost"
+                                    size="sm"
+                                    value={mitra.nama}
+                                    color="blue"
+                                    className="rounded-full"
+                                  />
+                                ))}
+                                {item.mitra.length > 2 && (
+                                  <Chip
+                                    variant="ghost"
+                                    size="sm"
+                                    value={`+${item.mitra.length - 2} lagi`}
+                                    color="gray"
+                                    className="rounded-full"
+                                  />
+                                )}
+                              </div>
+                            ) : (
+                              <Typography color="gray" className="text-xs">
+                                Tidak ada mitra
+                              </Typography>
+                            )}
+                          </td>
 
                           {/* Aksi */}
                           <td className="py-3 px-5 flex gap-2">

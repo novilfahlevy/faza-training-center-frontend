@@ -1,3 +1,4 @@
+// /home/novilfahlevy/Projects/faza-training-center/src/app/admin/(authenticated)/pelatihan/[id]/edit/page.jsx
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
@@ -11,6 +12,7 @@ import {
   Select,
   Option,
   Checkbox,
+  Chip,
 } from "@material-tailwind/react";
 import { useRouter, useParams } from "next/navigation";
 import { format } from "date-fns";
@@ -62,6 +64,7 @@ export default function EditPelatihan() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [mitraOptions, setMitraOptions] = useState([]);
   const [isMitraOptionsLoaded, setMitraOptionsLoaded] = useState(false);
+  const [selectedMitraIds, setSelectedMitraIds] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -115,7 +118,6 @@ export default function EditPelatihan() {
         .required("Link daring wajib diisi untuk pelatihan daring"),
       otherwise: (schema) => schema.notRequired(),
     }),
-    mitra_id: Yup.string().notRequired(),
   });
 
   // 🧠 Formik setup
@@ -126,7 +128,6 @@ export default function EditPelatihan() {
       tanggal_pelatihan: "",
       durasi_pelatihan: "",
       lokasi_pelatihan: "",
-      mitra_id: "",
       biaya: "",
       daring: false,
       link_daring: "",
@@ -145,7 +146,7 @@ export default function EditPelatihan() {
           ...values,
           biaya: biayaNumeric, // Gunakan nilai numerik untuk payload
           thumbnail_id: thumbnail?.id || null,
-          mitra_id: values.mitra_id || null,
+          mitra_ids: selectedMitraIds, // Kirim array mitra_ids
           tanggal_pelatihan: selectedDate
             ? format(selectedDate, "yyyy-MM-dd")
             : values.tanggal_pelatihan,
@@ -216,10 +217,6 @@ export default function EditPelatihan() {
     dateRef.current?.focus();
   };
 
-  const clearMitra = () => {
-    formik.setFieldValue("mitra_id", "");
-  };
-
   // Function to handle thumbnail upload state change
   const handleThumbnailUploadingChange = (isUploading) => {
     setUploadingThumbnail(isUploading);
@@ -268,7 +265,7 @@ export default function EditPelatihan() {
         );
         formik.setFieldValue("durasi_pelatihan", data.durasi || "");
         formik.setFieldValue("lokasi_pelatihan", data.lokasi || "");
-        formik.setFieldValue("mitra_id", data.mitra ? data.mitra.id : null);
+        
         // Format biaya dengan format mata uang
         formik.setFieldValue(
           "biaya",
@@ -278,6 +275,12 @@ export default function EditPelatihan() {
         formik.setFieldValue("link_daring", data.link_daring || "");
         formik.setFieldValue("nomor_rekening", data.nomor_rekening || "");
         formik.setFieldValue("nama_bank", data.nama_bank || "");
+
+        // Set mitra IDs dari data yang ada
+        if (data.mitra && Array.isArray(data.mitra)) {
+          const mitraIds = data.mitra.map(m => m.id);
+          setSelectedMitraIds(mitraIds);
+        }
 
         if (parsedDate) {
           setSelectedDate(parsedDate);
@@ -332,6 +335,24 @@ export default function EditPelatihan() {
     } else {
       formik.setFieldValue("link_daring", "");
     }
+  };
+
+  // Handler untuk menambahkan mitra
+  const handleAddMitra = (mitraId) => {
+    if (mitraId && !selectedMitraIds.includes(mitraId)) {
+      setSelectedMitraIds([...selectedMitraIds, mitraId]);
+    }
+  };
+
+  // Handler untuk menghapus mitra
+  const handleRemoveMitra = (mitraId) => {
+    setSelectedMitraIds(selectedMitraIds.filter(id => id !== mitraId));
+  };
+
+  // Mendapatkan nama mitra berdasarkan ID
+  const getMitraName = (mitraId) => {
+    const mitra = mitraOptions.find(m => m.id === mitraId);
+    return mitra ? mitra.nama : "";
   };
 
   return (
@@ -592,35 +613,51 @@ export default function EditPelatihan() {
               </Typography>
               
               {/* Mitra */}
-              <div className="relative">
-                {!isMitraOptionsLoaded ? (
-                  <Input label="Memuat daftar mitra..." disabled />
-                ) : (
-                  <Select
-                    label="Pilih Mitra (opsional)"
-                    value={formik.values.mitra_id}
-                    onChange={(value) => formik.setFieldValue("mitra_id", value)}
-                  >
-                    {mitraOptions.length > 0 ? (
-                      mitraOptions.map((m) => (
-                        <Option key={m.id} value={m.id}>
-                          {m.nama}
-                        </Option>
-                      ))
-                    ) : (
-                      <Option disabled>Tidak ada mitra</Option>
+              <div>
+                <Typography
+                  variant="small"
+                  color="blue-gray"
+                  className="mb-2 font-medium"
+                >
+                  Pilih Mitra (bisa lebih dari satu)
+                </Typography>
+                
+                {isMitraOptionsLoaded ? (
+                  <div className="space-y-2">
+                    <Select
+                      label="Pilih Mitra"
+                      onChange={(value) => value && handleAddMitra(value)}
+                      value=""
+                    >
+                      {mitraOptions.length > 0 ? (
+                        mitraOptions.map((m) => (
+                          <Option key={m.id} value={m.id}>
+                            {m.nama}
+                          </Option>
+                        ))
+                      ) : (
+                        <Option disabled>Tidak ada mitra</Option>
+                      )}
+                    </Select>
+                    
+                    {/* Menampilkan mitra yang sudah dipilih */}
+                    {selectedMitraIds.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {selectedMitraIds.map((mitraId) => (
+                          <Chip
+                            key={mitraId}
+                            value={getMitraName(mitraId)}
+                            onClose={() => handleRemoveMitra(mitraId)}
+                            closeBtn={
+                              <XMarkIcon className="h-3 w-3" />
+                            }
+                          />
+                        ))}
+                      </div>
                     )}
-                  </Select>
-                )}
-                {formik.values.mitra_id && (
-                  <button
-                    type="button"
-                    onClick={clearMitra}
-                    className="absolute right-8 top-1.5 p-1 text-gray-500 hover:text-red-600 transition"
-                    title="Hapus pilihan mitra"
-                  >
-                    <XMarkIcon className="w-5 h-5" />
-                  </button>
+                  </div>
+                ) : (
+                  <Input label="Memuat daftar mitra..." disabled />
                 )}
               </div>
 

@@ -1,3 +1,4 @@
+// /home/novilfahlevy/Projects/faza-training-center/src/app/(main)/pelatihan/[slug]/page.jsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -345,17 +346,28 @@ function TrainingDetailCard({
               </div>
             )}
 
-            {/* Mitra */}
-            {training?.mitra?.data_mitra?.nama_mitra && (
+            {/* Mitra - Menampilkan semua mitra */}
+            {training.mitra && training.mitra.length > 0 && (
               <div className="flex items-start">
                 <BuildingOfficeIcon className="h-5 w-5 mr-2 text-gray-500 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">
-                    Mitra
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-600 mb-2">
+                    Mitra{training.mitra.length > 1 ? ' Pelatihan' : ''}
                   </p>
-                  <p className="text-gray-800 font-medium">
-                    {training.mitra.data_mitra.nama_mitra}
-                  </p>
+                  <div className="space-y-2">
+                    {training.mitra.map((mitra, index) => (
+                      <div key={index} className="flex items-center">
+                        <p className="text-gray-800 font-medium">
+                          {mitra.nama}
+                        </p>
+                        {mitra.role && (
+                          <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                            {mitra.role}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}

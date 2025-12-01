@@ -1,3 +1,4 @@
+// /home/novilfahlevy/Projects/faza-training-center/src/components/main/training-card.jsx
 import Link from 'next/link';
 import Image from 'next/image';
 import { 
@@ -108,13 +109,30 @@ const TrainingCard = ({ training }) => {
             </div>
           )}
 
-          {/* Mitra */}
-          {training.mitra?.data_mitra?.nama_mitra && (
+          {/* Mitra - Menampilkan semua mitra atau beberapa saja */}
+          {training.mitra && training.mitra.length > 0 && (
             <div className="flex items-start">
               <BuildingOfficeIcon className="h-4 w-4 mr-2.5 text-indigo-500 mt-0.5 flex-shrink-0" />
-              <span className="text-sm text-gray-700 line-clamp-1">
-                {training.mitra.data_mitra.nama_mitra}
-              </span>
+              <div className="flex-1">
+                {training.mitra.length === 1 ? (
+                  <span className="text-sm text-gray-700 line-clamp-1">
+                    {training.mitra[0].nama}
+                  </span>
+                ) : (
+                  <div className="flex flex-wrap gap-1">
+                    {training.mitra.slice(0, 2).map((mitra, index) => (
+                      <span key={index} className="inline-block bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">
+                        {mitra.nama}
+                      </span>
+                    ))}
+                    {training.mitra.length > 2 && (
+                      <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
+                        +{training.mitra.length - 2} lagi
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

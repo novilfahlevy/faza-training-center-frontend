@@ -1,3 +1,4 @@
+// /home/novilfahlevy/Projects/faza-training-center/src/app/admin/(authenticated)/pelatihan/[id]/page.jsx
 "use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
@@ -225,12 +226,24 @@ export default function PesertaPelatihanPage({ params }) {
                       className="rounded-full"
                     />
                   )}
-                  {pelatihan.mitra && (
+                  {/* Menampilkan mitra sebagai chip */}
+                  {pelatihan.mitra && pelatihan.mitra.length > 0 && (
+                    pelatihan.mitra.slice(0, 2).map((mitra, index) => (
+                      <Chip
+                        key={index}
+                        variant="ghost"
+                        color="blue"
+                        value={mitra.nama}
+                        icon={<BuildingOfficeIcon className="h-4 w-4" />}
+                        className="rounded-full"
+                      />
+                    ))
+                  )}
+                  {pelatihan.mitra && pelatihan.mitra.length > 2 && (
                     <Chip
                       variant="ghost"
-                      color="blue"
-                      value={pelatihan.mitra}
-                      icon={<BuildingOfficeIcon className="h-4 w-4" />}
+                      color="gray"
+                      value={`+${pelatihan.mitra.length - 2} mitra lagi`}
                       className="rounded-full"
                     />
                   )}
@@ -311,24 +324,6 @@ export default function PesertaPelatihanPage({ params }) {
                     </div>
                   </div>
 
-                  {/* Mitra */}
-                  {pelatihan.mitra && (
-                    <div className="flex items-start gap-3">
-                      <BuildingOfficeIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
-                      <div>
-                        <Typography
-                          variant="small"
-                          className="font-medium text-blue-gray-700"
-                        >
-                          Mitra
-                        </Typography>
-                        <Typography variant="h6" color="blue-gray">
-                          {pelatihan.mitra}
-                        </Typography>
-                      </div>
-                    </div>
-                  )}
-
                   {/* Lokasi - hanya untuk luring */}
                   {!pelatihan.daring && (
                     <div className="flex items-start gap-3">
@@ -374,6 +369,41 @@ export default function PesertaPelatihanPage({ params }) {
                 </div>
               </CardBody>
             </Card>
+
+            {/* KARTU MITRA */}
+            {pelatihan.mitra && pelatihan.mitra.length > 0 && (
+              <Card className="border border-blue-gray-100 shadow-sm">
+                <CardHeader
+                  floated={false}
+                  shadow={false}
+                  className="m-0 p-6 border-b"
+                >
+                  <div className="flex items-center">
+                    <BuildingOfficeIcon className="h-5 w-5 text-blue-600 mr-2" />
+                    <Typography variant="h6" color="blue-gray">
+                      Mitra Pelatihan
+                    </Typography>
+                  </div>
+                </CardHeader>
+                <CardBody className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {pelatihan.mitra.map((mitra, index) => (
+                      <div key={index} className="flex items-start gap-3 p-3 border border-blue-gray-100 rounded-lg">
+                        <BuildingOfficeIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
+                        <div className="flex-1">
+                          <Typography
+                            variant="small"
+                            className="font-medium text-blue-gray-700"
+                          >
+                            {mitra.nama}
+                          </Typography>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardBody>
+              </Card>
+            )}
 
             {/* KARTU DESKRIPSI */}
             <Card className="border border-blue-gray-100 shadow-sm">

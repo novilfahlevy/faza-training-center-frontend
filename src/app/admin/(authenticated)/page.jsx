@@ -1,3 +1,4 @@
+// /home/novilfahlevy/Projects/faza-training-center/src/app/admin/(authenticated)/page.jsx
 "use client";
 
 import dynamic from "next/dynamic";
@@ -323,7 +324,7 @@ export default function DashboardPage() {
               <table className="w-full min-w-[640px] table-auto">
                 <thead>
                   <tr>
-                    {["Pelatihan", "Tanggal", "Peserta", "Status"].map((el) => (
+                    {["Pelatihan", "Tanggal", "Mitra", "Peserta", "Status"].map((el) => (
                       <th
                         key={el}
                         className="border-b border-blue-gray-50 py-3 px-6 text-left"
@@ -341,7 +342,7 @@ export default function DashboardPage() {
                 <tbody>
                   {pelatihanTerbaru.length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="text-center py-6 text-gray-500">
+                      <td colSpan="5" className="text-center py-6 text-gray-500">
                         Belum ada pelatihan
                       </td>
                     </tr>
@@ -371,20 +372,14 @@ export default function DashboardPage() {
                                 >
                                   {pelatihan.nama}
                                 </Typography>
-                                <Typography
-                                  variant="small"
-                                  className="text-xs font-normal text-blue-gray-500"
-                                >
-                                  {pelatihan.mitra || "Tanpa Mitra"}
+                                <Typography className="text-xs font-normal text-blue-gray-500">
+                                  {pelatihan.daring ? "Daring" : "Luring"}
                                 </Typography>
                               </div>
                             </div>
                           </td>
                           <td className={className}>
-                            <Typography
-                              variant="small"
-                              className="text-xs font-medium text-blue-gray-600"
-                            >
+                            <Typography className="text-xs font-semibold text-blue-gray-600">
                               {new Date(pelatihan.tanggal).toLocaleDateString("id-ID", {
                                 day: "numeric",
                                 month: "short",
@@ -393,10 +388,37 @@ export default function DashboardPage() {
                             </Typography>
                           </td>
                           <td className={className}>
-                            <Typography
-                              variant="small"
-                              className="text-xs font-medium text-blue-gray-600"
-                            >
+                            {pelatihan.mitra && pelatihan.mitra.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {pelatihan.mitra.slice(0, 2).map((m, index) => (
+                                  <Chip
+                                    key={index}
+                                    variant="ghost"
+                                    size="sm"
+                                    value={m.nama}
+                                    icon={<BuildingOfficeIcon className="h-3 w-3" />}
+                                    color="blue"
+                                    className="rounded-full"
+                                  />
+                                ))}
+                                {pelatihan.mitra.length > 2 && (
+                                  <Chip
+                                    variant="ghost"
+                                    size="sm"
+                                    value={`+${pelatihan.mitra.length - 2} lagi`}
+                                    color="gray"
+                                    className="rounded-full"
+                                  />
+                                )}
+                              </div>
+                            ) : (
+                              <Typography className="text-xs font-normal text-blue-gray-500">
+                                Tidak ada mitra
+                              </Typography>
+                            )}
+                          </td>
+                          <td className={className}>
+                            <Typography className="text-xs font-semibold text-blue-gray-600">
                               {pelatihan.jumlah_peserta} peserta
                             </Typography>
                           </td>
