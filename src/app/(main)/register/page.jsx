@@ -1,3 +1,4 @@
+// /home/novilfahlevy/Projects/faza-training-center/src/app/(main)/register/page.jsx
 "use client";
 
 import { useFormik } from "formik";
@@ -101,268 +102,287 @@ export default function RegisterPage({ searchParams }) {
   );
 
   return (
-    <section className="m-8 min-h-screen">
-      <div className="w-full mt-8">
-        <div className="mx-auto w-80 max-w-screen-lg lg:w-1/3">
+    <section className="min-h-screen flex items-center justify-center px-4 py-8 bg-gray-50">
+      <div className="w-full max-w-4xl">
+        <div className="mb-6">
           <VerificationAlert searchParams={searchParams} />
         </div>
 
-        <div className="text-center">
-          <Typography variant="h3" className="font-bold mb-4 text-blue-600">
-            Daftar Akun Peserta
-          </Typography>
-          <Typography variant="small" color="gray">
-            Lengkapi data diri Anda untuk membuat akun.
-          </Typography>
+        <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
+          <div className="text-center mb-6">
+            <Typography variant="h3" className="font-bold text-2xl md:text-3xl mb-4 text-blue-600">
+              Daftar Akun Peserta
+            </Typography>
+            <Typography variant="small" color="gray" className="text-base">
+              Lengkapi data diri Anda untuk membuat akun.
+            </Typography>
+          </div>
+
+          <form onSubmit={formik.handleSubmit} className="space-y-4 md:space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              {/* Email */}
+              <div className="md:col-span-2">
+                <Label>Email</Label>
+                <Input
+                  name="email"
+                  size="lg"
+                  placeholder="name@mail.com"
+                  value={formik.values.email}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.email && Boolean(formik.errors.email)}
+                />
+                {formik.touched.email && formik.errors.email && (
+                  <Typography variant="small" color="red" className="mt-2">
+                    {formik.errors.email}
+                  </Typography>
+                )}
+              </div>
+
+              {/* Password */}
+              <div>
+                <Label>Password</Label>
+                <div className="relative">
+                  <Input
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    size="lg"
+                    placeholder="********"
+                    value={formik.values.password}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={formik.touched.password && Boolean(formik.errors.password)}
+                  />
+                  <IconButton
+                    variant="text"
+                    className="!absolute right-1 top-1/2 -translate-y-1/2"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeSlashIcon className="h-5 w-5" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5" />
+                    )}
+                  </IconButton>
+                </div>
+                {formik.touched.password && formik.errors.password && (
+                  <Typography variant="small" color="red" className="mt-2">
+                    {formik.errors.password}
+                  </Typography>
+                )}
+              </div>
+
+              {/* Konfirmasi Password */}
+              <div>
+                <Label>Konfirmasi Password</Label>
+                <div className="relative">
+                  <Input
+                    name="confirm_password"
+                    type={showConfirm ? "text" : "password"}
+                    size="lg"
+                    placeholder="********"
+                    value={formik.values.confirm_password}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={
+                      formik.touched.confirm_password &&
+                      Boolean(formik.errors.confirm_password)
+                    }
+                  />
+                  <IconButton
+                    variant="text"
+                    className="!absolute right-1 top-1/2 -translate-y-1/2"
+                    onClick={() => setShowConfirm(!showConfirm)}
+                  >
+                    {showConfirm ? (
+                      <EyeSlashIcon className="h-5 w-5" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5" />
+                    )}
+                  </IconButton>
+                </div>
+                {formik.touched.confirm_password &&
+                  formik.errors.confirm_password && (
+                    <Typography variant="small" color="red" className="mt-2">
+                      {formik.errors.confirm_password}
+                    </Typography>
+                  )}
+              </div>
+
+              {/* Nama lengkap */}
+              <div className="md:col-span-2">
+                <Label>Nama Lengkap</Label>
+                <Input
+                  name="nama_lengkap"
+                  size="lg"
+                  placeholder="Nama lengkap"
+                  value={formik.values.nama_lengkap}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                {formik.touched.nama_lengkap && formik.errors.nama_lengkap && (
+                  <Typography variant="small" color="red" className="mt-2">
+                    {formik.errors.nama_lengkap}
+                  </Typography>
+                )}
+              </div>
+
+              {/* No Telepon */}
+              <div>
+                <Label>No. Telepon</Label>
+                <Input
+                  name="no_telp"
+                  size="lg"
+                  placeholder="08xxxxxxxxxx"
+                  value={formik.values.no_telp}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                {formik.touched.no_telp && formik.errors.no_telp && (
+                  <Typography variant="small" color="red" className="mt-2">
+                    {formik.errors.no_telp}
+                  </Typography>
+                )}
+              </div>
+
+              {/* Jenis Kelamin */}
+              <div>
+                <Label>Jenis Kelamin</Label>
+                <Select
+                  name="jenis_kelamin"
+                  label="Pilih Jenis Kelamin"
+                  value={formik.values.jenis_kelamin}
+                  onChange={(value) => formik.setFieldValue("jenis_kelamin", value)}
+                  onBlur={formik.handleBlur}
+                >
+                  <Option value="L">Laki-laki</Option>
+                  <Option value="P">Perempuan</Option>
+                </Select>
+                {formik.touched.jenis_kelamin && formik.errors.jenis_kelamin && (
+                  <Typography variant="small" color="red" className="mt-2">
+                    {formik.errors.jenis_kelamin}
+                  </Typography>
+                )}
+              </div>
+
+              {/* Tempat & Tanggal Lahir */}
+              <div>
+                <Label>Tempat Lahir</Label>
+                <Input
+                  name="tempat_lahir"
+                  placeholder="Samarinda"
+                  value={formik.values.tempat_lahir}
+                  onChange={formik.handleChange}
+                />
+                {formik.touched.tempat_lahir && formik.errors.tempat_lahir && (
+                  <Typography variant="small" color="red" className="mt-2">
+                    {formik.errors.tempat_lahir}
+                  </Typography>
+                )}
+              </div>
+              <div>
+                <Label>Tanggal Lahir</Label>
+                <Input
+                  name="tanggal_lahir"
+                  type="date"
+                  value={formik.values.tanggal_lahir}
+                  onChange={formik.handleChange}
+                />
+                {formik.touched.tanggal_lahir && formik.errors.tanggal_lahir && (
+                  <Typography variant="small" color="red" className="mt-2">
+                    {formik.errors.tanggal_lahir}
+                  </Typography>
+                )}
+              </div>
+
+              {/* Alamat */}
+              <div className="md:col-span-2">
+                <Label>Alamat</Label>
+                <Input
+                  name="alamat"
+                  size="lg"
+                  placeholder="Alamat lengkap"
+                  value={formik.values.alamat}
+                  onChange={formik.handleChange}
+                />
+                {formik.touched.alamat && formik.errors.alamat && (
+                  <Typography variant="small" color="red" className="mt-2">
+                    {formik.errors.alamat}
+                  </Typography>
+                )}
+              </div>
+
+              {/* Profesi, Instansi, STR */}
+              <div>
+                <Label>Profesi</Label>
+                <Input
+                  name="profesi"
+                  placeholder="Mahasiswa / Guru / Dll"
+                  value={formik.values.profesi}
+                  onChange={formik.handleChange}
+                />
+                {formik.touched.profesi && formik.errors.profesi && (
+                  <Typography variant="small" color="red" className="mt-2">
+                    {formik.errors.profesi}
+                  </Typography>
+                )}
+              </div>
+              <div>
+                <Label>Instansi</Label>
+                <Input
+                  name="instansi"
+                  placeholder="Nama kampus / perusahaan"
+                  value={formik.values.instansi}
+                  onChange={formik.handleChange}
+                />
+                {formik.touched.instansi && formik.errors.instansi && (
+                  <Typography variant="small" color="red" className="mt-2">
+                    {formik.errors.instansi}
+                  </Typography>
+                )}
+              </div>
+              <div className="md:col-span-2">
+                <Typography
+                  variant="small"
+                  color="blue-gray"
+                  className="my-2 font-medium"
+                >
+                  Surat Tanda Registrasi (STR)
+                </Typography>
+                <Input
+                  name="no_reg_kes"
+                  placeholder="(Opsional)"
+                  value={formik.values.no_reg_kes}
+                  onChange={formik.handleChange}
+                />
+              </div>
+            </div>
+
+            {/* Tombol */}
+            <Button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 transition-colors mt-6"
+              fullWidth
+              disabled={loading}
+            >
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  Mendaftarkan...
+                </div>
+              ) : (
+                "Daftar"
+              )}
+            </Button>
+
+            <Typography variant="small" color="gray" className="text-center">
+              Sudah punya akun?{" "}
+              <Link href="/login" className="text-blue-600 hover:underline font-medium">
+                Masuk sekarang
+              </Link>
+            </Typography>
+          </form>
         </div>
-
-        <form
-          onSubmit={formik.handleSubmit}
-          className="mt-8 mb-2 mx-auto w-96 max-w-screen-lg lg:w-1/2"
-        >
-          {/* Email */}
-          <Label>Email</Label>
-          <Input
-            name="email"
-            size="lg"
-            placeholder="name@mail.com"
-            value={formik.values.email}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={formik.touched.email && Boolean(formik.errors.email)}
-          />
-          {formik.touched.email && formik.errors.email && (
-            <Typography variant="small" color="red" className="mt-2">
-              {formik.errors.email}
-            </Typography>
-          )}
-
-          {/* Password */}
-          <Label>Password</Label>
-          <div className="relative">
-            <Input
-              name="password"
-              type={showPassword ? "text" : "password"}
-              size="lg"
-              placeholder="********"
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={formik.touched.password && Boolean(formik.errors.password)}
-            />
-            <IconButton
-              variant="text"
-              className="!absolute right-1 top-1/2 -translate-y-1/2"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? (
-                <EyeSlashIcon className="h-5 w-5" />
-              ) : (
-                <EyeIcon className="h-5 w-5" />
-              )}
-            </IconButton>
-          </div>
-          {formik.touched.password && formik.errors.password && (
-            <Typography variant="small" color="red" className="mt-2">
-              {formik.errors.password}
-            </Typography>
-          )}
-
-          {/* Konfirmasi Password */}
-          <Label>Konfirmasi Password</Label>
-          <div className="relative">
-            <Input
-              name="confirm_password"
-              type={showConfirm ? "text" : "password"}
-              size="lg"
-              placeholder="********"
-              value={formik.values.confirm_password}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={
-                formik.touched.confirm_password &&
-                Boolean(formik.errors.confirm_password)
-              }
-            />
-            <IconButton
-              variant="text"
-              className="!absolute right-1 top-1/2 -translate-y-1/2"
-              onClick={() => setShowConfirm(!showConfirm)}
-            >
-              {showConfirm ? (
-                <EyeSlashIcon className="h-5 w-5" />
-              ) : (
-                <EyeIcon className="h-5 w-5" />
-              )}
-            </IconButton>
-          </div>
-          {formik.touched.confirm_password &&
-            formik.errors.confirm_password && (
-              <Typography variant="small" color="red" className="mt-2">
-                {formik.errors.confirm_password}
-              </Typography>
-            )}
-
-          {/* Nama lengkap */}
-          <Label>Nama Lengkap</Label>
-          <Input
-            name="nama_lengkap"
-            size="lg"
-            placeholder="Nama lengkap"
-            value={formik.values.nama_lengkap}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-          />
-          {formik.touched.nama_lengkap && formik.errors.nama_lengkap && (
-            <Typography variant="small" color="red" className="mt-2">
-              {formik.errors.nama_lengkap}
-            </Typography>
-          )}
-
-          {/* No Telepon */}
-          <Label>No. Telepon</Label>
-          <Input
-            name="no_telp"
-            size="lg"
-            placeholder="08xxxxxxxxxx"
-            value={formik.values.no_telp}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-          />
-          {formik.touched.no_telp && formik.errors.no_telp && (
-            <Typography variant="small" color="red" className="mt-2">
-              {formik.errors.no_telp}
-            </Typography>
-          )}
-
-          {/* Jenis Kelamin */}
-          <Label>Jenis Kelamin</Label>
-          <Select
-            name="jenis_kelamin"
-            label="Pilih Jenis Kelamin"
-            value={formik.values.jenis_kelamin}
-            onChange={(value) => formik.setFieldValue("jenis_kelamin", value)}
-            onBlur={formik.handleBlur}
-          >
-            <Option value="L">Laki-laki</Option>
-            <Option value="P">Perempuan</Option>
-          </Select>
-          {formik.touched.jenis_kelamin && formik.errors.jenis_kelamin && (
-            <Typography variant="small" color="red" className="mt-2">
-              {formik.errors.jenis_kelamin}
-            </Typography>
-          )}
-
-          {/* Tempat & Tanggal Lahir */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-            <div>
-              <Label>Tempat Lahir</Label>
-              <Input
-                name="tempat_lahir"
-                placeholder="Samarinda"
-                value={formik.values.tempat_lahir}
-                onChange={formik.handleChange}
-              />
-              {formik.touched.tempat_lahir && formik.errors.tempat_lahir && (
-                <Typography variant="small" color="red" className="mt-2">
-                  {formik.errors.tempat_lahir}
-                </Typography>
-              )}
-            </div>
-            <div>
-              <Label>Tanggal Lahir</Label>
-              <Input
-                name="tanggal_lahir"
-                type="date"
-                value={formik.values.tanggal_lahir}
-                onChange={formik.handleChange}
-              />
-              {formik.touched.tanggal_lahir && formik.errors.tanggal_lahir && (
-                <Typography variant="small" color="red" className="mt-2">
-                  {formik.errors.tanggal_lahir}
-                </Typography>
-              )}
-            </div>
-          </div>
-
-          <Label className="mt-4">Alamat</Label>
-          <Input
-            name="alamat"
-            size="lg"
-            placeholder="Alamat lengkap"
-            value={formik.values.alamat}
-            onChange={formik.handleChange}
-          />
-          {formik.touched.alamat && formik.errors.alamat && (
-            <Typography variant="small" color="red" className="mt-2">
-              {formik.errors.alamat}
-            </Typography>
-          )}
-
-          {/* Profesi, Instansi, STR */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
-            <div>
-              <Label>Profesi</Label>
-              <Input
-                name="profesi"
-                placeholder="Mahasiswa / Guru / Dll"
-                value={formik.values.profesi}
-                onChange={formik.handleChange}
-              />
-              {formik.touched.profesi && formik.errors.profesi && (
-                <Typography variant="small" color="red" className="mt-2">
-                  {formik.errors.profesi}
-                </Typography>
-              )}
-            </div>
-            <div>
-              <Label>Instansi</Label>
-              <Input
-                name="instansi"
-                placeholder="Nama kampus / perusahaan"
-                value={formik.values.instansi}
-                onChange={formik.handleChange}
-              />
-              {formik.touched.instansi && formik.errors.instansi && (
-                <Typography variant="small" color="red" className="mt-2">
-                  {formik.errors.instansi}
-                </Typography>
-              )}
-            </div>
-            <div>
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className="my-2 font-medium"
-              >
-                Surat Tanda Registrasi (STR)
-              </Typography>
-              <Input
-                name="no_reg_kes"
-                placeholder="(Opsional)"
-                value={formik.values.no_reg_kes}
-                onChange={formik.handleChange}
-              />
-            </div>
-          </div>
-
-          {/* Tombol */}
-          <Button
-            type="submit"
-            className="mt-6 bg-blue-600"
-            fullWidth
-            disabled={loading}
-          >
-            {loading ? "Mendaftarkan..." : "Daftar"}
-          </Button>
-
-          <Typography variant="small" color="gray" className="mt-4 text-center">
-            Sudah punya akun?{" "}
-            <Link href="/login" className="text-blue-600 hover:underline">
-              Masuk sekarang
-            </Link>
-          </Typography>
-        </form>
       </div>
     </section>
   );

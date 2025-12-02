@@ -1,3 +1,4 @@
+// /home/novilfahlevy/Projects/faza-training-center/src/app/(main)/pelatihan/page.jsx
 "use client";
 
 import '@/css/tailwind.css';
@@ -15,10 +16,43 @@ const debounce = (func, delay) => {
   };
 };
 
+// Skeleton Card Component
+function TrainingCardSkeleton() {
+  return (
+    <div className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse">
+      <div className="h-48 bg-gray-200"></div>
+      <div className="p-6">
+        <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+        <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+        <div className="h-4 bg-gray-200 rounded w-5/6 mb-4"></div>
+        <div className="flex justify-between items-center">
+          <div className="h-6 bg-gray-200 rounded w-20"></div>
+          <div className="h-8 bg-gray-200 rounded w-24"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Loading Spinner Component
+function LoadingSpinner({ text = "Memuat data..." }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-10">
+      <div className="relative">
+        <div className="w-10 h-10 border-4 border-blue-200 rounded-full animate-spin border-t-blue-600"></div>
+        <div className="absolute top-0 left-0 w-10 h-10 border-4 border-transparent rounded-full animate-pulse border-t-blue-400"></div>
+      </div>
+      <p className="mt-2 text-gray-500 text-sm">{text}</p>
+    </div>
+  );
+}
+
 export default function PelatihanPage() {
   const [trainings, setTrainings] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Initial loading state
+  const [loadingMore, setLoadingMore] = useState(false); // Loading more state
   const [search, setSearch] = useState('');
+  const [isSearching, setIsSearching] = useState(false); // Search loading state
 
   const [page, setPage] = useState(1);
   const limit = 6;
@@ -28,12 +62,18 @@ export default function PelatihanPage() {
   const isFetchingRef = useRef(false);
 
   const fetchData = useCallback(
-    async (currentPage, query = '') => {
+    async (currentPage, query = '', isLoadMore = false) => {
       if (isFetchingRef.current) return;
       isFetchingRef.current = true;
 
       try {
-        setLoading(true);
+        // Set appropriate loading state
+        if (isLoadMore) {
+          setLoadingMore(true);
+        } else if (currentPage === 1) {
+          setLoading(true);
+          if (query) setIsSearching(true);
+        }
 
         const params = { page: currentPage, size: limit };
         if (query !== '') params.search = query;
@@ -43,7 +83,7 @@ export default function PelatihanPage() {
         const newRecords = res.records || [];
 
         if (currentPage === 1) {
-          // reset data jika search baru
+          // reset data jika search baru atau first load
           setTrainings(newRecords);
         } else {
           // append data lama + baru
@@ -61,7 +101,11 @@ export default function PelatihanPage() {
         toast.error("Gagal memuat data");
       } finally {
         isFetchingRef.current = false;
-        setLoading(false);
+        setTimeout(() => {
+          setLoading(false);
+          setLoadingMore(false);
+          setIsSearching(false);
+        }, 500);
       }
     },
     [limit]
@@ -92,7 +136,7 @@ export default function PelatihanPage() {
   // =====================================
   useEffect(() => {
     const handleScroll = () => {
-      if (!hasMore || loading) return;
+      if (!hasMore || loading || loadingMore) return;
 
       const scrolled = window.innerHeight + window.scrollY;
       const threshold = document.body.offsetHeight - 300;
@@ -104,7 +148,7 @@ export default function PelatihanPage() {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [hasMore, loading]);
+  }, [hasMore, loading, loadingMore]);
 
   return (
     <div className="container mx-auto px-6 py-10">
@@ -130,23 +174,46 @@ export default function PelatihanPage() {
 
       {/* Training Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {trainings.map((training, idx) => (
-          <TrainingCard key={training.pelatihan_id + '-' + idx} training={training} />
-        ))}
+        {/* Initial loading state */}
+        {loading && trainings.length === 0 ? (
+          Array(limit)
+            .fill(0)
+            .map((_, index) => <TrainingCardSkeleton key={`skeleton-${index}`} />)
+        ) : (
+          trainings.map((training, idx) => (
+            <TrainingCard key={training.pelatihan_id + '-' + idx} training={training} />
+          ))
+        )}
       </div>
 
-      {/* Loading Spinner */}
-      {loading && (
-        <div className="flex justify-center py-10">
-          <div className="animate-spin h-10 w-10 border-b-2 border-blue-600 rounded-full"></div>
+      {/* Loading More Spinner */}
+      {loadingMore && <LoadingSpinner text="Memuat lebih banyak..." />}
+
+      {/* Search Loading State */}
+      {isSearching && trainings.length === 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {Array(limit)
+            .fill(0)
+            .map((_, index) => <TrainingCardSkeleton key={`search-skeleton-${index}`} />)}
+        </div>
+      )}
+
+      {/* No Data State */}
+      {!loading && !isSearching && trainings.length === 0 && (
+        <div className="text-center py-10">
+          <div className="mb-4">
+            <MagnifyingGlassIcon className="h-12 w-12 text-gray-400 mx-auto" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Tidak ada pelatihan ditemukan</h3>
+          <p className="text-gray-500">Coba ubah kata kunci pencarian atau periksa kembali nanti.</p>
         </div>
       )}
 
       {/* No More Data */}
-      {!hasMore && !loading && (
-        <p className="text-center text-gray-500 py-10">
-          Tidak ada pelatihan lainnya.
-        </p>
+      {!hasMore && !loading && trainings.length > 0 && (
+        <div className="text-center py-10">
+          <p className="text-gray-500">Tidak ada pelatihan lainnya.</p>
+        </div>
       )}
     </div>
   );

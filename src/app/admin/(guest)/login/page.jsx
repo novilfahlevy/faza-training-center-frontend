@@ -50,7 +50,7 @@ export default function Login() {
 
   return (
     <section className="flex gap-4 max-h-screen">
-      <div className="w-full lg:w-2/5 mx-auto mt-20">
+      <div className="w-full mx-6 sm:w-3/6 lg:w-2/6 sm:mx-auto mt-20">
         <div className="text-center mb-8">
           <Typography variant="h2" className="font-bold mb-4 text-blue-600">
             Faza Training Center

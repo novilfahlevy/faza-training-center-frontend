@@ -1,3 +1,4 @@
+// /home/novilfahlevy/Projects/faza-training-center/src/app/(main)/login/login-form.jsx
 "use client";
 
 import { useFormik } from "formik";
@@ -50,54 +51,67 @@ export default function LoginForm() {
   });
 
   return (
-    <form
-      onSubmit={formik.handleSubmit}
-      className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/3"
-    >
-      <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
-        Email
-      </Typography>
-      <Input
-        name="email"
-        size="lg"
-        placeholder="name@mail.com"
-        value={formik.values.email}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
-        error={formik.touched.email && Boolean(formik.errors.email)}
-      />
-      {formik.touched.email && formik.errors.email && (
-        <Typography variant="small" color="red" className="mt-2">
-          {formik.errors.email}
+    <form onSubmit={formik.handleSubmit} className="space-y-6">
+      <div>
+        <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
+          Email
         </Typography>
-      )}
+        <Input
+          name="email"
+          size="lg"
+          placeholder="name@mail.com"
+          value={formik.values.email}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={formik.touched.email && Boolean(formik.errors.email)}
+        />
+        {formik.touched.email && formik.errors.email && (
+          <Typography variant="small" color="red" className="mt-2">
+            {formik.errors.email}
+          </Typography>
+        )}
+      </div>
 
-      <Typography variant="small" color="blue-gray" className="my-2 font-medium">
-        Password
-      </Typography>
-      <Input
-        name="password"
-        type="password"
-        size="lg"
-        placeholder="********"
-        value={formik.values.password}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
-        error={formik.touched.password && Boolean(formik.errors.password)}
-      />
-      {formik.touched.password && formik.errors.password && (
-        <Typography variant="small" color="red" className="mt-2">
-          {formik.errors.password}
+      <div>
+        <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
+          Password
         </Typography>
-      )}
+        <Input
+          name="password"
+          type="password"
+          size="lg"
+          placeholder="********"
+          value={formik.values.password}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={formik.touched.password && Boolean(formik.errors.password)}
+        />
+        {formik.touched.password && formik.errors.password && (
+          <Typography variant="small" color="red" className="mt-2">
+            {formik.errors.password}
+          </Typography>
+        )}
+      </div>
 
-      <Button type="submit" className="mt-6 bg-blue-600" fullWidth disabled={loading}>
-        {loading ? "Memproses..." : "Masuk"}
+      <Button 
+        type="submit" 
+        className="bg-blue-600 hover:bg-blue-700 transition-colors" 
+        fullWidth 
+        disabled={loading}
+      >
+        {loading ? (
+          <div className="flex items-center justify-center">
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+            Memproses...
+          </div>
+        ) : (
+          "Masuk"
+        )}
       </Button>
 
-      <Typography variant="small" color="gray" className="mt-4 text-center">
+      <Typography variant="small" color="gray" className="text-center">
         Belum punya akun?{" "}
-        <Link href="/register" className="text-blue-600 hover:underline">
+        <Link href="/register" className="text-blue-600 hover:underline font-medium">
           Daftar sekarang
         </Link>
       </Typography>
