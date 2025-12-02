@@ -1,4 +1,3 @@
-// /home/novilfahlevy/Projects/faza-training-center/src/components/admin/auth/verification-alert.jsx
 "use client";
 
 import { Alert, Typography } from "@material-tailwind/react";

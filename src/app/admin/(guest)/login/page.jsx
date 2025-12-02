@@ -1,4 +1,3 @@
-// /home/novilfahlevy/Projects/faza-training-center/src/app/admin/(guest)/login/page.jsx
 "use client";
 
 import { useFormik } from "formik";
@@ -11,6 +10,7 @@ import { login as loginRequest } from "@/adminHttpClient";
 import { useAuthStore } from "@/stores/useAuthStore";
 import Link from "next/link";
 import VerificationAlert from "@/components/admin/auth/verification-alert";
+import { Suspense } from "react";
 
 export default function Login() {
   const router = useRouter();
@@ -60,7 +60,9 @@ export default function Login() {
           </Typography>
         </div>
 
-        <VerificationAlert />
+        <Suspense>
+          <VerificationAlert />
+        </Suspense>
 
         <Card className="shadow-lg border border-blue-gray-100">
           <CardBody className="p-8">
