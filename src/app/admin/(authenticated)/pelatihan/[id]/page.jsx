@@ -1,4 +1,3 @@
-// /home/novilfahlevy/Projects/faza-training-center/src/app/admin/(authenticated)/pelatihan/[id]/page.jsx
 "use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
@@ -48,6 +47,251 @@ const debounce = (func, delay) => {
   };
 };
 
+// Loading Skeleton untuk Detail Pelatihan
+function PelatihanDetailSkeleton() {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      {/* KOLOM KIRI - Informasi Pelatihan */}
+      <div className="lg:col-span-2 space-y-6">
+        {/* CARD HEADER INFO */}
+        <Card className="border border-blue-gray-100 shadow-sm">
+          <CardBody className="p-6">
+            <div className="h-8 bg-gray-200 rounded w-3/4 mb-4 animate-pulse"></div>
+            
+            {/* Metadata dalam bentuk Chip */}
+            <div className="flex flex-wrap gap-2">
+              <div className="h-8 bg-gray-200 rounded-full w-32 animate-pulse"></div>
+              <div className="h-8 bg-gray-200 rounded-full w-24 animate-pulse"></div>
+              <div className="h-8 bg-gray-200 rounded-full w-28 animate-pulse"></div>
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* KARTU INFORMASI PELATIHAN */}
+        <Card className="border border-blue-gray-100 shadow-sm">
+          <CardHeader
+            floated={false}
+            shadow={false}
+            className="m-0 p-6 border-b"
+          >
+            <div className="flex items-center">
+              <div className="h-5 w-5 bg-gray-200 rounded mr-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-200 rounded w-40 animate-pulse"></div>
+            </div>
+          </CardHeader>
+          <CardBody className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Tanggal Pelatihan */}
+              <div className="flex items-start gap-3">
+                <div className="h-5 w-5 bg-gray-200 rounded mt-0.5 animate-pulse"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+                  <div className="h-6 bg-gray-200 rounded w-40 animate-pulse"></div>
+                </div>
+              </div>
+
+              {/* Durasi */}
+              <div className="flex items-start gap-3">
+                <div className="h-5 w-5 bg-gray-200 rounded mt-0.5 animate-pulse"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-200 rounded w-24 mb-2 animate-pulse"></div>
+                  <div className="h-6 bg-gray-200 rounded w-32 animate-pulse"></div>
+                </div>
+              </div>
+
+              {/* Pelaksanaan */}
+              <div className="flex items-start gap-3">
+                <div className="h-5 w-5 bg-gray-200 rounded mt-0.5 animate-pulse"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-200 rounded w-28 mb-2 animate-pulse"></div>
+                  <div className="h-6 bg-gray-200 rounded w-36 animate-pulse"></div>
+                </div>
+              </div>
+
+              {/* Lokasi */}
+              <div className="flex items-start gap-3">
+                <div className="h-5 w-5 bg-gray-200 rounded mt-0.5 animate-pulse"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-200 rounded w-20 mb-2 animate-pulse"></div>
+                  <div className="h-6 bg-gray-200 rounded w-40 animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* KARTU MITRA */}
+        <Card className="border border-blue-gray-100 shadow-sm">
+          <CardHeader
+            floated={false}
+            shadow={false}
+            className="m-0 p-6 border-b"
+          >
+            <div className="flex items-center">
+              <div className="h-5 w-5 bg-gray-200 rounded mr-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-200 rounded w-36 animate-pulse"></div>
+            </div>
+          </CardHeader>
+          <CardBody className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[1, 2].map((item) => (
+                <div key={item} className="flex items-start gap-3 p-3 border border-blue-gray-100 rounded-lg">
+                  <div className="h-5 w-5 bg-gray-200 rounded mt-0.5 animate-pulse"></div>
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* KARTU DESKRIPSI */}
+        <Card className="border border-blue-gray-100 shadow-sm">
+          <CardHeader
+            floated={false}
+            shadow={false}
+            className="m-0 p-6 border-b"
+          >
+            <div className="flex items-center">
+              <div className="h-5 w-5 bg-gray-200 rounded mr-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-200 rounded w-40 animate-pulse"></div>
+            </div>
+          </CardHeader>
+          <CardBody className="p-6">
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-4/5 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* KARTU INFORMASI BIAYA */}
+        <Card className="border border-blue-gray-100 shadow-sm">
+          <CardHeader
+            floated={false}
+            shadow={false}
+            className="m-0 p-6 border-b"
+          >
+            <div className="flex items-center">
+              <div className="h-5 w-5 bg-gray-200 rounded mr-2 animate-pulse"></div>
+              <div className="h-6 bg-gray-200 rounded w-32 animate-pulse"></div>
+            </div>
+          </CardHeader>
+          <CardBody className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Biaya */}
+              <div className="flex items-start gap-3">
+                <div className="h-5 w-5 bg-gray-200 rounded mt-0.5 animate-pulse"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+                  <div className="h-6 bg-gray-200 rounded w-28 animate-pulse"></div>
+                </div>
+              </div>
+
+              {/* Nomor Rekening */}
+              <div className="flex items-start gap-3">
+                <div className="h-5 w-5 bg-gray-200 rounded mt-0.5 animate-pulse"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-200 rounded w-36 mb-2 animate-pulse"></div>
+                  <div className="h-6 bg-gray-200 rounded w-40 animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+      </div>
+
+      {/* KOLOM KANAN - Thumbnail */}
+      <div className="lg:col-span-1">
+        <div className="sticky top-4">
+          <Card className="border border-blue-gray-100 shadow-sm overflow-hidden">
+            <div className="w-full h-64 lg:h-96 bg-gray-200 animate-pulse"></div>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Loading Skeleton untuk Tabel Peserta
+function PesertaTableSkeleton() {
+  return (
+    <div className="w-full">
+      <div className="overflow-x-auto">
+        <div className="min-h-[400px]">
+          <table className="w-full min-w-[800px] table-auto">
+            <thead className="bg-gray-50">
+              <tr>
+                {[
+                  "No",
+                  "Nama",
+                  "Email",
+                  "No. HP",
+                  "Bukti Pembayaran",
+                  "Status",
+                ].map((head) => (
+                  <th
+                    key={head}
+                    className="border-b border-blue-gray-100 py-3 px-5 text-left"
+                  >
+                    <Typography
+                      variant="small"
+                      className="text-[11px] font-bold uppercase text-blue-gray-400"
+                    >
+                      {head}
+                    </Typography>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {Array(5).fill(0).map((_, index) => (
+                <tr key={index} className="border-y">
+                  <td className="py-3 px-5">
+                    <div className="h-4 bg-gray-200 rounded w-4 animate-pulse"></div>
+                  </td>
+                  <td className="py-3 px-5">
+                    <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+                  </td>
+                  <td className="py-3 px-5">
+                    <div className="h-4 bg-gray-200 rounded w-40 animate-pulse"></div>
+                  </td>
+                  <td className="py-3 px-5">
+                    <div className="h-4 bg-gray-200 rounded w-28 animate-pulse"></div>
+                  </td>
+                  <td className="py-3 px-5">
+                    <div className="h-20 w-20 bg-gray-200 rounded animate-pulse"></div>
+                  </td>
+                  <td className="py-3 px-5">
+                    <div className="h-10 w-24 bg-gray-200 rounded animate-pulse"></div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Loading Spinner Component
+function LoadingSpinner() {
+  return (
+    <div className="flex flex-col items-center justify-center h-64">
+      <div className="relative">
+        <div className="w-16 h-16 border-4 border-blue-200 rounded-full animate-spin border-t-blue-600"></div>
+        <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent rounded-full animate-pulse border-t-blue-400"></div>
+      </div>
+      <p className="mt-4 text-gray-600">Memuat data...</p>
+    </div>
+  );
+}
+
 export default function PesertaPelatihanPage({ params }) {
   const { id } = params;
 
@@ -55,6 +299,7 @@ export default function PesertaPelatihanPage({ params }) {
   const [pesertaList, setPesertaList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isPelatihanLoading, setIsPelatihanLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   const [activePage, setActivePage] = useState(1);
@@ -71,7 +316,10 @@ export default function PesertaPelatihanPage({ params }) {
       console.error("Gagal mengambil detail pelatihan:", error);
       toast.error("Gagal memuat detail pelatihan.");
     } finally {
-      setIsPelatihanLoading(false);
+      setTimeout(() => {
+        setIsPelatihanLoading(false);
+        setInitialLoading(false);
+      }, 500);
     }
   };
 
@@ -153,6 +401,46 @@ export default function PesertaPelatihanPage({ params }) {
   const isFree =
     pelatihan && (pelatihan.biaya === 0 || pelatihan.biaya === "0");
 
+  if (initialLoading) {
+    return (
+      <div className="mt-10 mb-10">
+        <div className="flex flex-col gap-y-4 sm:flex-row sm:items-center gap-x-4 mb-6">
+          {/* Tombol Kembali */}
+          <div className="h-10 bg-gray-200 rounded w-28 animate-pulse"></div>
+          {/* Tombol Edit */}
+          <div className="h-10 bg-gray-200 rounded w-32 animate-pulse"></div>
+        </div>
+        <PelatihanDetailSkeleton />
+        {/* KARTU DAFTAR PESERTA - Full Width */}
+        <Card className="border border-blue-gray-100 shadow-sm mt-8">
+          <CardHeader
+            floated={false}
+            shadow={false}
+            color="transparent"
+            className="m-0 flex gap-y-4 flex-col md:flex-row md:items-center md:justify-between p-6 sticky top-0 bg-white z-10 border-b border-blue-gray-50"
+          >
+            <div className="h-6 bg-gray-200 rounded w-32 animate-pulse"></div>
+            <div className="w-full md:w-auto">
+              <div className="h-10 bg-gray-200 rounded w-full md:w-64 animate-pulse"></div>
+            </div>
+          </CardHeader>
+          <CardBody className="px-0 pt-0 pb-2">
+            <PesertaTableSkeleton />
+            {/* Pagination Skeleton */}
+            <div className="flex items-center justify-between p-4">
+              <div className="h-8 bg-gray-200 rounded w-32 animate-pulse"></div>
+              <div className="flex gap-2">
+                <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-10 mb-10">
       <div className="flex flex-col gap-y-4 sm:flex-row sm:items-center gap-x-4 mb-6">
@@ -176,9 +464,7 @@ export default function PesertaPelatihanPage({ params }) {
       </div>
 
       {isPelatihanLoading ? (
-        <div className="flex items-center justify-center h-64">
-          <Typography color="gray">Memuat detail pelatihan...</Typography>
-        </div>
+        <PelatihanDetailSkeleton />
       ) : pelatihan ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* KOLOM KIRI - Informasi Pelatihan */}

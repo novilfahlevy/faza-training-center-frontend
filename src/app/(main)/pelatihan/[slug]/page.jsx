@@ -25,6 +25,18 @@ import {
 import { Button } from "@material-tailwind/react";
 import { useAuthStore } from "@/stores/useAuthStore";
 
+// Loading Spinner Component
+function LoadingSpinner() {
+  return (
+    <div className="flex justify-center items-center h-64">
+      <div className="relative">
+        <div className="w-16 h-16 border-4 border-blue-200 rounded-full animate-spin border-t-blue-600"></div>
+        <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent rounded-full animate-pulse border-t-blue-400"></div>
+      </div>
+    </div>
+  );
+}
+
 export default function PelatihanDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -37,18 +49,27 @@ export default function PelatihanDetailPage() {
   const [file, setFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Reset scroll to top when component mounts or slug changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [params.slug]);
 
   // Ambil detail pelatihan
   useEffect(() => {
     const getTraining = async () => {
       try {
         setError(null);
+        setLoading(true);
         const detail = await fetchTrainingBySlug(params.slug);
         setTraining(detail);
       } catch (error) {
         console.error("Gagal memuat detail pelatihan:", error);
         setError("Gagal memuat detail pelatihan. Silakan coba lagi nanti.");
         toast.error("Gagal memuat detail pelatihan.");
+      } finally {
+        setTimeout(() => setLoading(false), 500);
       }
     };
     getTraining();
@@ -162,9 +183,14 @@ export default function PelatihanDetailPage() {
     );
   }
 
-  if (!training) {
+  if (loading) {
     return (
-      <p className="container mx-auto px-6 py-10 text-gray-600">Memuat...</p>
+      <div className="container mx-auto px-6 py-10">
+        <div className="flex flex-col items-center justify-center min-h-[50vh]">
+          <LoadingSpinner />
+          <p className="mt-4 text-gray-600">Memuat detail pelatihan...</p>
+        </div>
+      </div>
     );
   }
 
@@ -198,7 +224,7 @@ export default function PelatihanDetailPage() {
           </div>
 
           <div className="lg:col-span-2">
-            <div className="sticky top-24">
+            <div className="sticky top-28">
               {registerStatus && registerStatus.status ? (
                 <RegisterStatusCard
                   status={registerStatus}

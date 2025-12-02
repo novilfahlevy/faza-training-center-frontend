@@ -24,11 +24,51 @@ import {
 } from "@/adminHttpClient";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
-import LoadingOverlay from "@/components/admin/loading-overlay";
 
 const TextEditor = dynamic(() => import("@/components/admin/laporan-kegiatan/text-editor"), {
   ssr: false,
 });
+
+// Loading Skeleton Component untuk Form Edit Laporan
+function FormSkeleton() {
+  return (
+    <div className="mt-12 flex justify-center">
+      <Card className="w-full max-w-3xl border border-blue-gray-100 shadow-sm">
+        <CardHeader floated={false} shadow={false} className="p-3">
+          <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
+        </CardHeader>
+
+        <CardBody className="px-6 pb-6">
+          <div className="flex flex-col gap-6">
+            {/* Judul Laporan */}
+            <div>
+              <div className="h-4 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+              <div className="h-10 bg-gray-200 rounded w-full animate-pulse"></div>
+            </div>
+
+            {/* Tanggal Laporan */}
+            <div className="relative">
+              <div className="h-4 bg-gray-200 rounded w-36 mb-2 animate-pulse"></div>
+              <div className="h-10 bg-gray-200 rounded w-full animate-pulse"></div>
+            </div>
+
+            {/* Isi Laporan */}
+            <div>
+              <div className="h-4 bg-gray-200 rounded w-28 mb-2 animate-pulse"></div>
+              <div className="h-64 bg-gray-200 rounded w-full animate-pulse"></div>
+            </div>
+
+            {/* Tombol */}
+            <div className="flex justify-end gap-3 pt-4 border-blue-gray-100">
+              <div className="h-10 bg-gray-200 rounded w-20 animate-pulse"></div>
+              <div className="h-10 bg-gray-200 rounded w-24 animate-pulse"></div>
+            </div>
+          </div>
+        </CardBody>
+      </Card>
+    </div>
+  );
+}
 
 export default function EditLaporanKegiatan() {
   const router = useRouter();
@@ -64,7 +104,7 @@ export default function EditLaporanKegiatan() {
         console.error("Gagal mengambil data laporan kegiatan:", error);
         router.push("/admin/laporan-kegiatan");
       } finally {
-        setInitialLoading(false);
+        setTimeout(() => setInitialLoading(false), 500);
       }
     };
     
@@ -165,6 +205,10 @@ export default function EditLaporanKegiatan() {
     dateRef.current?.focus();
   };
 
+  if (initialLoading) {
+    return <FormSkeleton />;
+  }
+
   return (
     <div className="mt-12 flex justify-center">
       <Card className="w-full max-w-3xl border border-blue-gray-100 shadow-sm">
@@ -175,112 +219,117 @@ export default function EditLaporanKegiatan() {
         </CardHeader>
 
         <CardBody className="px-6 pb-6">
-          <LoadingOverlay active={initialLoading || loading}>
-            <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
-              {/* Judul Laporan */}
-              <div>
-                <Input
-                  label="Judul Laporan"
-                  name="judul_laporan"
-                  value={formik.values.judul_laporan}
-                  onChange={formik.handleChange}
-                  error={formik.touched.judul_laporan && Boolean(formik.errors.judul_laporan)}
-                />
-                {formik.touched.judul_laporan &&
-                  formik.errors.judul_laporan && (
-                    <Typography variant="small" color="red" className="mt-1">
-                      {formik.errors.judul_laporan}
-                    </Typography>
-                  )}
-              </div>
+          <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
+            {/* Judul Laporan */}
+            <div>
+              <Input
+                label="Judul Laporan"
+                name="judul_laporan"
+                value={formik.values.judul_laporan}
+                onChange={formik.handleChange}
+                error={formik.touched.judul_laporan && Boolean(formik.errors.judul_laporan)}
+              />
+              {formik.touched.judul_laporan &&
+                formik.errors.judul_laporan && (
+                  <Typography variant="small" color="red" className="mt-1">
+                    {formik.errors.judul_laporan}
+                  </Typography>
+                )}
+            </div>
 
-              {/* Tanggal Laporan */}
-              <div className="relative" ref={calendarRef}>
-                <div className="relative">
-                  <Input
-                    ref={dateRef}
-                    label="Tanggal Laporan"
-                    name="tanggal_laporan"
-                    value={formik.values.tanggal_laporan}
-                    readOnly
-                    onFocus={() => setShowCalendar(true)}
-                    className="cursor-pointer"
-                    error={formik.touched.tanggal_laporan && Boolean(formik.errors.tanggal_laporan)}
-                  />
-                  {formik.values.tanggal_laporan ? (
-                    <button
-                      type="button"
-                      onClick={clearDate}
-                      className="absolute right-2 top-1.5 p-1 text-gray-500 hover:text-red-600 transition"
-                    >
-                      <XMarkIcon className="w-5 h-5" />
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setShowCalendar(true)}
-                      className="absolute right-2 top-1.5 p-1 text-gray-500 hover:text-blue-600 transition"
-                    >
-                      <CalendarDaysIcon className="w-5 h-5" />
-                    </button>
-                  )}
-                </div>
-                {formik.touched.tanggal_laporan &&
-                  formik.errors.tanggal_laporan && (
-                    <Typography variant="small" color="red" className="mt-1">
-                      {formik.errors.tanggal_laporan}
-                    </Typography>
-                  )}
-                {showCalendar && (
-                  <div className="absolute z-50 bg-white shadow-lg rounded-lg mt-2 p-3 border border-blue-gray-100">
-                    <DayPicker
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={handleDateSelect}
-                    />
-                  </div>
+            {/* Tanggal Laporan */}
+            <div className="relative" ref={calendarRef}>
+              <div className="relative">
+                <Input
+                  ref={dateRef}
+                  label="Tanggal Laporan"
+                  name="tanggal_laporan"
+                  value={formik.values.tanggal_laporan}
+                  readOnly
+                  onFocus={() => setShowCalendar(true)}
+                  className="cursor-pointer"
+                  error={formik.touched.tanggal_laporan && Boolean(formik.errors.tanggal_laporan)}
+                />
+                {formik.values.tanggal_laporan ? (
+                  <button
+                    type="button"
+                    onClick={clearDate}
+                    className="absolute right-2 top-1.5 p-1 text-gray-500 hover:text-red-600 transition"
+                  >
+                    <XMarkIcon className="w-5 h-5" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowCalendar(true)}
+                    className="absolute right-2 top-1.5 p-1 text-gray-500 hover:text-blue-600 transition"
+                  >
+                    <CalendarDaysIcon className="w-5 h-5" />
+                  </button>
                 )}
               </div>
+              {formik.touched.tanggal_laporan &&
+                formik.errors.tanggal_laporan && (
+                  <Typography variant="small" color="red" className="mt-1">
+                    {formik.errors.tanggal_laporan}
+                  </Typography>
+                )}
+              {showCalendar && (
+                <div className="absolute z-50 bg-white shadow-lg rounded-lg mt-2 p-3 border border-blue-gray-100">
+                  <DayPicker
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={handleDateSelect}
+                  />
+                </div>
+              )}
+            </div>
 
-              {/* Isi Laporan */}
-              <div>
-                <Typography
-                  variant="small"
-                  color="blue-gray"
-                  className="mb-2 font-medium"
-                >
-                  Isi Laporan
-                </Typography>
-                <TextEditor
-                  value={formik.values.isi_laporan}
-                  onChange={(value) =>
-                    formik.setFieldValue("isi_laporan", value)
-                  }
-                />
-                {formik.touched.isi_laporan &&
-                  formik.errors.isi_laporan && (
-                    <Typography variant="small" color="red" className="mt-1">
-                      {formik.errors.isi_laporan}
-                    </Typography>
-                  )}
-              </div>
+            {/* Isi Laporan */}
+            <div>
+              <Typography
+                variant="small"
+                color="blue-gray"
+                className="mb-2 font-medium"
+              >
+                Isi Laporan
+              </Typography>
+              <TextEditor
+                value={formik.values.isi_laporan}
+                onChange={(value) =>
+                  formik.setFieldValue("isi_laporan", value)
+                }
+              />
+              {formik.touched.isi_laporan &&
+                formik.errors.isi_laporan && (
+                  <Typography variant="small" color="red" className="mt-1">
+                    {formik.errors.isi_laporan}
+                  </Typography>
+                )}
+            </div>
 
-              {/* Tombol */}
-              <div className="flex justify-end gap-3 pt-4 border-blue-gray-100">
-                <Button
-                  type="button"
-                  variant="text"
-                  color="blue-gray"
-                  onClick={() => router.push("/admin/laporan-kegiatan")}
-                >
-                  Batal
-                </Button>
-                <Button type="submit" color="blue" disabled={loading}>
-                  {loading ? "Menyimpan..." : "Simpan"}
-                </Button>
-              </div>
-            </form>
-          </LoadingOverlay>
+            {/* Tombol */}
+            <div className="flex justify-end gap-3 pt-4 border-blue-gray-100">
+              <Button
+                type="button"
+                variant="text"
+                color="blue-gray"
+                onClick={() => router.push("/admin/laporan-kegiatan")}
+              >
+                Batal
+              </Button>
+              <Button type="submit" color="blue" disabled={loading}>
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Menyimpan...
+                  </div>
+                ) : (
+                  "Simpan"
+                )}
+              </Button>
+            </div>
+          </form>
         </CardBody>
       </Card>
     </div>

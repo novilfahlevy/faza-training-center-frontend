@@ -38,6 +38,144 @@ const TextEditor = dynamic(
   }
 );
 
+// Loading Skeleton Components
+function FormSkeleton() {
+  return (
+    <div className="mt-12 flex justify-center">
+      <Card className="w-full max-w-3xl border border-blue-gray-100 shadow-sm">
+        <CardHeader
+          floated={false}
+          shadow={false}
+          className="p-3 sticky top-0 bg-white z-10 border-b"
+        >
+          <div className="h-6 bg-gray-200 rounded w-32 animate-pulse"></div>
+        </CardHeader>
+
+        <CardBody className="px-6 pb-6">
+          <div className="flex flex-col gap-6">
+            {/* Informasi Dasar */}
+            <div className="space-y-4">
+              <div className="h-6 bg-gray-200 rounded w-40 animate-pulse"></div>
+              
+              {/* Nama */}
+              <div>
+                <div className="h-4 bg-gray-200 rounded w-28 mb-2 animate-pulse"></div>
+                <div className="h-10 bg-gray-200 rounded w-full animate-pulse"></div>
+              </div>
+
+              {/* Deskripsi */}
+              <div>
+                <div className="h-4 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+                <div className="h-40 bg-gray-200 rounded w-full animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* Jenis Pelatihan */}
+            <div className="space-y-4">
+              <div className="h-6 bg-gray-200 rounded w-36 animate-pulse"></div>
+              
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-4 bg-gray-200 rounded w-48 animate-pulse"></div>
+              </div>
+
+              {/* Lokasi/Link */}
+              <div>
+                <div className="h-4 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+                <div className="h-10 bg-gray-200 rounded w-full animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* Informasi Waktu dan Biaya */}
+            <div className="space-y-4">
+              <div className="h-6 bg-gray-200 rounded w-40 animate-pulse"></div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Tanggal */}
+                <div>
+                  <div className="h-4 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+                  <div className="h-10 bg-gray-200 rounded w-full animate-pulse"></div>
+                </div>
+
+                {/* Durasi */}
+                <div>
+                  <div className="h-4 bg-gray-200 rounded w-28 mb-2 animate-pulse"></div>
+                  <div className="h-10 bg-gray-200 rounded w-full animate-pulse"></div>
+                </div>
+              </div>
+
+              {/* Biaya */}
+              <div>
+                <div className="h-4 bg-gray-200 rounded w-24 mb-2 animate-pulse"></div>
+                <div className="h-10 bg-gray-200 rounded w-full animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* Informasi Pembayaran */}
+            <div className="space-y-4">
+              <div className="h-6 bg-gray-200 rounded w-44 animate-pulse"></div>
+              
+              {/* Nomor Rekening */}
+              <div>
+                <div className="h-4 bg-gray-200 rounded w-36 mb-2 animate-pulse"></div>
+                <div className="h-10 bg-gray-200 rounded w-full animate-pulse"></div>
+              </div>
+
+              {/* Nama Bank */}
+              <div>
+                <div className="h-4 bg-gray-200 rounded w-28 mb-2 animate-pulse"></div>
+                <div className="h-10 bg-gray-200 rounded w-full animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* Informasi Tambahan */}
+            <div className="space-y-4">
+              <div className="h-6 bg-gray-200 rounded w-40 animate-pulse"></div>
+              
+              {/* Mitra */}
+              <div>
+                <div className="h-4 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+                <div className="h-10 bg-gray-200 rounded w-full animate-pulse"></div>
+                
+                {/* Selected Mitra */}
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <div className="h-8 bg-gray-200 rounded-full w-24 animate-pulse"></div>
+                  <div className="h-8 bg-gray-200 rounded-full w-32 animate-pulse"></div>
+                </div>
+              </div>
+
+              {/* Thumbnail */}
+              <div>
+                <div className="h-4 bg-gray-200 rounded w-28 mb-2 animate-pulse"></div>
+                <div className="h-40 bg-gray-200 rounded w-full animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* Tombol */}
+            <div className="sticky bottom-0 bg-white py-3 flex justify-end gap-3 border-t mt-4">
+              <div className="h-10 bg-gray-200 rounded w-20 animate-pulse"></div>
+              <div className="h-10 bg-gray-200 rounded w-24 animate-pulse"></div>
+            </div>
+          </div>
+        </CardBody>
+      </Card>
+    </div>
+  );
+}
+
+// Loading Spinner Component
+function LoadingSpinner() {
+  return (
+    <div className="flex flex-col items-center justify-center h-64">
+      <div className="relative">
+        <div className="w-16 h-16 border-4 border-blue-200 rounded-full animate-spin border-t-blue-600"></div>
+        <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent rounded-full animate-pulse border-t-blue-400"></div>
+      </div>
+      <p className="mt-4 text-gray-600">Memuat data pelatihan...</p>
+    </div>
+  );
+}
+
 // Fungsi untuk memformat mata uang
 const formatCurrency = (value) => {
   if (!value) return "";
@@ -288,7 +426,7 @@ export default function EditPelatihan() {
       } catch (err) {
         console.error("Gagal memuat data pelatihan:", err);
       } finally {
-        setLoading(false);
+        setTimeout(() => setLoading(false), 500);
       }
     };
 
@@ -296,11 +434,7 @@ export default function EditPelatihan() {
   }, [pelatihanId]);
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Typography>Memuat data pelatihan...</Typography>
-      </div>
-    );
+    return <FormSkeleton />;
   }
 
   // Handler untuk perubahan input biaya
@@ -693,7 +827,14 @@ export default function EditPelatihan() {
                 color="blue"
                 disabled={submitting || uploadingThumbnail}
               >
-                {submitting ? "Menyimpan..." : "Simpan"}
+                {submitting ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Menyimpan...
+                  </div>
+                ) : (
+                  "Simpan"
+                )}
               </Button>
             </div>
           </form>

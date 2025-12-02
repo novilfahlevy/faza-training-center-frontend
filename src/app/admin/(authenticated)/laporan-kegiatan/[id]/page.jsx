@@ -1,3 +1,4 @@
+// /home/novilfahlevy/Projects/faza-training-center/src/app/admin/(authenticated)/laporan-kegiatan/[id]/page.jsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -17,7 +18,69 @@ import {
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { fetchLaporanKegiatanById } from "@/adminHttpClient";
-import LoadingOverlay from "@/components/admin/loading-overlay";
+
+// Loading Skeleton Component untuk Detail Laporan
+function DetailSkeleton() {
+  return (
+    <div className="mt-12">
+      <div className="mb-4">
+        <div className="h-4 bg-gray-200 rounded w-48 animate-pulse"></div>
+      </div>
+
+      <Card className="border border-blue-gray-100 shadow-sm">
+        <CardHeader
+          floated={false}
+          shadow={false}
+          color="transparent"
+          className="m-0 flex items-center justify-between p-6 border-b border-blue-gray-50"
+        >
+          <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
+          <div className="flex gap-2">
+            <div className="h-8 bg-gray-200 rounded w-16 animate-pulse"></div>
+            <div className="h-8 bg-gray-200 rounded w-20 animate-pulse"></div>
+          </div>
+        </CardHeader>
+
+        <CardBody className="p-6">
+          <div className="space-y-6">
+            {/* Judul Laporan */}
+            <div>
+              <div className="h-6 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+              <div className="h-5 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+            </div>
+
+            {/* Tanggal Laporan */}
+            <div>
+              <div className="h-6 bg-gray-200 rounded w-36 mb-2 animate-pulse"></div>
+              <div className="h-5 bg-gray-200 rounded w-40 animate-pulse"></div>
+            </div>
+
+            {/* Pengunggah */}
+            <div>
+              <div className="h-6 bg-gray-200 rounded w-28 mb-2 animate-pulse"></div>
+              <div className="flex items-center gap-2">
+                <div className="h-5 bg-gray-200 rounded w-32 animate-pulse"></div>
+                <div className="h-6 bg-gray-200 rounded-full w-20 animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* Isi Laporan */}
+            <div>
+              <div className="h-6 bg-gray-200 rounded w-28 mb-2 animate-pulse"></div>
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
+                <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
+                <div className="h-4 bg-gray-200 rounded w-4/5 animate-pulse"></div>
+                <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </CardBody>
+      </Card>
+    </div>
+  );
+}
 
 export default function DetailLaporanKegiatan() {
   const params = useParams();
@@ -34,7 +97,7 @@ export default function DetailLaporanKegiatan() {
       } catch (error) {
         console.error("Gagal mengambil data laporan kegiatan:", error);
       } finally {
-        setIsLoading(false);
+        setTimeout(() => setIsLoading(false), 500);
       }
     };
 
@@ -67,6 +130,10 @@ export default function DetailLaporanKegiatan() {
         return role;
     }
   };
+
+  if (isLoading) {
+    return <DetailSkeleton />;
+  }
 
   return (
     <div className="mt-12">
@@ -113,71 +180,69 @@ export default function DetailLaporanKegiatan() {
         </CardHeader>
 
         <CardBody className="p-6">
-          <LoadingOverlay active={isLoading}>
-            {laporan && (
-              <div className="space-y-6">
-                {/* Judul Laporan */}
-                <div>
-                  <Typography variant="h6" color="blue-gray" className="mb-2">
-                    Judul Laporan
-                  </Typography>
+          {laporan && (
+            <div className="space-y-6">
+              {/* Judul Laporan */}
+              <div>
+                <Typography variant="h6" color="blue-gray" className="mb-2">
+                  Judul Laporan
+                </Typography>
+                <Typography variant="paragraph">
+                  {laporan.judul_laporan}
+                </Typography>
+              </div>
+
+              {/* Tanggal Laporan */}
+              <div>
+                <Typography variant="h6" color="blue-gray" className="mb-2">
+                  Tanggal Laporan
+                </Typography>
+                <Typography variant="paragraph">
+                  {new Date(laporan.tanggal_laporan).toLocaleDateString(
+                    "id-ID",
+                    {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    }
+                  )}
+                </Typography>
+              </div>
+
+              {/* Pengunggah */}
+              <div>
+                <Typography variant="h6" color="blue-gray" className="mb-2">
+                  Pengunggah
+                </Typography>
+                <div className="flex items-center gap-2">
                   <Typography variant="paragraph">
-                    {laporan.judul_laporan}
+                    {getUploaderName()}
                   </Typography>
-                </div>
-
-                {/* Tanggal Laporan */}
-                <div>
-                  <Typography variant="h6" color="blue-gray" className="mb-2">
-                    Tanggal Laporan
-                  </Typography>
-                  <Typography variant="paragraph">
-                    {new Date(laporan.tanggal_laporan).toLocaleDateString(
-                      "id-ID",
-                      {
-                        day: "2-digit",
-                        month: "long",
-                        year: "numeric",
-                      }
-                    )}
-                  </Typography>
-                </div>
-
-                {/* Pengunggah */}
-                <div>
-                  <Typography variant="h6" color="blue-gray" className="mb-2">
-                    Pengunggah
-                  </Typography>
-                  <div className="flex items-center gap-2">
-                    <Typography variant="paragraph">
-                      {getUploaderName()}
-                    </Typography>
-                    <Chip
-                      variant="ghost"
-                      size="sm"
-                      value={getUploaderRole(laporan.uploader.role)}
-                      color={
-                        laporan.uploader.role === 'admin' ? 'red' :
-                        laporan.uploader.role === 'mitra' ? 'blue' : 'green'
-                      }
-                      className="rounded-full"
-                    />
-                  </div>
-                </div>
-
-                {/* Isi Laporan */}
-                <div>
-                  <Typography variant="h6" color="blue-gray" className="mb-2">
-                    Isi Laporan
-                  </Typography>
-                  <div
-                    className="prose prose-sm max-w-none"
-                    dangerouslySetInnerHTML={{ __html: laporan.isi_laporan }}
+                  <Chip
+                    variant="ghost"
+                    size="sm"
+                    value={getUploaderRole(laporan.uploader.role)}
+                    color={
+                      laporan.uploader.role === 'admin' ? 'red' :
+                      laporan.uploader.role === 'mitra' ? 'blue' : 'green'
+                    }
+                    className="rounded-full"
                   />
                 </div>
               </div>
-            )}
-          </LoadingOverlay>
+
+              {/* Isi Laporan */}
+              <div>
+                <Typography variant="h6" color="blue-gray" className="mb-2">
+                  Isi Laporan
+                </Typography>
+                <div
+                  className="prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: laporan.isi_laporan }}
+                />
+              </div>
+            </div>
+          )}
         </CardBody>
       </Card>
     </div>
