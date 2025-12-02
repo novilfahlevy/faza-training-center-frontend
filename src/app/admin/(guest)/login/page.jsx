@@ -67,7 +67,10 @@ export default function Login() {
         <Card className="shadow-lg border border-blue-gray-100">
           <CardBody className="p-8">
             <form
-              onSubmit={formik.handleSubmit}
+              onSubmit={(event) => {
+                event.preventDefault();
+                formik.handleSubmit();
+              }}
               className="mx-auto w-full max-w-screen-lg"
             >
               <Typography variant="small" color="blue-gray" className="mb-2 font-medium">

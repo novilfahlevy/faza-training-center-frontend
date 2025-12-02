@@ -160,3 +160,24 @@ export const updatePengguna = (id, data) =>
 
 export const deletePengguna = (id) =>
   httpClient.delete(`/admin/pengguna/${id}`);
+
+// =============================================================================
+// LAPORAN KEGIATAN ROUTES
+// =============================================================================
+
+export const fetchLaporanKegiatanList = (params = {}) => {
+  const queryString = new URLSearchParams(params).toString();
+  return httpClient.get(`/admin/laporan-kegiatan?${queryString}`);
+};
+
+export const fetchLaporanKegiatanById = (id) =>
+  httpClient.get(`/admin/laporan-kegiatan/${id}`);
+
+export const createLaporanKegiatan = (data) =>
+  httpClient.post("/admin/laporan-kegiatan", data);
+
+export const updateLaporanKegiatan = (id, data) =>
+  httpClient.put(`/admin/laporan-kegiatan/${id}`, data);
+
+export const deleteLaporanKegiatan = (id) =>
+  httpClient.delete(`/admin/laporan-kegiatan/${id}`);

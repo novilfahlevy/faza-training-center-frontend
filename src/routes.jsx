@@ -1,6 +1,7 @@
 import { ChartBarSquareIcon, UsersIcon } from "@heroicons/react/24/outline";
 import {
   AcademicCapIcon,
+  DocumentTextIcon,
 } from "@heroicons/react/24/solid";
 
 // import { SignIn, SignUp } from "@/pages/auth";
@@ -17,6 +18,11 @@ export const routes = [
         icon: <ChartBarSquareIcon {...icon} />,
         name: "Dasbor",
         path: "/admin"
+      },
+      {
+        icon: <DocumentTextIcon {...icon} />,
+        name: "Laporan Kegiatan",
+        path: "/admin/laporan-kegiatan"
       },
       {
         icon: <AcademicCapIcon {...icon} />,
