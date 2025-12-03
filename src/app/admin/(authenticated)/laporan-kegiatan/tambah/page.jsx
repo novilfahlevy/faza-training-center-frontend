@@ -130,15 +130,15 @@ export default function TambahLaporanKegiatan() {
   };
 
   return (
-    <div className="mt-12 flex justify-center">
-      <Card className="w-full max-w-3xl border border-blue-gray-100 shadow-sm">
-        <CardHeader floated={false} shadow={false} className="p-3">
-          <Typography variant="h6" color="blue-gray">
+    <div className="mt-8 mb-8 px-4 sm:px-6 lg:px-8 flex justify-center">
+      <Card className="w-full max-w-2xl border border-blue-gray-100 shadow-sm">
+        <CardHeader floated={false} shadow={false} className="p-4 sm:p-6">
+          <Typography variant="h6" color="blue-gray" className="text-lg sm:text-xl">
             Tambah Laporan Kegiatan
           </Typography>
         </CardHeader>
 
-        <CardBody className="px-6 pb-6">
+        <CardBody className="px-4 pb-6 sm:px-6">
           <LoadingOverlay active={loading}>
             <form onSubmit={formik.handleSubmit} className="flex flex-col gap-6">
               {/* Judul Laporan */}
@@ -207,22 +207,20 @@ export default function TambahLaporanKegiatan() {
               </div>
 
               {/* Isi Laporan */}
-              <div className="mb-8">
+              <div>
                 <Typography
                   variant="small"
                   color="blue-gray"
-                  className="mb-2 font-medium"
+                  className="mb-3 font-medium text-sm sm:text-base"
                 >
                   Isi Laporan
                 </Typography>
-                <div className="border border-blue-gray-200 rounded-lg">
-                  <TextEditor
-                    value={formik.values.isi_laporan}
-                    onChange={(value) =>
-                      formik.setFieldValue("isi_laporan", value)
-                    }
-                  />
-                </div>
+                <TextEditor
+                  value={formik.values.isi_laporan}
+                  onChange={(value) =>
+                    formik.setFieldValue("isi_laporan", value)
+                  }
+                />
                 {formik.touched.isi_laporan &&
                   formik.errors.isi_laporan && (
                     <Typography variant="small" color="red" className="mt-1">
@@ -238,10 +236,11 @@ export default function TambahLaporanKegiatan() {
                   variant="text"
                   color="blue-gray"
                   onClick={() => router.push("/admin/laporan-kegiatan")}
+                  className="w-full sm:w-auto"
                 >
                   Batal
                 </Button>
-                <Button type="submit" color="blue" disabled={loading}>
+                <Button type="submit" color="blue" disabled={loading} className="w-full sm:w-auto">
                   {loading ? "Menyimpan..." : "Simpan"}
                 </Button>
               </div>

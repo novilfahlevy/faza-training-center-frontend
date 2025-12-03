@@ -22,9 +22,7 @@ const TextEditor = ({ value, onChange }) => {
       [{ header: [1, 2, 3, 4, 5, 6, false] }],
       ["bold", "italic", "underline", "strike"],
       [{ list: "ordered" }, { list: "bullet" }],
-      [{ color: [] }, { background: [] }],
-      ["link", "image"],
-      ["clean"],
+      ["link", "image"]
     ],
   };
 
@@ -36,14 +34,28 @@ const TextEditor = ({ value, onChange }) => {
     "strike",
     "list",
     "bullet",
-    "color",
-    "background",
     "link",
     "image",
   ];
 
   return (
-    <div className="text-editor">
+    <div className="text-editor w-full">
+      <style jsx>{`
+        :global(.text-editor .ql-container) {
+          font-size: 16px;
+          min-height: 300px;
+        }
+        :global(.text-editor .ql-editor) {
+          min-height: 300px;
+          max-height: 500px;
+          padding: 12px;
+        }
+        :global(.text-editor) {
+          border: 1px solid #e0e0e0;
+          border-radius: 0.5rem;
+          overflow: hidden;
+        }
+      `}</style>
       <ReactQuill
         theme="snow"
         value={editorHtml}
@@ -51,7 +63,6 @@ const TextEditor = ({ value, onChange }) => {
         modules={modules}
         formats={formats}
         placeholder="Tulis isi laporan kegiatan di sini..."
-        style={{ height: "300px" }}
       />
     </div>
   );
