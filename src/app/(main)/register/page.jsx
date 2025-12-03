@@ -11,10 +11,10 @@ import {
   Select,
   Option,
   IconButton,
+  Alert,
 } from "@material-tailwind/react";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-import toast from "react-hot-toast";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { registerUser } from "@/mainHttpClient";
 import Link from "next/link";
 import VerificationAlert from "@/components/main/auth/verification-alert";
@@ -22,6 +22,8 @@ import VerificationAlert from "@/components/main/auth/verification-alert";
 export default function RegisterPage({ searchParams }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [registerError, setRegisterError] = useState(null);
+  const [registerSuccess, setRegisterSuccess] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -66,23 +68,24 @@ export default function RegisterPage({ searchParams }) {
     validationSchema,
     onSubmit: async (values) => {
       setLoading(true);
+      setRegisterError(null);
       try {
         const { confirm_password, ...payload } = values;
         payload.role = "peserta";
         const data = await registerUser(payload);
 
-        toast.success(data.message || "Registrasi berhasil!", {
-          position: "top-right",
-        });
-
-        // Redirect ke halaman login
-        router.push("/login");
+        // Show success message and redirect shortly
+        const successMessage =
+          data?.message ||
+          "Registrasi berhasil! Silakan periksa email Anda untuk verifikasi.";
+        setRegisterSuccess(successMessage);
       } catch (err) {
         console.error("Register Error:", err);
-        toast.dismissAll();
-        toast.error(err.message || "Gagal registrasi. Silakan coba lagi.", {
-          position: "top-right",
-        });
+        setRegisterError(
+          err?.response?.message ||
+            err.message ||
+            "Gagal registrasi. Silakan coba lagi."
+        );
       } finally {
         setLoading(false);
       }
@@ -110,7 +113,10 @@ export default function RegisterPage({ searchParams }) {
 
         <div className="bg-white rounded-lg shadow-md p-6 md:p-8">
           <div className="text-center mb-6">
-            <Typography variant="h3" className="font-bold text-2xl md:text-3xl mb-4 text-blue-600">
+            <Typography
+              variant="h3"
+              className="font-bold text-2xl md:text-3xl mb-4 text-blue-600"
+            >
               Daftar Akun Peserta
             </Typography>
             <Typography variant="small" color="gray" className="text-base">
@@ -118,8 +124,29 @@ export default function RegisterPage({ searchParams }) {
             </Typography>
           </div>
 
-          <form onSubmit={formik.handleSubmit} className="space-y-4 md:space-y-6">
+          <form
+            onSubmit={formik.handleSubmit}
+            className="space-y-4 md:space-y-6"
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              {/* Nama lengkap */}
+              <div className="md:col-span-2">
+                <Label>Nama Lengkap</Label>
+                <Input
+                  name="nama_lengkap"
+                  size="lg"
+                  placeholder="Nama lengkap"
+                  value={formik.values.nama_lengkap}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                {formik.touched.nama_lengkap && formik.errors.nama_lengkap && (
+                  <Typography variant="small" color="red" className="mt-2">
+                    {formik.errors.nama_lengkap}
+                  </Typography>
+                )}
+              </div>
+
               {/* Email */}
               <div className="md:col-span-2">
                 <Label>Email</Label>
@@ -151,7 +178,9 @@ export default function RegisterPage({ searchParams }) {
                     value={formik.values.password}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    error={formik.touched.password && Boolean(formik.errors.password)}
+                    error={
+                      formik.touched.password && Boolean(formik.errors.password)
+                    }
                   />
                   <IconButton
                     variant="text"
@@ -209,24 +238,6 @@ export default function RegisterPage({ searchParams }) {
                   )}
               </div>
 
-              {/* Nama lengkap */}
-              <div className="md:col-span-2">
-                <Label>Nama Lengkap</Label>
-                <Input
-                  name="nama_lengkap"
-                  size="lg"
-                  placeholder="Nama lengkap"
-                  value={formik.values.nama_lengkap}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                />
-                {formik.touched.nama_lengkap && formik.errors.nama_lengkap && (
-                  <Typography variant="small" color="red" className="mt-2">
-                    {formik.errors.nama_lengkap}
-                  </Typography>
-                )}
-              </div>
-
               {/* No Telepon */}
               <div>
                 <Label>No. Telepon</Label>
@@ -252,17 +263,20 @@ export default function RegisterPage({ searchParams }) {
                   name="jenis_kelamin"
                   label="Pilih Jenis Kelamin"
                   value={formik.values.jenis_kelamin}
-                  onChange={(value) => formik.setFieldValue("jenis_kelamin", value)}
+                  onChange={(value) =>
+                    formik.setFieldValue("jenis_kelamin", value)
+                  }
                   onBlur={formik.handleBlur}
                 >
                   <Option value="L">Laki-laki</Option>
                   <Option value="P">Perempuan</Option>
                 </Select>
-                {formik.touched.jenis_kelamin && formik.errors.jenis_kelamin && (
-                  <Typography variant="small" color="red" className="mt-2">
-                    {formik.errors.jenis_kelamin}
-                  </Typography>
-                )}
+                {formik.touched.jenis_kelamin &&
+                  formik.errors.jenis_kelamin && (
+                    <Typography variant="small" color="red" className="mt-2">
+                      {formik.errors.jenis_kelamin}
+                    </Typography>
+                  )}
               </div>
 
               {/* Tempat & Tanggal Lahir */}
@@ -288,11 +302,12 @@ export default function RegisterPage({ searchParams }) {
                   value={formik.values.tanggal_lahir}
                   onChange={formik.handleChange}
                 />
-                {formik.touched.tanggal_lahir && formik.errors.tanggal_lahir && (
-                  <Typography variant="small" color="red" className="mt-2">
-                    {formik.errors.tanggal_lahir}
-                  </Typography>
-                )}
+                {formik.touched.tanggal_lahir &&
+                  formik.errors.tanggal_lahir && (
+                    <Typography variant="small" color="red" className="mt-2">
+                      {formik.errors.tanggal_lahir}
+                    </Typography>
+                  )}
               </div>
 
               {/* Alamat */}
@@ -358,7 +373,20 @@ export default function RegisterPage({ searchParams }) {
               </div>
             </div>
 
-            {/* Tombol */}
+            {/* Alert error */}
+            {registerError && (
+              <Alert open={Boolean(registerError)} color="red" className="mb-4">
+                {registerError}
+              </Alert>
+            )}
+
+            {/* Alert success */}
+            {registerSuccess && (
+              <Alert open={Boolean(registerSuccess)} color="green" className="mb-4">
+                {registerSuccess}
+              </Alert>
+            )}
+
             <Button
               type="submit"
               className="bg-blue-600 hover:bg-blue-700 transition-colors mt-6"
@@ -377,7 +405,10 @@ export default function RegisterPage({ searchParams }) {
 
             <Typography variant="small" color="gray" className="text-center">
               Sudah punya akun?{" "}
-              <Link href="/login" className="text-blue-600 hover:underline font-medium">
+              <Link
+                href="/login"
+                className="text-blue-600 hover:underline font-medium"
+              >
                 Masuk sekarang
               </Link>
             </Typography>

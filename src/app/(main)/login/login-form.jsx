@@ -3,8 +3,7 @@
 
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Input, Button, Typography } from "@material-tailwind/react";
-import toast from "react-hot-toast";
+import { Input, Button, Typography, Alert } from "@material-tailwind/react";
 import React, { useState } from "react";
 import { loginPeserta } from "@/mainHttpClient";
 import Link from "next/link";
@@ -15,13 +14,13 @@ export default function LoginForm() {
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
   const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState(null);
 
   const validationSchema = Yup.object().shape({
     email: Yup.string()
       .email("Format email tidak valid")
       .required("Email wajib diisi"),
     password: Yup.string()
-      .min(6, "Password minimal 6 karakter")
       .required("Password wajib diisi"),
   });
 
@@ -30,20 +29,21 @@ export default function LoginForm() {
     validationSchema,
     onSubmit: async (values) => {
       setLoading(true);
+      setLoginError(null);
       try {
         const data = await loginPeserta(values);
 
         // response diasumsikan: { token, user, message }
         login(data.token, data.user);
 
-        toast.success(data.message || "Login berhasil!", { position: "top-right" });
+        // Optionally show server message somewhere; for now redirect on success
         
         // Redirect
         router.push("/");
       } catch (err) {
         console.error("Login Error:", err);
-        toast.dismissAll();
-        toast.error(err.message || "Login gagal. Silakan coba lagi.", { position: "top-right" });
+        // Show inline alert with error message
+        setLoginError(err?.response?.message || err.message || "Login gagal. Silakan coba lagi.");
       } finally {
         setLoading(false);
       }
@@ -52,6 +52,11 @@ export default function LoginForm() {
 
   return (
     <form onSubmit={formik.handleSubmit} className="space-y-6">
+      {loginError && (
+        <Alert open={Boolean(loginError)} color="red" className="mb-2">
+          {loginError}
+        </Alert>
+      )}
       <div>
         <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
           Email
