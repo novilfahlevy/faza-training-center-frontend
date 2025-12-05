@@ -1,71 +1,98 @@
-import React, { useState, useEffect } from "react";
+import React, { useMemo } from "react";
 import dynamic from "next/dynamic";
+import { uploadEditorImage } from "@/adminHttpClient";
 
-// Dynamically import ReactQuill with SSR disabled
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "react-quill/dist/quill.snow.css";
+import '@/css/admin/editor-content.css';
 
-const TextEditor = ({ value, onChange }) => {
-  const [editorHtml, setEditorHtml] = useState(value || "");
+const ReactQuill = dynamic(
+  async () => {
+    const { default: RQ } = await import("react-quill");
 
-  useEffect(() => {
-    setEditorHtml(value || "");
-  }, [value]);
+    return ({ forwardedRef, ...props }) => <RQ ref={forwardedRef} {...props} />;
+  },
+  {
+    ssr: false,
+  }
+);
 
-  const handleChange = (html) => {
-    setEditorHtml(html);
-    onChange(html);
-  };
+export default function QuillWrapper({ value, onChange, ...props }) {
+  const quillRef = React.useRef(false);
 
-  const modules = {
-    toolbar: [
-      [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      ["bold", "italic", "underline", "strike"],
-      [{ list: "ordered" }, { list: "bullet" }],
-      ["link", "image"]
-    ],
-  };
+  // Custom image upload handler
+  function imgHandler() {
+    // from https://github.com/quilljs/quill/issues/1089#issuecomment-318066471
+    const quill = quillRef.current.getEditor();
+    let fileInput = quill.root.querySelector("input.ql-image[type=file]");
 
-  const formats = [
-    "header",
-    "bold",
-    "italic",
-    "underline",
-    "strike",
-    "list",
-    "bullet",
-    "link",
-    "image",
-  ];
+    // to prevent duplicate initialization I guess
+    if (fileInput === null) {
+      fileInput = document.createElement("input");
+      fileInput.setAttribute("type", "file");
+      fileInput.setAttribute(
+        "accept",
+        "image/png, image/gif, image/jpeg, image/bmp, image/x-icon"
+      );
+      fileInput.classList.add("ql-image");
+
+      fileInput.addEventListener("change", () => {
+        const files = fileInput.files;
+        const range = quill.getSelection(true);
+
+        if (!files || !files.length) {
+          console.log("No files selected");
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("image", files[0]);
+        quill.enable(false);
+        uploadEditorImage(formData)
+          .then((response) => {
+            // after uploading succeed add img tag in the editor.
+            // for detail visit https://quilljs.com/docs/api/#editor
+            quill.enable(true);
+            quill.insertEmbed(range.index, "image", response.data.data.url);
+            quill.setSelection(range.index + 1);
+            fileInput.value = "";
+          })
+          .catch((error) => {
+            console.log("quill image upload failed");
+            console.log(error);
+            quill.enable(true);
+          });
+      });
+      quill.root.appendChild(fileInput);
+    }
+    fileInput.click();
+  }
+
+  const modules = useMemo(
+    () => ({
+      toolbar: {
+        container: [
+          [{ size: ["small", false, "large", "huge"] }], // custom dropdown
+          ["bold", "italic", "underline", "strike"], // toggled buttons
+          [{ header: 1 }, { header: 2 }],
+          [{ list: "ordered" }, { list: "bullet" }],
+
+          [{ align: [] }],
+          ["link", "image"],
+          ["clean"], // remove formatting button
+        ],
+        handlers: { image: imgHandler }, // Custom image handler
+      },
+    }),
+    []
+  );
 
   return (
-    <div className="text-editor w-full">
-      <style jsx>{`
-        :global(.text-editor .ql-container) {
-          font-size: 16px;
-          min-height: 300px;
-        }
-        :global(.text-editor .ql-editor) {
-          min-height: 300px;
-          max-height: 500px;
-          padding: 12px;
-        }
-        :global(.text-editor) {
-          border: 1px solid #e0e0e0;
-          border-radius: 0.5rem;
-          overflow: hidden;
-        }
-      `}</style>
-      <ReactQuill
-        theme="snow"
-        value={editorHtml}
-        onChange={handleChange}
-        modules={modules}
-        formats={formats}
-        placeholder="Tulis isi laporan kegiatan di sini..."
-      />
-    </div>
+    <ReactQuill
+      forwardedRef={quillRef}
+      modules={modules}
+      value={value}
+      onChange={onChange}
+      {...props}
+    />
   );
-};
-
-export default TextEditor;
+}

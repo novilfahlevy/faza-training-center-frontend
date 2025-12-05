@@ -181,3 +181,35 @@ export const updateLaporanKegiatan = (id, data) =>
 
 export const deleteLaporanKegiatan = (id) =>
   httpClient.delete(`/admin/laporan-kegiatan/${id}`);
+
+// =============================================================================
+// EDITOR IMAGE ROUTES
+// =============================================================================
+
+/**
+ * Upload image from React Quill editor
+ * @param {FormData} formData - Form data containing the image file
+ * @returns {Promise} Upload result with image URL
+ */
+export const uploadEditorImage = (formData) =>
+  httpClient.post("/admin/editor-images/upload", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+/**
+ * Get list of uploaded editor images
+ * @param {Object} params - Query parameters (page, limit)
+ * @returns {Promise} List of images with pagination
+ */
+export const fetchEditorImages = (params = {}) => {
+  const queryString = new URLSearchParams(params).toString();
+  return httpClient.get(`/admin/editor-images?${queryString}`);
+};
+
+/**
+ * Delete an editor image by ID
+ * @param {number} id - Image ID
+ * @returns {Promise} Deletion result
+ */
+export const deleteEditorImage = (id) =>
+  httpClient.delete(`/admin/editor-images/${id}`);
