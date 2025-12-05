@@ -5,9 +5,25 @@ import { uploadEditorImage } from "@/adminHttpClient";
 import "react-quill/dist/quill.snow.css";
 import '@/css/admin/editor-content.css';
 
+// Import Quill's ImageResize module
+const QuillImageResize = dynamic(
+  () => import('quill-image-resize-module-react'),
+  { ssr: false }
+);
+
 const ReactQuill = dynamic(
   async () => {
     const { default: RQ } = await import("react-quill");
+    
+    // Register ImageResize module
+    if (typeof window !== 'undefined') {
+      const ReactQuillModule = await import('react-quill');
+      const { default: ImageResize } = await import('quill-image-resize-module-react');
+      const Quill = ReactQuillModule.default.Quill;
+      if (Quill) {
+        Quill.register('modules/imageResize', ImageResize);
+      }
+    }
 
     return ({ forwardedRef, ...props }) => <RQ ref={forwardedRef} {...props} />;
   },
@@ -82,6 +98,10 @@ export default function QuillWrapper({ value, onChange, ...props }) {
         ],
         handlers: { image: imgHandler }, // Custom image handler
       },
+      imageResize: {
+        parchment: typeof window !== 'undefined' ? (require('react-quill').Quill || {}).import('parchment') : undefined,
+        modules: ['Resize', 'DisplaySize', 'Toolbar']
+      }
     }),
     []
   );
