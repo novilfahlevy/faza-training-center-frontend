@@ -20,13 +20,11 @@ import {
 } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import HapusPelatihanModal from "@/components/admin/pelatihan/hapus-pelatihan-modal";
-import { 
-  fetchPelatihanList, 
-  deletePelatihan 
-} from "@/adminHttpClient";
+import { fetchPelatihanList, deletePelatihan } from "@/adminHttpClient";
 import { toast } from "react-toastify";
 import Pagination from "@/components/admin/pagination";
 import LoadingOverlay from "@/components/admin/loading-overlay";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 // 🧠 Utility: debounce function
 const debounce = (func, delay) => {
@@ -38,6 +36,8 @@ const debounce = (func, delay) => {
 };
 
 export default function Pelatihan() {
+  const authUser = useAuthStore.getState().user;
+
   const [pelatihanList, setPelatihanList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -52,7 +52,7 @@ export default function Pelatihan() {
   const fetchPelatihan = async (page = 1, perPage = 5, query = "") => {
     try {
       setIsLoading(true);
-      
+
       const params = { page: page, size: perPage };
       if (query) params.search = query;
       const response = await fetchPelatihanList(params);
@@ -149,11 +149,13 @@ export default function Pelatihan() {
                 className: "before:content-none after:content-none",
               }}
             />
-            <Link href="/admin/pelatihan/tambah">
-              <Button className="flex items-center gap-2 px-4 py-2 whitespace-nowrap">
-                <PlusIcon className="h-5 w-5" /> Tambah Pelatihan
-              </Button>
-            </Link>
+            {authUser?.role === "admin" && (
+              <Link href="/admin/pelatihan/tambah">
+                <Button className="flex items-center gap-2 px-4 py-2 whitespace-nowrap">
+                  <PlusIcon className="h-5 w-5" /> Tambah Pelatihan
+                </Button>
+              </Link>
+            )}
           </div>
         </CardHeader>
 
@@ -232,13 +234,14 @@ export default function Pelatihan() {
 
                           {/* Tanggal */}
                           <td className="py-3 px-5">
-                            {new Date(
-                              item.tanggal
-                            ).toLocaleDateString("id-ID", {
-                              day: "2-digit",
-                              month: "long",
-                              year: "numeric",
-                            })}
+                            {new Date(item.tanggal).toLocaleDateString(
+                              "id-ID",
+                              {
+                                day: "2-digit",
+                                month: "long",
+                                year: "numeric",
+                              }
+                            )}
                           </td>
 
                           {/* Durasi */}
@@ -281,32 +284,34 @@ export default function Pelatihan() {
                           {/* Aksi */}
                           <td className="py-3 px-5 flex gap-2">
                             <Tooltip content="Lihat Detail">
-                              <Link
-                                href={`/admin/pelatihan/${item.id}`}
-                              >
+                              <Link href={`/admin/pelatihan/${item.id}`}>
                                 <IconButton variant="outlined" color="green">
                                   <EyeIcon className="h-4 w-4" />
                                 </IconButton>
                               </Link>
                             </Tooltip>
-                            <Tooltip content="Edit">
-                              <Link
-                                href={`/admin/pelatihan/${item.id}/edit`}
-                              >
-                                <IconButton variant="outlined" color="blue">
-                                  <PencilIcon className="h-4 w-4" />
-                                </IconButton>
-                              </Link>
-                            </Tooltip>
-                            <Tooltip content="Hapus">
-                              <IconButton
-                                variant="outlined"
-                                color="red"
-                                onClick={() => handleDelete(item)}
-                              >
-                                <TrashIcon className="h-4 w-4" />
-                              </IconButton>
-                            </Tooltip>
+                            {authUser?.role === "admin" && (
+                              <>
+                                <Tooltip content="Edit">
+                                  <Link
+                                    href={`/admin/pelatihan/${item.id}/edit`}
+                                  >
+                                    <IconButton variant="outlined" color="blue">
+                                      <PencilIcon className="h-4 w-4" />
+                                    </IconButton>
+                                  </Link>
+                                </Tooltip>
+                                <Tooltip content="Hapus">
+                                  <IconButton
+                                    variant="outlined"
+                                    color="red"
+                                    onClick={() => handleDelete(item)}
+                                  >
+                                    <TrashIcon className="h-4 w-4" />
+                                  </IconButton>
+                                </Tooltip>
+                              </>
+                            )}
                           </td>
                         </tr>
                       ))

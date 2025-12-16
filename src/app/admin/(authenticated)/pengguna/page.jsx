@@ -30,6 +30,7 @@ import {
 import { toast } from "react-toastify";
 import Pagination from "@/components/admin/pagination";
 import LoadingOverlay from "@/components/admin/loading-overlay";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 // 🧠 Utility: debounce function untuk mencegah panggilan API berlebihan saat mengetik
 const debounce = (func, delay) => {
@@ -41,6 +42,8 @@ const debounce = (func, delay) => {
 };
 
 export default function PenggunaPage() {
+  const authUser = useAuthStore.getState().user;
+
   // --- STATE MANAGEMENT ---
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -101,7 +104,7 @@ export default function PenggunaPage() {
       setLoadingDetail(false);
     }
   };
-  
+
   // --- EVENT HANDLERS ---
   // ⚡️ Debounced search handler
   const debouncedFetch = useCallback(
@@ -141,7 +144,7 @@ export default function PenggunaPage() {
         position: "top-right",
         autoClose: 2500,
       });
-      
+
       // Refresh daftar pengguna setelah hapus
       fetchUsers(activePage, limit, search);
     } catch (error) {
@@ -186,14 +189,16 @@ export default function PenggunaPage() {
                 className: "before:content-none after:content-none",
               }}
             />
-            <div>
-              <Button
-                onClick={() => setOpenTambah(true)}
-                className="flex items-center gap-2 px-4 py-2 whitespace-nowrap"
-              >
-                <PlusIcon className="h-5 w-5" /> Tambah Pengguna
-              </Button>
-            </div>
+            {authUser?.role === "admin" && (
+              <div>
+                <Button
+                  onClick={() => setOpenTambah(true)}
+                  className="flex items-center gap-2 px-4 py-2 whitespace-nowrap"
+                >
+                  <PlusIcon className="h-5 w-5" /> Tambah Pengguna
+                </Button>
+              </div>
+            )}
           </div>
         </CardHeader>
 
@@ -205,23 +210,27 @@ export default function PenggunaPage() {
                 <table className="w-full min-w-[800px] table-auto">
                   <thead className="bg-gray-200">
                     <tr>
-                      {["No", "Role", "Email", "Nama Lengkap / Mitra", "Aksi"].map(
-                        (head, index) => (
-                          <th
-                            key={head}
-                            className={`border-b border-blue-gray-50 py-3 px-5 text-left ${
-                              index !== 0 ? "min-w-[200px]" : ""
-                            }`}
+                      {[
+                        "No",
+                        "Role",
+                        "Email",
+                        "Nama Lengkap / Mitra",
+                        "Aksi",
+                      ].map((head, index) => (
+                        <th
+                          key={head}
+                          className={`border-b border-blue-gray-50 py-3 px-5 text-left ${
+                            index !== 0 ? "min-w-[200px]" : ""
+                          }`}
+                        >
+                          <Typography
+                            variant="small"
+                            className="text-[11px] font-bold uppercase text-blue-gray-400"
                           >
-                            <Typography
-                              variant="small"
-                              className="text-[11px] font-bold uppercase text-blue-gray-400"
-                            >
-                              {head}
-                            </Typography>
-                          </th>
-                        )
-                      )}
+                            {head}
+                          </Typography>
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
@@ -265,7 +274,8 @@ export default function PenggunaPage() {
                                 color="green"
                                 onClick={() => handleOpenDetailModal(user)}
                                 className={
-                                  user.role === "peserta" || user.role === "mitra"
+                                  user.role === "peserta" ||
+                                  user.role === "mitra"
                                     ? ""
                                     : "opacity-0 pointer-events-none"
                                 }
@@ -273,30 +283,36 @@ export default function PenggunaPage() {
                                 <EyeIcon className="h-4 w-4" />
                               </IconButton>
                             </Tooltip>
-                            <Tooltip content="Edit">
-                              <IconButton
-                                variant="outlined"
-                                color="amber"
-                                onClick={() => handleOpenEditModal(user)}
-                                className={
-                                  user.role === "mitra" ? "" : "opacity-0 pointer-events-none"
-                                }
-                              >
-                                <PencilIcon className="h-4 w-4" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip content="Hapus">
-                              <IconButton
-                                variant="outlined"
-                                color="red"
-                                onClick={() => {
-                                  setSelectedUser(user);
-                                  setOpenHapus(true);
-                                }}
-                              >
-                                <TrashIcon className="h-4 w-4" />
-                              </IconButton>
-                            </Tooltip>
+                            {authUser?.role === "admin" && (
+                              <>
+                                <Tooltip content="Edit">
+                                  <IconButton
+                                    variant="outlined"
+                                    color="amber"
+                                    onClick={() => handleOpenEditModal(user)}
+                                    className={
+                                      user.role === "mitra"
+                                        ? ""
+                                        : "opacity-0 pointer-events-none"
+                                    }
+                                  >
+                                    <PencilIcon className="h-4 w-4" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip content="Hapus">
+                                  <IconButton
+                                    variant="outlined"
+                                    color="red"
+                                    onClick={() => {
+                                      setSelectedUser(user);
+                                      setOpenHapus(true);
+                                    }}
+                                  >
+                                    <TrashIcon className="h-4 w-4" />
+                                  </IconButton>
+                                </Tooltip>
+                              </>
+                            )}
                           </td>
                         </tr>
                       ))

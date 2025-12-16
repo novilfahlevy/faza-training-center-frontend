@@ -37,6 +37,7 @@ import Pagination from "@/components/admin/pagination";
 import LoadingOverlay from "@/components/admin/loading-overlay";
 
 import "@/css/admin/editor-content.css";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 // Utility: debounce function
 const debounce = (func, delay) => {
@@ -57,7 +58,7 @@ function PelatihanDetailSkeleton() {
         <Card className="border border-blue-gray-100 shadow-sm">
           <CardBody className="p-6">
             <div className="h-8 bg-gray-200 rounded w-3/4 mb-4 animate-pulse"></div>
-            
+
             {/* Metadata dalam bentuk Chip */}
             <div className="flex flex-wrap gap-2">
               <div className="h-8 bg-gray-200 rounded-full w-32 animate-pulse"></div>
@@ -135,7 +136,10 @@ function PelatihanDetailSkeleton() {
           <CardBody className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[1, 2].map((item) => (
-                <div key={item} className="flex items-start gap-3 p-3 border border-blue-gray-100 rounded-lg">
+                <div
+                  key={item}
+                  className="flex items-start gap-3 p-3 border border-blue-gray-100 rounded-lg"
+                >
                   <div className="h-5 w-5 bg-gray-200 rounded mt-0.5 animate-pulse"></div>
                   <div className="flex-1">
                     <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
@@ -249,28 +253,30 @@ function PesertaTableSkeleton() {
               </tr>
             </thead>
             <tbody>
-              {Array(5).fill(0).map((_, index) => (
-                <tr key={index} className="border-y">
-                  <td className="py-3 px-5">
-                    <div className="h-4 bg-gray-200 rounded w-4 animate-pulse"></div>
-                  </td>
-                  <td className="py-3 px-5">
-                    <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
-                  </td>
-                  <td className="py-3 px-5">
-                    <div className="h-4 bg-gray-200 rounded w-40 animate-pulse"></div>
-                  </td>
-                  <td className="py-3 px-5">
-                    <div className="h-4 bg-gray-200 rounded w-28 animate-pulse"></div>
-                  </td>
-                  <td className="py-3 px-5">
-                    <div className="h-20 w-20 bg-gray-200 rounded animate-pulse"></div>
-                  </td>
-                  <td className="py-3 px-5">
-                    <div className="h-10 w-24 bg-gray-200 rounded animate-pulse"></div>
-                  </td>
-                </tr>
-              ))}
+              {Array(5)
+                .fill(0)
+                .map((_, index) => (
+                  <tr key={index} className="border-y">
+                    <td className="py-3 px-5">
+                      <div className="h-4 bg-gray-200 rounded w-4 animate-pulse"></div>
+                    </td>
+                    <td className="py-3 px-5">
+                      <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+                    </td>
+                    <td className="py-3 px-5">
+                      <div className="h-4 bg-gray-200 rounded w-40 animate-pulse"></div>
+                    </td>
+                    <td className="py-3 px-5">
+                      <div className="h-4 bg-gray-200 rounded w-28 animate-pulse"></div>
+                    </td>
+                    <td className="py-3 px-5">
+                      <div className="h-20 w-20 bg-gray-200 rounded animate-pulse"></div>
+                    </td>
+                    <td className="py-3 px-5">
+                      <div className="h-10 w-24 bg-gray-200 rounded animate-pulse"></div>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
@@ -294,6 +300,8 @@ function LoadingSpinner() {
 
 export default function PesertaPelatihanPage({ params }) {
   const { id } = params;
+
+  const authUser = useAuthStore.getState().user;
 
   const [pelatihan, setPelatihan] = useState(null);
   const [pesertaList, setPesertaList] = useState([]);
@@ -456,11 +464,13 @@ export default function PesertaPelatihanPage({ params }) {
         </Link>
 
         {/* Tombol Edit */}
-        <Link href={`/admin/pelatihan/${id}/edit`}>
-          <Button color="blue" className="flex items-center gap-2">
-            <PencilIcon className="h-5 w-5" /> Edit Pelatihan
-          </Button>
-        </Link>
+        {authUser?.role === "admin" && (
+          <Link href={`/admin/pelatihan/${id}/edit`}>
+            <Button color="blue" className="flex items-center gap-2">
+              <PencilIcon className="h-5 w-5" /> Edit Pelatihan
+            </Button>
+          </Link>
+        )}
       </div>
 
       {isPelatihanLoading ? (
@@ -513,18 +523,20 @@ export default function PesertaPelatihanPage({ params }) {
                     />
                   )}
                   {/* Menampilkan mitra sebagai chip */}
-                  {pelatihan.mitra && pelatihan.mitra.length > 0 && (
-                    pelatihan.mitra.slice(0, 2).map((mitra, index) => (
-                      <Chip
-                        key={index}
-                        variant="ghost"
-                        color="blue"
-                        value={mitra.nama}
-                        icon={<BuildingOfficeIcon className="h-4 w-4" />}
-                        className="rounded-full"
-                      />
-                    ))
-                  )}
+                  {pelatihan.mitra &&
+                    pelatihan.mitra.length > 0 &&
+                    pelatihan.mitra
+                      .slice(0, 2)
+                      .map((mitra, index) => (
+                        <Chip
+                          key={index}
+                          variant="ghost"
+                          color="blue"
+                          value={mitra.nama}
+                          icon={<BuildingOfficeIcon className="h-4 w-4" />}
+                          className="rounded-full"
+                        />
+                      ))}
                   {pelatihan.mitra && pelatihan.mitra.length > 2 && (
                     <Chip
                       variant="ghost"
@@ -674,7 +686,10 @@ export default function PesertaPelatihanPage({ params }) {
                 <CardBody className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {pelatihan.mitra.map((mitra, index) => (
-                      <div key={index} className="flex items-start gap-3 p-3 border border-blue-gray-100 rounded-lg">
+                      <div
+                        key={index}
+                        className="flex items-start gap-3 p-3 border border-blue-gray-100 rounded-lg"
+                      >
                         <BuildingOfficeIcon className="h-5 w-5 text-blue-gray-500 mt-0.5" />
                         <div className="flex-1">
                           <Typography
@@ -971,16 +986,22 @@ export default function PesertaPelatihanPage({ params }) {
                             </td>
 
                             <td className="py-3 px-5">
-                              <Select
-                                value={peserta.status}
-                                onChange={(value) =>
-                                  handleStatusChange(peserta.id, value)
-                                }
-                              >
-                                <Option value="pending">Pending</Option>
-                                <Option value="terdaftar">Terdaftar</Option>
-                                <Option value="selesai">Selesai</Option>
-                              </Select>
+                              {authUser?.role === "admin" ? (
+                                <Select
+                                  value={peserta.status}
+                                  onChange={(value) =>
+                                    handleStatusChange(peserta.id, value)
+                                  }
+                                >
+                                  <Option value="pending">Pending</Option>
+                                  <Option value="terdaftar">Terdaftar</Option>
+                                  <Option value="selesai">Selesai</Option>
+                                </Select>
+                              ) : (
+                                <Typography className="capitalize">
+                                  {peserta.status || "-"}
+                                </Typography>
+                              )}
                             </td>
                           </tr>
                         );

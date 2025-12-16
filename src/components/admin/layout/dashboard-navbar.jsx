@@ -2,12 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import {
   Navbar,
   Typography,
   Button,
   IconButton,
   Breadcrumbs,
+  Menu,
+  MenuHandler,
+  MenuList,
+  MenuItem,
 } from "@material-tailwind/react";
 import {
   UserCircleIcon,
@@ -24,18 +29,25 @@ export default function DashboardNavbar() {
   const [controller, dispatch] = useMaterialTailwindController();
   const { fixedNavbar, openSidenav } = controller;
   const pathname = usePathname();
+  const [openMenu, setOpenMenu] = useState(false);
 
   const pathSegments = pathname.split("/").filter(Boolean);
   const layout = pathSegments[0] || "dashboard";
   const page = pathSegments[1] || "home";
 
   const logout = useAuthStore((s) => s.logout);
+  const user = useAuthStore((s) => s.user);
   const router = useRouter();
 
   const handleLogout = () => {
     logout();
     router.push('/admin/login');
-  }
+  };
+
+  const handleEditProfil = () => {
+    setOpenMenu(false);
+    router.push('/admin/edit-profil');
+  };
 
   return (
     <Navbar
@@ -89,18 +101,29 @@ export default function DashboardNavbar() {
           </div>
         </div>
 
-        {/* Right Section: Logout Button */}
+        {/* Right Section: User Dropdown Menu */}
         <div className="flex items-center">
-          {/* Desktop Button */}
-          <Button
-            variant="text"
-            color="blue-gray"
-            className="flex items-center gap-x-1 normal-case"
-            onClick={handleLogout}
-          >
-            <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-            Keluar
-          </Button>
+          {/* Desktop Dropdown */}
+          <Menu open={openMenu} handler={setOpenMenu}>
+            <MenuHandler>
+              <Button
+                variant="text"
+                color="blue-gray"
+                className="flex items-center gap-x-1 normal-case"
+              >
+                <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
+                <span className="hidden sm:inline truncate max-w-[120px] text-sm">{user?.email || "User"}</span>
+              </Button>
+            </MenuHandler>
+            <MenuList className="min-w-max">
+              <MenuItem onClick={handleEditProfil} className="flex items-center gap-2">
+                Edit Profil
+              </MenuItem>
+              <MenuItem onClick={handleLogout} className="flex items-center gap-2 text-red-500">
+                Keluar
+              </MenuItem>
+            </MenuList>
+          </Menu>
         </div>
       </div>
     </Navbar>

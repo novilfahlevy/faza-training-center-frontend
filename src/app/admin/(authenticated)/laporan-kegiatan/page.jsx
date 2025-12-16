@@ -20,13 +20,14 @@ import {
 } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import HapusLaporanModal from "@/components/admin/laporan-kegiatan/hapus-laporan-modal";
-import { 
-  fetchLaporanKegiatanList, 
-  deleteLaporanKegiatan 
+import {
+  fetchLaporanKegiatanList,
+  deleteLaporanKegiatan,
 } from "@/adminHttpClient";
 import { toast } from "react-toastify";
 import Pagination from "@/components/admin/pagination";
 import LoadingOverlay from "@/components/admin/loading-overlay";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 // Utility: debounce function
 const debounce = (func, delay) => {
@@ -38,6 +39,8 @@ const debounce = (func, delay) => {
 };
 
 export default function LaporanKegiatan() {
+  const authUser = useAuthStore.getState().user;
+
   const [laporanList, setLaporanList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -52,7 +55,7 @@ export default function LaporanKegiatan() {
   const fetchLaporan = async (page = 1, perPage = 5, query = "") => {
     try {
       setIsLoading(true);
-      
+
       const params = { page: page, size: perPage };
       if (query) params.search = query;
       const response = await fetchLaporanKegiatanList(params);
@@ -102,10 +105,13 @@ export default function LaporanKegiatan() {
     try {
       const response = await deleteLaporanKegiatan(selectedLaporan.laporan_id);
 
-      toast.success(response.data.message || "Laporan kegiatan berhasil dihapus!", {
-        position: "top-right",
-        autoClose: 2500,
-      });
+      toast.success(
+        response.data.message || "Laporan kegiatan berhasil dihapus!",
+        {
+          position: "top-right",
+          autoClose: 2500,
+        }
+      );
 
       // Refresh daftar laporan setelah hapus
       fetchLaporan(activePage, limit, search);
@@ -140,12 +146,12 @@ export default function LaporanKegiatan() {
 
   const getUploaderRole = (role) => {
     switch (role) {
-      case 'admin':
-        return 'Admin';
-      case 'mitra':
-        return 'Mitra';
-      case 'peserta':
-        return 'Peserta';
+      case "admin":
+        return "Admin";
+      case "mitra":
+        return "Mitra";
+      case "peserta":
+        return "Peserta";
       default:
         return role;
     }
@@ -172,11 +178,13 @@ export default function LaporanKegiatan() {
                 className: "before:content-none after:content-none",
               }}
             />
-            <Link href="/admin/laporan-kegiatan/tambah">
-              <Button className="flex items-center gap-2 px-4 py-2 whitespace-nowrap">
-                <PlusIcon className="h-5 w-5" /> Tambah Laporan
-              </Button>
-            </Link>
+            {authUser.role === "admin" && (
+              <Link href="/admin/laporan-kegiatan/tambah">
+                <Button className="flex items-center gap-2 px-4 py-2 whitespace-nowrap">
+                  <PlusIcon className="h-5 w-5" /> Tambah Laporan
+                </Button>
+              </Link>
+            )}
           </div>
         </CardHeader>
 
@@ -241,19 +249,23 @@ export default function LaporanKegiatan() {
 
                           {/* Tanggal */}
                           <td className="py-3 px-5">
-                            {new Date(
-                              item.tanggal_laporan
-                            ).toLocaleDateString("id-ID", {
-                              day: "2-digit",
-                              month: "long",
-                              year: "numeric",
-                            })}
+                            {new Date(item.tanggal_laporan).toLocaleDateString(
+                              "id-ID",
+                              {
+                                day: "2-digit",
+                                month: "long",
+                                year: "numeric",
+                              }
+                            )}
                           </td>
 
                           {/* Pengunggah */}
                           <td className="py-3 px-5">
                             <div className="flex flex-col">
-                              <Typography variant="small" className="font-medium">
+                              <Typography
+                                variant="small"
+                                className="font-medium"
+                              >
                                 {getUploaderName(item)}
                               </Typography>
                               <Chip
@@ -261,8 +273,11 @@ export default function LaporanKegiatan() {
                                 size="sm"
                                 value={getUploaderRole(item.uploader.role)}
                                 color={
-                                  item.uploader.role === 'admin' ? 'red' :
-                                  item.uploader.role === 'mitra' ? 'blue' : 'green'
+                                  item.uploader.role === "admin"
+                                    ? "red"
+                                    : item.uploader.role === "mitra"
+                                    ? "blue"
+                                    : "green"
                                 }
                                 className="rounded-full w-fit"
                               />
@@ -280,24 +295,28 @@ export default function LaporanKegiatan() {
                                 </IconButton>
                               </Link>
                             </Tooltip>
-                            <Tooltip content="Edit">
-                              <Link
-                                href={`/admin/laporan-kegiatan/${item.laporan_id}/edit`}
-                              >
-                                <IconButton variant="outlined" color="blue">
-                                  <PencilIcon className="h-4 w-4" />
-                                </IconButton>
-                              </Link>
-                            </Tooltip>
-                            <Tooltip content="Hapus">
-                              <IconButton
-                                variant="outlined"
-                                color="red"
-                                onClick={() => handleDelete(item)}
-                              >
-                                <TrashIcon className="h-4 w-4" />
-                              </IconButton>
-                            </Tooltip>
+                            {authUser.role === "admin" && (
+                              <>
+                                <Tooltip content="Edit">
+                                  <Link
+                                    href={`/admin/laporan-kegiatan/${item.laporan_id}/edit`}
+                                  >
+                                    <IconButton variant="outlined" color="blue">
+                                      <PencilIcon className="h-4 w-4" />
+                                    </IconButton>
+                                  </Link>
+                                </Tooltip>
+                                <Tooltip content="Hapus">
+                                  <IconButton
+                                    variant="outlined"
+                                    color="red"
+                                    onClick={() => handleDelete(item)}
+                                  >
+                                    <TrashIcon className="h-4 w-4" />
+                                  </IconButton>
+                                </Tooltip>
+                              </>
+                            )}
                           </td>
                         </tr>
                       ))
