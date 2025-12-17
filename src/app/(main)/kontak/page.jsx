@@ -17,7 +17,7 @@ import {
   ChatBubbleLeftRightIcon,
   MapPinIcon,
 } from "@heroicons/react/24/outline";
-import { toast } from "react-hot-toast";
+import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
 // Loading Skeleton Component

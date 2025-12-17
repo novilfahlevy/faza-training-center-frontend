@@ -2,7 +2,8 @@ import "@/css/tailwind.css";
 
 import Footer from "@/components/main/layout/footer";
 import Header from "@/components/main/layout/header";
-import { Toaster } from 'react-hot-toast';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import NextTopLoader from "nextjs-toploader";
 import AuthDataLayout from "@/app/(main)/auth-data-layout";
 
@@ -25,7 +26,7 @@ export default function RootLayout({ children }) {
           <Header />
           {children}
           <Footer />
-          <Toaster position="top-right" />
+          <ToastContainer position="top-right" />
         </AuthDataLayout>
       </body>
     </html>

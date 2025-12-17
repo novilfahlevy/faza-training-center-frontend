@@ -215,7 +215,7 @@ export default function EditProfilPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <Typography variant="h6">Memuat...</Typography>
+        <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -293,12 +293,10 @@ export default function EditProfilPage() {
                 type="submit"
                 color="blue"
                 disabled={loadingMitra}
+                className="flex items-center justify-center gap-2"
               >
                 {loadingMitra ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Menyimpan...
-                  </div>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   "Perbarui Data Mitra"
                 )}
@@ -335,12 +333,10 @@ export default function EditProfilPage() {
               type="submit"
               color="blue"
               disabled={loadingEmail}
+              className="flex items-center justify-center gap-2"
             >
               {loadingEmail ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Menyimpan...
-                </div>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               ) : (
                 "Perbarui Email"
               )}
@@ -412,12 +408,10 @@ export default function EditProfilPage() {
               type="submit"
               color="blue"
               disabled={loadingPassword}
+              className="flex items-center justify-center gap-2"
             >
               {loadingPassword ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Menyimpan...
-                </div>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               ) : (
                 "Perbarui Password"
               )}

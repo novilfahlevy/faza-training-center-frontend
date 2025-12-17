@@ -4,7 +4,7 @@
 import '@/css/tailwind.css';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchTrainings } from '@/mainHttpClient';
-import { toast } from 'react-hot-toast';
+import { toast } from 'react-toastify';
 import TrainingCard from '@/components/main/training-card';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 

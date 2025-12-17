@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { toast } from "react-hot-toast";
+import { toast } from "react-toastify";
 import Link from "next/link";
 import {
   fetchTrainingStatus,
