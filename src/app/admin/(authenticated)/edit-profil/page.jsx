@@ -11,6 +11,7 @@ export default function EditProfilPage() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const login = useAuthStore((s) => s.login);
+  const isHydrated = useAuthStore((s) => s.isHydrated);
 
   const [role, setRole] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,40 +44,60 @@ export default function EditProfilPage() {
 
   // Fetch profile data on mount
   useEffect(() => {
+    console.log("Effect running - isHydrated:", isHydrated, "user:", user);
+    
+    // If user is null and we've already tried to load (past initial mount), redirect
+    if (user === null && typeof window !== "undefined") {
+      // Give it one more moment for hydration
+      const timer = setTimeout(() => {
+        if (!useAuthStore.getState().user) {
+          console.log("No user after hydration, redirecting to login");
+          setIsLoading(false);
+          router.replace("/admin/login");
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+
     if (!user) {
-      router.replace("/admin/login");
+      console.log("No user yet, waiting for hydration");
       return;
     }
 
-    setRole(user.role);
-    setFormPengguna({ ...formPengguna, email: user.email || "" });
+    const initializeProfile = async () => {
+      try {
+        console.log("Initializing profile for role:", user.role);
+        setRole(user.role);
+        setFormPengguna((prev) => ({ ...prev, email: user.email || "" }));
 
-    if (user.role === "mitra") {
-      fetchMitraData();
-    } else {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const fetchMitraData = async () => {
-    try {
-      const response = await adminHttpClient.get("/admin/profile");
-      if (response.data?.data?.data_mitra) {
-        const mitra = response.data.data.data_mitra;
-        setFormMitra({
-          nama_mitra: mitra.nama_mitra || "",
-          deskripsi_mitra: mitra.deskripsi_mitra || "",
-          alamat_mitra: mitra.alamat_mitra || "",
-          telepon_mitra: mitra.telepon_mitra || "",
-          website_mitra: mitra.website_mitra || "",
-        });
+        if (user.role === "mitra") {
+          try {
+            const response = await adminHttpClient.get("/admin/profile");
+            console.log("Mitra data response:", response.data);
+            if (response.data?.data?.data_mitra) {
+              const mitra = response.data.data.data_mitra;
+              setFormMitra({
+                nama_mitra: mitra.nama_mitra || "",
+                deskripsi_mitra: mitra.deskripsi_mitra || "",
+                alamat_mitra: mitra.alamat_mitra || "",
+                telepon_mitra: mitra.telepon_mitra || "",
+                website_mitra: mitra.website_mitra || "",
+              });
+            }
+          } catch (fetchError) {
+            console.error("Error fetching mitra data:", fetchError);
+          }
+        }
+      } catch (error) {
+        console.error("Error initializing profile:", error);
+      } finally {
+        console.log("Setting isLoading to false");
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching mitra data:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
+
+    initializeProfile();
+  }, [user, router]);
 
   // Handle Pengguna form change
   const handlePenggunaChange = (e) => {

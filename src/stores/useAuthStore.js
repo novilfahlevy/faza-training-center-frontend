@@ -36,12 +36,12 @@ export const useAuthStore = create(
     {
       name: "auth-storage",
       onRehydrateStorage: () => (state, _) => {
-        clearAuthCookies();
-
         useAuthStore.setState({ isHydrated: true });
 
         if (state?.token && state?.user) {
           setAuthCookies(state.token, state.user);
+        } else {
+          clearAuthCookies();
         }
       },
     }
