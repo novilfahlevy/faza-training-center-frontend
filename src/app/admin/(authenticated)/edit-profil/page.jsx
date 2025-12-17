@@ -13,8 +13,12 @@ export default function EditProfilPage() {
   const login = useAuthStore((s) => s.login);
 
   const [role, setRole] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Loading states for each form
+  const [loadingEmail, setLoadingEmail] = useState(false);
+  const [loadingPassword, setLoadingPassword] = useState(false);
+  const [loadingMitra, setLoadingMitra] = useState(false);
 
   // Form states - Pengguna (Email & Password)
   const [formPengguna, setFormPengguna] = useState({
@@ -23,6 +27,10 @@ export default function EditProfilPage() {
     newPassword: "",
     confirmPassword: "",
   });
+
+  // Error states for validation
+  const [emailErrors, setEmailErrors] = useState({});
+  const [passwordErrors, setPasswordErrors] = useState({});
 
   // Form states - Mitra
   const [formMitra, setFormMitra] = useState({
@@ -92,21 +100,21 @@ export default function EditProfilPage() {
   const handleUpdateEmail = async (e) => {
     e.preventDefault();
     
+    const newErrors = {};
     if (!formPengguna.email) {
-      toast.error("Email tidak boleh kosong", {
-        position: "top-right",
-        autoClose: 2500,
-      });
+      newErrors.email = "Email tidak boleh kosong";
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setEmailErrors(newErrors);
       return;
     }
 
-    setLoading(true);
+    setLoadingEmail(true);
     try {
-      const response = await adminHttpClient.put("/admin/profile/email", {
+      await adminHttpClient.put("/admin/profile/email", {
         email: formPengguna.email,
       });
-
-      console.log("Email update response:", response);
       
       toast.success("Email berhasil diperbarui", {
         position: "top-right",
@@ -116,15 +124,14 @@ export default function EditProfilPage() {
       // Update local user
       const updatedUser = { ...user, email: formPengguna.email };
       login(useAuthStore.getState().token, updatedUser);
+      setEmailErrors({});
     } catch (error) {
-      console.error("Email update error:", error);
-      
       toast.error(error.response?.data?.message || "Gagal memperbarui email", {
         position: "top-right",
         autoClose: 3500,
       });
     } finally {
-      setLoading(false);
+      setLoadingEmail(false);
     }
   };
 
@@ -132,38 +139,34 @@ export default function EditProfilPage() {
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
 
-    if (!formPengguna.currentPassword || !formPengguna.newPassword || !formPengguna.confirmPassword) {
-      toast.error("Semua field password harus diisi", {
-        position: "top-right",
-        autoClose: 2500,
-      });
+    const newErrors = {};
+    if (!formPengguna.currentPassword) {
+      newErrors.currentPassword = "Password saat ini harus diisi";
+    }
+    if (!formPengguna.newPassword) {
+      newErrors.newPassword = "Password baru harus diisi";
+    }
+    if (!formPengguna.confirmPassword) {
+      newErrors.confirmPassword = "Konfirmasi password harus diisi";
+    }
+    if (formPengguna.newPassword && formPengguna.confirmPassword && formPengguna.newPassword !== formPengguna.confirmPassword) {
+      newErrors.confirmPassword = "Password baru tidak cocok";
+    }
+    if (formPengguna.newPassword && formPengguna.newPassword.length < 6) {
+      newErrors.newPassword = "Password minimal 6 karakter";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setPasswordErrors(newErrors);
       return;
     }
 
-    if (formPengguna.newPassword !== formPengguna.confirmPassword) {
-      toast.error("Password baru tidak cocok", {
-        position: "top-right",
-        autoClose: 2500,
-      });
-      return;
-    }
-
-    if (formPengguna.newPassword.length < 6) {
-      toast.error("Password minimal 6 karakter", {
-        position: "top-right",
-        autoClose: 2500,
-      });
-      return;
-    }
-
-    setLoading(true);
+    setLoadingPassword(true);
     try {
       await adminHttpClient.put("/admin/profile/password", {
         current_password: formPengguna.currentPassword,
         new_password: formPengguna.newPassword,
       });
-
-      console.log("Password update success");
       
       toast.success("Password berhasil diperbarui", {
         position: "top-right",
@@ -175,15 +178,14 @@ export default function EditProfilPage() {
         newPassword: "",
         confirmPassword: "",
       }));
+      setPasswordErrors({});
     } catch (error) {
-      console.error("Password update error:", error);
-      
       toast.error(error.response?.data?.message || "Gagal memperbarui password", {
         position: "top-right",
         autoClose: 3500,
       });
     } finally {
-      setLoading(false);
+      setLoadingPassword(false);
     }
   };
 
@@ -191,9 +193,10 @@ export default function EditProfilPage() {
   const handleUpdateMitra = async (e) => {
     e.preventDefault();
 
-    setLoading(true);
+    setLoadingMitra(true);
     try {
       await adminHttpClient.put("/admin/profile/mitra", formMitra);
+
       toast.success("Data mitra berhasil diperbarui", {
         position: "top-right",
         autoClose: 2500,
@@ -205,7 +208,7 @@ export default function EditProfilPage() {
         autoClose: 3500,
       });
     } finally {
-      setLoading(false);
+      setLoadingMitra(false);
     }
   };
 
@@ -236,10 +239,8 @@ export default function EditProfilPage() {
             </Typography>
             <form onSubmit={handleUpdateMitra} className="flex flex-col gap-4">
               <div>
-                <Typography variant="small" className="mb-2 block font-semibold">
-                  Nama Mitra
-                </Typography>
                 <Input
+                  label="Nama Mitra"
                   type="text"
                   name="nama_mitra"
                   value={formMitra.nama_mitra}
@@ -248,7 +249,7 @@ export default function EditProfilPage() {
               </div>
 
               <div>
-                <Typography variant="small" className="mb-2 block font-semibold">
+                <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
                   Deskripsi Mitra
                 </Typography>
                 <Textarea
@@ -259,10 +260,8 @@ export default function EditProfilPage() {
               </div>
 
               <div>
-                <Typography variant="small" className="mb-2 block font-semibold">
-                  Alamat Mitra
-                </Typography>
                 <Input
+                  label="Alamat Mitra"
                   type="text"
                   name="alamat_mitra"
                   value={formMitra.alamat_mitra}
@@ -271,10 +270,8 @@ export default function EditProfilPage() {
               </div>
 
               <div>
-                <Typography variant="small" className="mb-2 block font-semibold">
-                  Telepon Mitra
-                </Typography>
                 <Input
+                  label="Telepon Mitra"
                   type="text"
                   name="telepon_mitra"
                   value={formMitra.telepon_mitra}
@@ -283,10 +280,8 @@ export default function EditProfilPage() {
               </div>
 
               <div>
-                <Typography variant="small" className="mb-2 block font-semibold">
-                  Website Mitra
-                </Typography>
                 <Input
+                  label="Website Mitra"
                   type="url"
                   name="website_mitra"
                   value={formMitra.website_mitra}
@@ -296,11 +291,17 @@ export default function EditProfilPage() {
 
               <Button
                 type="submit"
-                className="w-full"
-                loading={loading}
-                disabled={loading}
+                color="blue"
+                disabled={loadingMitra}
               >
-                Perbarui Data Mitra
+                {loadingMitra ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Menyimpan...
+                  </div>
+                ) : (
+                  "Perbarui Data Mitra"
+                )}
               </Button>
             </form>
           </Card>
@@ -313,23 +314,36 @@ export default function EditProfilPage() {
           </Typography>
           <form onSubmit={handleUpdateEmail} className="flex flex-col gap-4">
             <div>
-              <Typography variant="small" className="mb-2 block font-semibold">
-                Email
-              </Typography>
               <Input
+                label="Email"
                 type="email"
                 name="email"
                 value={formPengguna.email}
-                onChange={handlePenggunaChange}
+                onChange={(e) => {
+                  handlePenggunaChange(e);
+                  setEmailErrors({});
+                }}
+                error={Boolean(emailErrors.email)}
               />
+              {emailErrors.email && (
+                <Typography variant="small" color="red" className="mt-1">
+                  {emailErrors.email}
+                </Typography>
+              )}
             </div>
             <Button
               type="submit"
-              className="w-full"
-              loading={loading}
-              disabled={loading}
+              color="blue"
+              disabled={loadingEmail}
             >
-              Perbarui Email
+              {loadingEmail ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Menyimpan...
+                </div>
+              ) : (
+                "Perbarui Email"
+              )}
             </Button>
           </form>
         </Card>
@@ -341,45 +355,72 @@ export default function EditProfilPage() {
           </Typography>
           <form onSubmit={handleUpdatePassword} className="flex flex-col gap-4">
             <div>
-              <Typography variant="small" className="mb-2 block font-semibold">
-                Password Saat Ini
-              </Typography>
               <Input
                 type="password"
+                label="Password Saat Ini"
                 name="currentPassword"
                 value={formPengguna.currentPassword}
-                onChange={handlePenggunaChange}
+                onChange={(e) => {
+                  handlePenggunaChange(e);
+                  setPasswordErrors((prev) => ({ ...prev, currentPassword: "" }));
+                }}
+                error={Boolean(passwordErrors.currentPassword)}
               />
+              {passwordErrors.currentPassword && (
+                <Typography variant="small" color="red" className="mt-1">
+                  {passwordErrors.currentPassword}
+                </Typography>
+              )}
             </div>
             <div>
-              <Typography variant="small" className="mb-2 block font-semibold">
-                Password Baru
-              </Typography>
               <Input
                 type="password"
+                label="Password Baru"
                 name="newPassword"
                 value={formPengguna.newPassword}
-                onChange={handlePenggunaChange}
+                onChange={(e) => {
+                  handlePenggunaChange(e);
+                  setPasswordErrors((prev) => ({ ...prev, newPassword: "" }));
+                }}
+                error={Boolean(passwordErrors.newPassword)}
               />
+              {passwordErrors.newPassword && (
+                <Typography variant="small" color="red" className="mt-1">
+                  {passwordErrors.newPassword}
+                </Typography>
+              )}
             </div>
             <div>
-              <Typography variant="small" className="mb-2 block font-semibold">
-                Konfirmasi Password Baru
-              </Typography>
               <Input
                 type="password"
+                label="Konfirmasi Password Baru"
                 name="confirmPassword"
                 value={formPengguna.confirmPassword}
-                onChange={handlePenggunaChange}
+                onChange={(e) => {
+                  handlePenggunaChange(e);
+                  setPasswordErrors((prev) => ({ ...prev, confirmPassword: "" }));
+                }}
+                error={Boolean(passwordErrors.confirmPassword)}
               />
+              {passwordErrors.confirmPassword && (
+                <Typography variant="small" color="red" className="mt-1">
+                  {passwordErrors.confirmPassword}
+                </Typography>
+              )}
             </div>
             <Button
               type="submit"
-              className="w-full"
-              loading={loading}
-              disabled={loading}
+              color="blue"
+              disabled={loadingPassword}
             >
-              Perbarui Password
+              {loadingPassword ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Menyimpan...
+                </div>
+              ) : (
+                "Perbarui Password"
+              )}
             </Button>
           </form>
         </Card>
