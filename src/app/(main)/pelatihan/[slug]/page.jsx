@@ -198,9 +198,7 @@ export default function PelatihanDetailPage() {
   const isRegistered =
     registerStatus &&
     registerStatus.status &&
-    (registerStatus.status.toLowerCase() === "terdaftar" ||
-      registerStatus.status.toLowerCase() === "selesai" ||
-      registerStatus.status.toLowerCase() === "pending");
+    (registerStatus.status.toLowerCase() === "terdaftar");
 
   return (
     <div className="container mx-auto px-6 py-10">
