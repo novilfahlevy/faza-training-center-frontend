@@ -178,7 +178,7 @@ export default function LaporanKegiatan() {
                 className: "before:content-none after:content-none",
               }}
             />
-            {authUser.role === "admin" && (
+            {authUser?.role === "admin" && (
               <Link href="/admin/laporan-kegiatan/tambah">
                 <Button className="flex items-center gap-2 px-4 py-2 whitespace-nowrap">
                   <PlusIcon className="h-5 w-5" /> Tambah Laporan
@@ -295,7 +295,7 @@ export default function LaporanKegiatan() {
                                 </IconButton>
                               </Link>
                             </Tooltip>
-                            {authUser.role === "admin" && (
+                            {authUser?.role === "admin" && (
                               <>
                                 <Tooltip content="Edit">
                                   <Link
