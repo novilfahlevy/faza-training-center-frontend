@@ -161,6 +161,11 @@ export const updatePengguna = (id, data) =>
 export const deletePengguna = (id) =>
   httpClient.delete(`/admin/pengguna/${id}`);
 
+export const uploadMitraLogo = (formData) =>
+  httpClient.post("/admin/pengguna/upload-logo", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
 // =============================================================================
 // LAPORAN KEGIATAN ROUTES
 // =============================================================================

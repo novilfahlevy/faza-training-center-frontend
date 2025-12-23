@@ -186,6 +186,18 @@ export default function DetailPenggunaModal({ open, onClose, user }) {
           {user.deskripsi_mitra || "-"}
         </Typography>
       </BasicInfo>
+
+      {user.logo_mitra && (
+        <BasicInfo title="Logo Mitra" icon={<BuildingOfficeIcon className="h-5 w-5 text-amber-600" />}>
+          <div className="flex justify-center py-4">
+            <img 
+              src={user.logo_mitra} 
+              alt="Logo Mitra" 
+              className="max-h-40 max-w-40 object-contain rounded-lg shadow-md border border-blue-gray-100"
+            />
+          </div>
+        </BasicInfo>
+      )}
     </>
   );
 

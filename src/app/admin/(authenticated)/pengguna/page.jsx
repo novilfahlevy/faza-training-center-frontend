@@ -42,9 +42,8 @@ const debounce = (func, delay) => {
 };
 
 export default function PenggunaPage() {
-  const authUser = useAuthStore.getState().user;
-
   // --- STATE MANAGEMENT ---
+  const [authUser, setAuthUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -62,6 +61,11 @@ export default function PenggunaPage() {
 
   // State untuk menyimpan data pengguna yang sedang dipilih/diedit
   const [selectedUser, setSelectedUser] = useState(null);
+
+  // 🔹 Get auth user dari zustand store (client-side only)
+  useEffect(() => {
+    setAuthUser(useAuthStore.getState().user);
+  }, []);
 
   // 🚀 Fungsi untuk mengambil daftar pengguna
   const fetchUsers = async (page = 1, perPage = 5, query = "") => {

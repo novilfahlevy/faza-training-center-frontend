@@ -16,9 +16,21 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { updatePengguna } from "@/adminHttpClient"; // 🔹 Gunakan fungsi baru
 import { toast } from "react-toastify";
+import LogoUploader from "./logo-uploader";
 
 export default function EditPenggunaModal({ open, onClose, user, onSuccess }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [logoData, setLogoData] = useState(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+
+  // 🔹 Set logo data ketika user berubah
+  useEffect(() => {
+    if (user?.logo_mitra) {
+      setLogoData({ url: user.logo_mitra });
+    } else {
+      setLogoData(null);
+    }
+  }, [user]);
 
   // Skema validasi hanya untuk mitra
   const validationSchema = Yup.object().shape({
@@ -31,6 +43,7 @@ export default function EditPenggunaModal({ open, onClose, user, onSuccess }) {
     alamat_mitra: Yup.string().required("Alamat wajib diisi"),
     telepon_mitra: Yup.string().required("Telepon wajib diisi"),
     website_mitra: Yup.string().nullable(),
+    logo_mitra: Yup.string().nullable(),
   });
 
   const formik = useFormik({
@@ -42,6 +55,7 @@ export default function EditPenggunaModal({ open, onClose, user, onSuccess }) {
       alamat_mitra: user?.alamat_mitra || "",
       telepon_mitra: user?.telepon_mitra || "",
       website_mitra: user?.website_mitra || "",
+      logo_mitra: user?.logo_mitra || "",
     },
     enableReinitialize: true, // Penting untuk reset form saat user berubah
     validationSchema,
@@ -58,6 +72,7 @@ export default function EditPenggunaModal({ open, onClose, user, onSuccess }) {
             alamat_mitra: values.alamat_mitra,
             telepon_mitra: values.telepon_mitra,
             website_mitra: values.website_mitra,
+            logo_mitra: logoData?.path || null,
           },
         };
 
@@ -181,6 +196,17 @@ export default function EditPenggunaModal({ open, onClose, user, onSuccess }) {
               value={formik.values.website_mitra}
               onChange={formik.handleChange}
             />
+
+            <div>
+              <Typography variant="small" className="font-medium text-gray-700 mb-2 block">
+                Logo Mitra
+              </Typography>
+              <LogoUploader 
+                value={logoData}
+                onChange={setLogoData}
+                onUploadingChange={setUploadingLogo}
+              />
+            </div>
           </div>
         </DialogBody>
 
@@ -188,7 +214,7 @@ export default function EditPenggunaModal({ open, onClose, user, onSuccess }) {
           <Button onClick={onClose} variant="text" color="gray">
             Batal
           </Button>
-          <Button type="submit" color="blue" disabled={isSubmitting}>
+          <Button type="submit" color="blue" disabled={isSubmitting || uploadingLogo}>
             {isSubmitting ? "Menyimpan..." : "Simpan"}
           </Button>
         </DialogFooter>

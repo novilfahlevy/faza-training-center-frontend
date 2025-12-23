@@ -18,9 +18,12 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { createPengguna } from "@/adminHttpClient"; // 🔹 Gunakan fungsi baru
 import { toast } from "react-toastify";
+import LogoUploader from "./logo-uploader";
 
 export default function TambahPenggunaModal({ open, onClose, onSuccess }) {
   const [isAdding, setIsAdding] = useState(false);
+  const [logoData, setLogoData] = useState(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   const validationSchema = Yup.object().shape({
     email: Yup.string().email("Format email tidak valid").required("Email wajib diisi"),
@@ -48,7 +51,8 @@ export default function TambahPenggunaModal({ open, onClose, onSuccess }) {
       then: (schema) => schema.required("Telepon wajib diisi"),
       otherwise: (schema) => schema.nullable(),
     }),
-    website_mitra: Yup.string().nullable()
+    website_mitra: Yup.string().nullable(),
+    logo_mitra: Yup.string().nullable()
   });
 
   const formik = useFormik({
@@ -62,15 +66,23 @@ export default function TambahPenggunaModal({ open, onClose, onSuccess }) {
       alamat_mitra: "",
       telepon_mitra: "",
       website_mitra: "",
+      logo_mitra: "",
     },
     validationSchema,
     onSubmit: async (values, { resetForm }) => {
       setIsAdding(true);
       try {
+        // Siapkan payload dengan logo data
+        const payload = {
+          ...values,
+          logo_mitra: logoData?.path || null,
+        };
+        
         // 🔹 Gunakan fungsi createPengguna dari adminHttpClient
-        const response = await createPengguna(values);
+        const response = await createPengguna(payload);
         toast.success(response.data.message || "Pengguna berhasil dibuat!");
         resetForm();
+        setLogoData(null);
         onClose();
         if (onSuccess) onSuccess();
       } catch (error) {
@@ -235,6 +247,17 @@ export default function TambahPenggunaModal({ open, onClose, onSuccess }) {
                   onChange={formik.handleChange}
                 />
               </div>
+
+              <div>
+                <Typography variant="small" className="font-medium text-gray-700 mb-2 block">
+                  Logo Mitra
+                </Typography>
+                <LogoUploader 
+                  value={logoData}
+                  onChange={setLogoData}
+                  onUploadingChange={setUploadingLogo}
+                />
+              </div>
             </div>
           )}
         </DialogBody>
@@ -243,7 +266,11 @@ export default function TambahPenggunaModal({ open, onClose, onSuccess }) {
           <Button onClick={onClose} variant="text" color="gray">
             Batal
           </Button>
-          <Button type="submit" color="blue" disabled={isAdding}>
+          <Button 
+            type="submit" 
+            color="blue" 
+            disabled={isAdding || uploadingLogo}
+          >
             {isAdding ? "Menyimpan..." : "Simpan"}
           </Button>
         </DialogFooter>
