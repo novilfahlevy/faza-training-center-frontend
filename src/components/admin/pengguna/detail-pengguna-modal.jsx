@@ -187,6 +187,14 @@ export default function DetailPenggunaModal({ open, onClose, user }) {
         </Typography>
       </BasicInfo>
 
+      {user.visi_misi && (
+        <BasicInfo title="Visi & Misi" icon={<BriefcaseIcon className="h-5 w-5 text-indigo-600" />}>
+          <Typography variant="small" className="text-blue-gray-700 leading-relaxed">
+            {user.visi_misi}
+          </Typography>
+        </BasicInfo>
+      )}
+
       {user.logo_mitra && (
         <BasicInfo title="Logo Mitra" icon={<BuildingOfficeIcon className="h-5 w-5 text-amber-600" />}>
           <div className="flex justify-center py-4">

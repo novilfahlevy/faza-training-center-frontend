@@ -43,6 +43,7 @@ export default function EditPenggunaModal({ open, onClose, user, onSuccess }) {
     alamat_mitra: Yup.string().required("Alamat wajib diisi"),
     telepon_mitra: Yup.string().required("Telepon wajib diisi"),
     website_mitra: Yup.string().nullable(),
+    visi_misi: Yup.string().nullable(),
     logo_mitra: Yup.string().nullable(),
   });
 
@@ -55,6 +56,7 @@ export default function EditPenggunaModal({ open, onClose, user, onSuccess }) {
       alamat_mitra: user?.alamat_mitra || "",
       telepon_mitra: user?.telepon_mitra || "",
       website_mitra: user?.website_mitra || "",
+      visi_misi: user?.visi_misi || "",
       logo_mitra: user?.logo_mitra || "",
     },
     enableReinitialize: true, // Penting untuk reset form saat user berubah
@@ -72,6 +74,7 @@ export default function EditPenggunaModal({ open, onClose, user, onSuccess }) {
             alamat_mitra: values.alamat_mitra,
             telepon_mitra: values.telepon_mitra,
             website_mitra: values.website_mitra,
+            visi_misi: values.visi_misi,
             logo_mitra: logoData?.path || null,
           },
         };
@@ -195,6 +198,14 @@ export default function EditPenggunaModal({ open, onClose, user, onSuccess }) {
               name="website_mitra"
               value={formik.values.website_mitra}
               onChange={formik.handleChange}
+            />
+
+            <Textarea
+              label="Visi & Misi"
+              name="visi_misi"
+              value={formik.values.visi_misi}
+              onChange={formik.handleChange}
+              rows={3}
             />
 
             <div>

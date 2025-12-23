@@ -52,6 +52,7 @@ export default function TambahPenggunaModal({ open, onClose, onSuccess }) {
       otherwise: (schema) => schema.nullable(),
     }),
     website_mitra: Yup.string().nullable(),
+    visi_misi: Yup.string().nullable(),
     logo_mitra: Yup.string().nullable()
   });
 
@@ -66,6 +67,7 @@ export default function TambahPenggunaModal({ open, onClose, onSuccess }) {
       alamat_mitra: "",
       telepon_mitra: "",
       website_mitra: "",
+      visi_misi: "",
       logo_mitra: "",
     },
     validationSchema,
@@ -104,6 +106,7 @@ export default function TambahPenggunaModal({ open, onClose, onSuccess }) {
         alamat_mitra: "",
         telepon_mitra: "",
         website_mitra: "",
+        visi_misi: "",
       });
     }
   }, [formik.values.role]);
@@ -245,6 +248,16 @@ export default function TambahPenggunaModal({ open, onClose, onSuccess }) {
                   name="website_mitra"
                   value={formik.values.website_mitra}
                   onChange={formik.handleChange}
+                />
+              </div>
+
+              <div>
+                <Textarea
+                  label="Visi & Misi"
+                  name="visi_misi"
+                  value={formik.values.visi_misi}
+                  onChange={formik.handleChange}
+                  rows={3}
                 />
               </div>
 

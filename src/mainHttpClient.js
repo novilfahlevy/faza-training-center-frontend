@@ -162,3 +162,16 @@ export const updatePassword = (data) => api.put("/profile/password", data);
 
 // PUT /profile/profile  (update profil peserta)
 export const updateProfilePeserta = (data) => api.put("/profile", data);
+
+// -----------------------------------------------------------------------
+// MITRA (main/mitraRoutes.js)
+// -----------------------------------------------------------------------
+
+// GET /mitra
+export const fetchMitraList = (params = {}) => {
+  const query = new URLSearchParams(params).toString();
+  return api.get(`/mitra?${query}`);
+};
+
+// GET /mitra/:id
+export const fetchMitraById = (id) => api.get(`/mitra/${id}`);

@@ -56,7 +56,12 @@ const Header = () => {
 
         {/* === Menu Utama (Desktop) === */}
         <div className="hidden md:flex items-center space-x-8">
-          {[{ href: "/", label: "Beranda" }, { href: "/pelatihan", label: "Pelatihan" }, { href: "/kontak", label: "Kontak" }].map((item) => (
+          {[
+            { href: "/", label: "Beranda" },
+            { href: "/pelatihan", label: "Pelatihan" },
+            { href: "/mitra", label: "Mitra" },
+            { href: "/kontak", label: "Kontak" }
+          ].map((item) => (
             <Link
               key={item.href}
               href={item.href}
