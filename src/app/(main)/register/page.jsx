@@ -245,8 +245,12 @@ export default function RegisterPage({ searchParams }) {
                   name="no_telp"
                   size="lg"
                   placeholder="08xxxxxxxxxx"
+                  inputMode="numeric"
                   value={formik.values.no_telp}
-                  onChange={formik.handleChange}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, "");
+                    formik.setFieldValue("no_telp", value);
+                  }}
                   onBlur={formik.handleBlur}
                 />
                 {formik.touched.no_telp && formik.errors.no_telp && (
