@@ -234,6 +234,9 @@ export default function TambahPenggunaModal({ open, onClose, onSuccess }) {
                     onChange={formik.handleChange}
                     error={Boolean(formik.touched.telepon_mitra && formik.errors.telepon_mitra)}
                   />
+                  <Typography variant="small" color="gray">
+                    Contoh: 082109233100
+                  </Typography>
                   {formik.touched.telepon_mitra && formik.errors.telepon_mitra && (
                     <Typography variant="small" color="red">
                       {formik.errors.telepon_mitra}

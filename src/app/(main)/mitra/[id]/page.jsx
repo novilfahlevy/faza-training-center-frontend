@@ -269,10 +269,16 @@ export default function DetailMitraPage() {
               <div className="space-y-3">
                 {mitra.telepon_mitra && (
                   <a
-                    href={`tel:${mitra.telepon_mitra}`}
-                    className="block w-full py-3 px-4 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors text-center"
+                    href={`https://wa.me/${mitra.telepon_mitra
+                      .replace(/\D/g, "")
+                      .replace(/^0/, "62")}?text=${encodeURIComponent(
+                      `Halo ${mitra.nama_mitra}. Saya mendapatkan kontak Anda melalui website Faza Training Center (FTC). Saya tertarik untuk menjalin kerja sama lebih lanjut. Apakah anda bersedia mendiskusikan peluang kolaborasi?`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full py-3 px-4 bg-white text-green-600 font-semibold rounded-lg hover:bg-green-50 transition-colors text-center"
                   >
-                    Hubungi via Telepon
+                    Hubungi via WhatsApp
                   </a>
                 )}
                 {mitra.pengguna?.email && (

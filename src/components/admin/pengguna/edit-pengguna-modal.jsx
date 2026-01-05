@@ -81,12 +81,16 @@ export default function EditPenggunaModal({ open, onClose, user, onSuccess }) {
 
         // 🔹 Gunakan fungsi updatePengguna dari adminHttpClient
         const response = await updatePengguna(user.id, payload);
-        toast.success(response.data.message || "Data mitra berhasil diperbarui!");
+        toast.success(
+          response.data.message || "Data mitra berhasil diperbarui!"
+        );
         onClose();
         if (onSuccess) onSuccess();
       } catch (error) {
         console.error("Gagal memperbarui pengguna:", error);
-        toast.error(error.response?.data?.message || "Gagal memperbarui data mitra.");
+        toast.error(
+          error.response?.data?.message || "Gagal memperbarui data mitra."
+        );
       } finally {
         setIsSubmitting(false);
       }
@@ -139,7 +143,9 @@ export default function EditPenggunaModal({ open, onClose, user, onSuccess }) {
               name="nama_mitra"
               value={formik.values.nama_mitra}
               onChange={formik.handleChange}
-              error={Boolean(formik.touched.nama_mitra && formik.errors.nama_mitra)}
+              error={Boolean(
+                formik.touched.nama_mitra && formik.errors.nama_mitra
+              )}
             />
             {formik.touched.nama_mitra && formik.errors.nama_mitra && (
               <Typography variant="small" color="red">
@@ -153,13 +159,16 @@ export default function EditPenggunaModal({ open, onClose, user, onSuccess }) {
               value={formik.values.deskripsi_mitra}
               onChange={formik.handleChange}
               rows={3}
-              error={Boolean(formik.touched.deskripsi_mitra && formik.errors.deskripsi_mitra)}
+              error={Boolean(
+                formik.touched.deskripsi_mitra && formik.errors.deskripsi_mitra
+              )}
             />
-            {formik.touched.deskripsi_mitra && formik.errors.deskripsi_mitra && (
-              <Typography variant="small" color="red">
-                {formik.errors.deskripsi_mitra}
-              </Typography>
-            )}
+            {formik.touched.deskripsi_mitra &&
+              formik.errors.deskripsi_mitra && (
+                <Typography variant="small" color="red">
+                  {formik.errors.deskripsi_mitra}
+                </Typography>
+              )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -168,7 +177,9 @@ export default function EditPenggunaModal({ open, onClose, user, onSuccess }) {
                   name="alamat_mitra"
                   value={formik.values.alamat_mitra}
                   onChange={formik.handleChange}
-                  error={Boolean(formik.touched.alamat_mitra && formik.errors.alamat_mitra)}
+                  error={Boolean(
+                    formik.touched.alamat_mitra && formik.errors.alamat_mitra
+                  )}
                 />
                 {formik.touched.alamat_mitra && formik.errors.alamat_mitra && (
                   <Typography variant="small" color="red">
@@ -183,13 +194,19 @@ export default function EditPenggunaModal({ open, onClose, user, onSuccess }) {
                   name="telepon_mitra"
                   value={formik.values.telepon_mitra}
                   onChange={formik.handleChange}
-                  error={Boolean(formik.touched.telepon_mitra && formik.errors.telepon_mitra)}
+                  error={Boolean(
+                    formik.touched.telepon_mitra && formik.errors.telepon_mitra
+                  )}
                 />
-                {formik.touched.telepon_mitra && formik.errors.telepon_mitra && (
-                  <Typography variant="small" color="red">
-                    {formik.errors.telepon_mitra}
-                  </Typography>
-                )}
+                <Typography variant="small" color="gray">
+                  Contoh: 082109233100
+                </Typography>
+                {formik.touched.telepon_mitra &&
+                  formik.errors.telepon_mitra && (
+                    <Typography variant="small" color="red">
+                      {formik.errors.telepon_mitra}
+                    </Typography>
+                  )}
               </div>
             </div>
 
@@ -209,10 +226,13 @@ export default function EditPenggunaModal({ open, onClose, user, onSuccess }) {
             />
 
             <div>
-              <Typography variant="small" className="font-medium text-gray-700 mb-2 block">
+              <Typography
+                variant="small"
+                className="font-medium text-gray-700 mb-2 block"
+              >
                 Logo Mitra
               </Typography>
-              <LogoUploader 
+              <LogoUploader
                 value={logoData}
                 onChange={setLogoData}
                 onUploadingChange={setUploadingLogo}
@@ -225,7 +245,11 @@ export default function EditPenggunaModal({ open, onClose, user, onSuccess }) {
           <Button onClick={onClose} variant="text" color="gray">
             Batal
           </Button>
-          <Button type="submit" color="blue" disabled={isSubmitting || uploadingLogo}>
+          <Button
+            type="submit"
+            color="blue"
+            disabled={isSubmitting || uploadingLogo}
+          >
             {isSubmitting ? "Menyimpan..." : "Simpan"}
           </Button>
         </DialogFooter>
