@@ -19,6 +19,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { fetchPlatformSettings } from "@/mainHttpClient";
 
 // Loading Skeleton Component
 function ContactSkeleton() {
@@ -93,6 +94,11 @@ function ContactSkeleton() {
 export default function KontakPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [contactData, setContactData] = useState({
+    whatsapp_number: "",
+    email: "",
+    address: "",
+  });
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -100,12 +106,26 @@ export default function KontakPage() {
   });
 
   useEffect(() => {
-    // Simulasi loading untuk data
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
+    // Fetch platform settings
+    const loadContactData = async () => {
+      try {
+        const response = await fetchPlatformSettings();
+        if (response.data) {
+          setContactData({
+            whatsapp_number: response.data.whatsapp_number || "",
+            email: response.data.email || "",
+            address: response.data.address || "",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching contact data:", error);
+        toast.error("Gagal memuat data kontak");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer);
+    loadContactData();
   }, []);
 
   const handleChange = (e) => {
@@ -170,12 +190,12 @@ export default function KontakPage() {
             <div>
                 <h3 className="font-medium text-gray-800">WhatsApp</h3>
                 <a
-                href="https://wa.me/6285213314700"
+                href={`https://wa.me/${contactData.whatsapp_number?.replace(/\D/g, '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:underline"
                 >
-                +62 852-1331-4700
+                {contactData.whatsapp_number}
                 </a>
             </div>
             </div>
@@ -186,10 +206,10 @@ export default function KontakPage() {
             <div>
                 <h3 className="font-medium text-gray-800">Email</h3>
                 <a
-                href="mailto:fazatrainingcenter@gmail.com"
+                href={`mailto:${contactData.email}`}
                 className="text-blue-600 hover:underline"
                 >
-                fazatrainingcenter@gmail.com
+                {contactData.email}
                 </a>
             </div>
             </div>
@@ -200,7 +220,7 @@ export default function KontakPage() {
             <div>
                 <h3 className="font-medium text-gray-800">Alamat</h3>
                 <p className="text-gray-600">
-                Jl. Contoh No. 123, Jakarta Selatan, Indonesia
+                {contactData.address}
                 </p>
             </div>
             </div>
@@ -209,7 +229,7 @@ export default function KontakPage() {
         <div className="mt-8">
             <h3 className="font-medium text-gray-800 mb-4">Chat Langsung</h3>
             <a
-            href="https://wa.me/6285213314700"
+            href={`https://wa.me/${contactData.whatsapp_number?.replace(/\D/g, '')}`}
             target="_blank"
             rel="noopener noreferrer"
             className="block w-full"

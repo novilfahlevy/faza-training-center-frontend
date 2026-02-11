@@ -1,6 +1,6 @@
 import { useAuthStore } from "@/stores/useAuthStore";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1";
 
 const handleResponse = async (response) => {
   // Parse response body terlebih dahulu
@@ -175,3 +175,13 @@ export const fetchMitraList = (params = {}) => {
 
 // GET /mitra/:id
 export const fetchMitraById = (id) => api.get(`/mitra/${id}`);
+
+// -----------------------------------------------------------------------
+// PLATFORM SETTINGS
+// -----------------------------------------------------------------------
+
+/**
+ * Fetch platform settings (contact information)
+ * @returns {Promise} Platform settings data (whatsapp_number, email, address)
+ */
+export const fetchPlatformSettings = () => api.get("/profile/settings");

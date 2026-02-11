@@ -22,6 +22,7 @@ import {
 } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import ProfileInfoCard from "@/components/admin/cards/profile-info-card";
+import ContactSettingsCard from "@/components/admin/cards/contact-settings-card";
 import MessageCard from "@/components/admin/cards/message-card";
 import { platformSettingsData, conversationsData, projectsData } from "@/data";
 
@@ -73,7 +74,7 @@ export default function Profile() {
             </div>
           </div>
 
-          <div className="grid gap-12 px-4 mb-12 lg:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-12 px-4 mb-12 lg:grid-cols-2 xl:grid-cols-4">
             <div>
               <Typography variant="h6" color="blue-gray" className="mb-3">
                 Platform Settings
@@ -101,6 +102,8 @@ export default function Profile() {
                 ))}
               </div>
             </div>
+
+            <ContactSettingsCard />
 
             <ProfileInfoCard
               title="Profile Information"

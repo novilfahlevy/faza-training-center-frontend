@@ -1,4 +1,4 @@
-import { ChartBarSquareIcon, UsersIcon } from "@heroicons/react/24/outline";
+import { ChartBarSquareIcon, UsersIcon, Cog6ToothIcon } from "@heroicons/react/24/outline";
 import {
   AcademicCapIcon,
   DocumentTextIcon,
@@ -33,6 +33,11 @@ export const routes = [
         icon: <UsersIcon {...icon} />,
         name: "Pengguna",
         path: "/admin/pengguna"
+      },
+      {
+        icon: <Cog6ToothIcon {...icon} />,
+        name: "Kontak",
+        path: "/admin/contact"
       },
       // {
       //   icon: <UserCircleIcon {...icon} />,

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useAuthStore, clearAuthCookies } from "@/stores/useAuthStore";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1";
 
 const httpClient = axios.create({
   baseURL: API_BASE_URL,
@@ -218,3 +218,23 @@ export const fetchEditorImages = (params = {}) => {
  */
 export const deleteEditorImage = (id) =>
   httpClient.delete(`/admin/editor-images/${id}`);
+
+
+// =============================================================================
+// PLATFORM SETTINGS ROUTES
+// =============================================================================
+
+/**
+ * Get platform settings (contact information)
+ * @returns {Promise} Platform settings data (whatsapp_number, email, address)
+ */
+export const fetchPlatformSettings = () =>
+  httpClient.get("/admin/profile/settings");
+
+/**
+ * Update platform settings (contact information)
+ * @param {Object} data - Settings data to update
+ * @returns {Promise} Updated platform settings
+ */
+export const updatePlatformSettings = (data) =>
+  httpClient.put("/admin/profile/settings", data);
