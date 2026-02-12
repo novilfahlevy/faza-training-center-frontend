@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import adminHttpClient from "@/adminHttpClient";
 import { toast } from "react-toastify";
 import { Card, Typography, Input, Button, Textarea } from "@material-tailwind/react";
+import LogoUploader from "@/components/admin/pengguna/logo-uploader";
 
 export default function EditProfilPage() {
   const router = useRouter();
@@ -20,6 +21,10 @@ export default function EditProfilPage() {
   const [loadingEmail, setLoadingEmail] = useState(false);
   const [loadingPassword, setLoadingPassword] = useState(false);
   const [loadingMitra, setLoadingMitra] = useState(false);
+
+  // Logo upload states
+  const [logoData, setLogoData] = useState(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   // Form states - Pengguna (Email & Password)
   const [formPengguna, setFormPengguna] = useState({
@@ -37,9 +42,11 @@ export default function EditProfilPage() {
   const [formMitra, setFormMitra] = useState({
     nama_mitra: "",
     deskripsi_mitra: "",
+    visi_misi: "",
     alamat_mitra: "",
     telepon_mitra: "",
     website_mitra: "",
+    logo_mitra: "",
   });
 
   // Fetch profile data on mount
@@ -79,10 +86,20 @@ export default function EditProfilPage() {
               setFormMitra({
                 nama_mitra: mitra.nama_mitra || "",
                 deskripsi_mitra: mitra.deskripsi_mitra || "",
+                visi_misi: mitra.visi_misi || "",
                 alamat_mitra: mitra.alamat_mitra || "",
                 telepon_mitra: mitra.telepon_mitra || "",
                 website_mitra: mitra.website_mitra || "",
+                logo_mitra: mitra.logo_mitra || "",
               });
+              
+              // Set logo data if exists
+              if (mitra.logo_mitra) {
+                setLogoData({
+                  url: `${process.env.NEXT_PUBLIC_API_BASE_URL}${mitra.logo_mitra}`,
+                  path: mitra.logo_mitra,
+                });
+              }
             }
           } catch (fetchError) {
             console.error("Error fetching mitra data:", fetchError);
@@ -216,7 +233,12 @@ export default function EditProfilPage() {
 
     setLoadingMitra(true);
     try {
-      await adminHttpClient.put("/admin/profile/mitra", formMitra);
+      const payload = {
+        ...formMitra,
+        logo_mitra: logoData?.path || formMitra.logo_mitra || "",
+      };
+      
+      await adminHttpClient.put("/admin/profile/mitra", payload);
 
       toast.success("Data mitra berhasil diperbarui", {
         position: "top-right",
@@ -281,6 +303,28 @@ export default function EditProfilPage() {
               </div>
 
               <div>
+                <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
+                  Visi Misi
+                </Typography>
+                <Textarea
+                  name="visi_misi"
+                  value={formMitra.visi_misi}
+                  onChange={handleMitraChange}
+                />
+              </div>
+
+              <div>
+                <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
+                  Logo Mitra
+                </Typography>
+                <LogoUploader
+                  value={logoData}
+                  onChange={setLogoData}
+                  onUploadingChange={setUploadingLogo}
+                />
+              </div>
+
+              <div>
                 <Input
                   label="Alamat Mitra"
                   type="text"
@@ -313,11 +357,13 @@ export default function EditProfilPage() {
               <Button
                 type="submit"
                 color="blue"
-                disabled={loadingMitra}
+                disabled={loadingMitra || uploadingLogo}
                 className="flex items-center justify-center gap-2"
               >
                 {loadingMitra ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : uploadingLogo ? (
+                  "Mengunggah logo..."
                 ) : (
                   "Perbarui Data Mitra"
                 )}
