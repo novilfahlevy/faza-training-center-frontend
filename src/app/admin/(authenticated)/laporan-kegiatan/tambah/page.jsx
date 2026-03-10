@@ -8,6 +8,8 @@ import {
   Input,
   Button,
   Typography,
+  Select,
+  Option,
 } from "@material-tailwind/react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
@@ -18,7 +20,8 @@ import { XMarkIcon, CalendarDaysIcon } from "@heroicons/react/24/outline";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { 
-  createLaporanKegiatan 
+  createLaporanKegiatan,
+  fetchPelatihanOptions
 } from "@/adminHttpClient";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
@@ -33,9 +36,24 @@ export default function TambahLaporanKegiatan() {
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [pelatihanOptions, setPelatihanOptions] = useState([]);
 
   const dateRef = useRef(null);
   const calendarRef = useRef(null);
+
+  // Fetch pelatihan options
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        const response = await fetchPelatihanOptions();
+        setPelatihanOptions(response.data.data || []);
+      } catch (error) {
+        console.error("Gagal mengambil data pelatihan:", error);
+        toast.error("Gagal mengambil data pelatihan", { position: "top-right" });
+      }
+    };
+    fetchOptions();
+  }, []);
 
   // Validasi form
   const validationSchema = Yup.object({
@@ -46,6 +64,7 @@ export default function TambahLaporanKegiatan() {
       .min(10, "Isi laporan minimal 10 karakter")
       .required("Isi laporan wajib diisi"),
     tanggal_laporan: Yup.string().required("Tanggal laporan wajib dipilih"),
+    pelatihan_id: Yup.number().required("Pelatihan wajib dipilih"),
   });
 
   // Formik setup
@@ -54,40 +73,63 @@ export default function TambahLaporanKegiatan() {
       judul_laporan: "",
       isi_laporan: "",
       tanggal_laporan: "",
+      pelatihan_id: "",
     },
     validationSchema,
-    onSubmit: async (values) => {
-      try {
-        setLoading(true);
-        
-        const payload = {
-          ...values,
-          tanggal_laporan: format(selectedDate, "yyyy-MM-dd"),
-        };
-
-        const response = await createLaporanKegiatan(payload);
-
-        toast.success(
-          response.data.message || "Laporan kegiatan berhasil ditambahkan!",
-          {
-            position: "top-right",
-            autoClose: 2500,
-          }
-        );
-
-        setTimeout(() => router.push("/admin/laporan-kegiatan"), 500);
-      } catch (error) {
-        console.error("Gagal menambahkan laporan kegiatan:", error);
-        toast.error(
-          "Gagal menambahkan laporan kegiatan: " +
-            (error.response?.data?.message || error.message),
-          { position: "top-right", autoClose: 3500 }
-        );
-      } finally {
-        setLoading(false);
-      }
+    onSubmit: async (values, { setSubmitting }) => {
+      // This will be triggered by handleSubmit function
+      setSubmitting(false);
     },
   });
+
+  // Handle submit with status parameter
+  const handleSubmit = async (status) => {
+    // Validate form
+    const errors = await formik.validateForm();
+    if (Object.keys(errors).length > 0) {
+      formik.setTouched({
+        judul_laporan: true,
+        isi_laporan: true,
+        tanggal_laporan: true,
+        pelatihan_id: true,
+      });
+      toast.error("Mohon lengkapi semua field yang wajib diisi", {
+        position: "top-right",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      const payload = {
+        ...formik.values,
+        tanggal_laporan: format(selectedDate, "yyyy-MM-dd"),
+        status: status, // 'draft' or 'final'
+      };
+
+      const response = await createLaporanKegiatan(payload);
+
+      toast.success(
+        response.data.message || "Laporan kegiatan berhasil ditambahkan!",
+        {
+          position: "top-right",
+          autoClose: 2500,
+        }
+      );
+
+      setTimeout(() => router.push("/admin/laporan-kegiatan"), 500);
+    } catch (error) {
+      console.error("Gagal menambahkan laporan kegiatan:", error);
+      toast.error(
+        "Gagal menambahkan laporan kegiatan: " +
+          (error.response?.data?.message || error.message),
+        { position: "top-right", autoClose: 3500 }
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Tutup kalender saat klik di luar
   useEffect(() => {
@@ -206,6 +248,30 @@ export default function TambahLaporanKegiatan() {
                 )}
               </div>
 
+              {/* Pelatihan */}
+              <div>
+                <Select
+                  key={pelatihanOptions.length}
+                  label="Pilih Pelatihan"
+                  name="pelatihan_id"
+                  value={formik.values.pelatihan_id?.toString()}
+                  onChange={(value) => formik.setFieldValue("pelatihan_id", parseInt(value))}
+                  error={formik.touched.pelatihan_id && Boolean(formik.errors.pelatihan_id)}
+                >
+                  {pelatihanOptions.map((pelatihan) => (
+                    <Option key={pelatihan.pelatihan_id} value={pelatihan.pelatihan_id.toString()}>
+                      {pelatihan.nama_pelatihan}
+                    </Option>
+                  ))}
+                </Select>
+                {formik.touched.pelatihan_id &&
+                  formik.errors.pelatihan_id && (
+                    <Typography variant="small" color="red" className="mt-1">
+                      {formik.errors.pelatihan_id}
+                    </Typography>
+                  )}
+              </div>
+
               {/* Isi Laporan */}
               <div>
                 <Typography
@@ -230,7 +296,7 @@ export default function TambahLaporanKegiatan() {
               </div>
 
               {/* Tombol */}
-              <div className="flex justify-end gap-3 pt-4 border-blue-gray-100">
+              <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-blue-gray-100">
                 <Button
                   type="button"
                   variant="text"
@@ -240,8 +306,24 @@ export default function TambahLaporanKegiatan() {
                 >
                   Batal
                 </Button>
-                <Button type="submit" color="blue" disabled={loading} className="w-full sm:w-auto">
-                  {loading ? "Menyimpan..." : "Simpan"}
+                <Button 
+                  type="button"
+                  variant="outlined"
+                  color="amber"
+                  disabled={loading} 
+                  onClick={() => handleSubmit('draft')}
+                  className="w-full sm:w-auto"
+                >
+                  {loading ? "Menyimpan..." : "Simpan sebagai Draf"}
+                </Button>
+                <Button 
+                  type="button"
+                  color="green"
+                  disabled={loading} 
+                  onClick={() => handleSubmit('final')}
+                  className="w-full sm:w-auto"
+                >
+                  {loading ? "Menyimpan..." : "Buat Laporan"}
                 </Button>
               </div>
             </form>

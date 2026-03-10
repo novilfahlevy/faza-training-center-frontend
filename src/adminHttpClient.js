@@ -112,6 +112,8 @@ export const fetchPelatihanList = (params = {}) => {
 
 export const fetchMitraOptions = () => httpClient.get("/admin/mitra/options");
 
+export const fetchPelatihanOptions = () => httpClient.get("/admin/pelatihan/options/list");
+
 export const fetchPelatihanById = (id, params = {}) => {
   const queryString = new URLSearchParams(params).toString();
   return httpClient.get(`/admin/pelatihan/${id}?${queryString}`);
@@ -138,6 +140,20 @@ export const fetchPelatihanParticipants = (id, params = {}) => {
 
 export const updatePesertaStatus = (id, data) =>
   httpClient.put(`/admin/pelatihan/peserta/${id}/status`, data);
+
+
+// =============================================================================
+// SERTIFIKAT ROUTES
+// =============================================================================
+
+export const downloadCertificate = (sertifikatId) =>
+  httpClient.get(`/admin/sertifikat/${sertifikatId}/download`, { responseType: 'blob' });
+
+export const downloadAllCertificates = (pelatihanId) =>
+  httpClient.get(`/admin/sertifikat/pelatihan/${pelatihanId}/download-all`, { responseType: 'blob' });
+
+export const markAllAttended = (pelatihanId) =>
+  httpClient.post(`/admin/sertifikat/pelatihan/${pelatihanId}/mark-all-attended`);
 
 
 // =============================================================================
@@ -177,6 +193,9 @@ export const fetchLaporanKegiatanList = (params = {}) => {
 
 export const fetchLaporanKegiatanById = (id) =>
   httpClient.get(`/admin/laporan-kegiatan/${id}`);
+
+export const fetchLaporanKegiatanStatistics = () =>
+  httpClient.get("/admin/laporan-kegiatan/stats");
 
 export const createLaporanKegiatan = (data) =>
   httpClient.post("/admin/laporan-kegiatan", data);

@@ -10,14 +10,35 @@ import {
   Button,
   Chip,
   Breadcrumbs,
+  Input,
+  Select,
+  Option,
 } from "@material-tailwind/react";
 import {
   ArrowLeftIcon,
   PencilIcon,
+  UserGroupIcon,
+  ClockIcon,
+  CheckCircleIcon,
+  CheckBadgeIcon,
+  XCircleIcon,
+  ArrowDownTrayIcon,
+  DocumentCheckIcon,
 } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { fetchLaporanKegiatanById } from "@/adminHttpClient";
+import {
+  fetchLaporanKegiatanById,
+  fetchPelatihanParticipants,
+  updatePesertaStatus,
+  downloadCertificate,
+  downloadAllCertificates,
+  markAllAttended,
+} from "@/adminHttpClient";
+import { toast } from "react-toastify";
+import Pagination from "@/components/admin/pagination";
+import LoadingOverlay from "@/components/admin/loading-overlay";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 // Loading Skeleton Component untuk Detail Laporan
 function DetailSkeleton() {
@@ -93,8 +114,31 @@ function DetailSkeleton() {
 export default function DetailLaporanKegiatan() {
   const params = useParams();
   const id = params.id;
+  const authUser = useAuthStore.getState().user;
+  const [isMounted, setIsMounted] = useState(false);
   const [laporan, setLaporan] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Peserta states
+  const [pesertaList, setPesertaList] = useState([]);
+  const [pesertaLoading, setPesertaLoading] = useState(false);
+  const [pesertaSearch, setPesertaSearch] = useState("");
+  const [activePage, setActivePage] = useState(1);
+  const [limit, setLimit] = useState(5);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // Statistics state
+  const [pesertaStats, setPesertaStats] = useState({
+    pending: 0,
+    terdaftar: 0,
+    selesai: 0,
+    tidak_hadir: 0,
+    total: 0,
+  });
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     const fetchLaporan = async () => {
@@ -114,9 +158,140 @@ export default function DetailLaporanKegiatan() {
     }
   }, [id]);
 
+  // Fetch peserta when laporan is loaded and has pelatihan
+  const fetchPeserta = async (page = 1, perPage = 5, query = "") => {
+    if (!laporan?.pelatihan?.pelatihan_id) return;
+
+    try {
+      setPesertaLoading(true);
+      const params = { page, size: perPage };
+      if (query) params.search = query;
+      const res = await fetchPelatihanParticipants(laporan.pelatihan.pelatihan_id, params);
+      const { records, totalPages } = res.data;
+      setPesertaList(records || []);
+      setTotalPages(totalPages || 1);
+    } catch (error) {
+      console.error("Gagal mengambil data peserta:", error);
+      setPesertaList([]);
+    } finally {
+      setPesertaLoading(false);
+    }
+  };
+
+  // Fetch ALL peserta (unpaginated) for statistics
+  const fetchPesertaStats = async () => {
+    if (!laporan?.pelatihan?.pelatihan_id) return;
+
+    try {
+      const res = await fetchPelatihanParticipants(laporan.pelatihan.pelatihan_id, { page: 1, size: 999999 });
+      const allRecords = res.data.records || [];
+      const stats = { pending: 0, terdaftar: 0, selesai: 0, tidak_hadir: 0, total: allRecords.length };
+      allRecords.forEach((p) => {
+        if (stats[p.status] !== undefined) stats[p.status]++;
+      });
+      setPesertaStats(stats);
+    } catch (error) {
+      console.error("Gagal mengambil statistik peserta:", error);
+    }
+  };
+
+  // Load peserta when laporan is ready
+  useEffect(() => {
+    if (laporan?.pelatihan?.pelatihan_id) {
+      fetchPeserta(activePage, limit, pesertaSearch);
+      fetchPesertaStats();
+    }
+  }, [laporan]);
+
+  // Debounced search
+  useEffect(() => {
+    if (!laporan?.pelatihan?.pelatihan_id) return;
+    const timer = setTimeout(() => {
+      fetchPeserta(1, limit, pesertaSearch);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [pesertaSearch]);
+
+  // Page/limit change
+  useEffect(() => {
+    if (laporan?.pelatihan?.pelatihan_id) {
+      fetchPeserta(activePage, limit, pesertaSearch);
+    }
+  }, [activePage, limit]);
+
+  const handlePesertaSearch = (e) => {
+    setPesertaSearch(e.target.value);
+    setActivePage(1);
+  };
+
+  const handleStatusChange = async (pesertaId, newStatus) => {
+    try {
+      await updatePesertaStatus(pesertaId, { status: newStatus });
+      toast.success("Status peserta berhasil diperbarui!");
+      fetchPeserta(activePage, limit, pesertaSearch);
+      fetchPesertaStats();
+    } catch (error) {
+      console.error("Gagal mengubah status:", error);
+      toast.error("Gagal memperbarui status peserta.");
+    }
+  };
+
+  const handleDownloadCertificate = async (sertifikatId, namaLengkap) => {
+    try {
+      const res = await downloadCertificate(sertifikatId);
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `Sertifikat_${namaLengkap}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Gagal mengunduh sertifikat:", error);
+      toast.error("Gagal mengunduh sertifikat.");
+    }
+  };
+
+  const handleDownloadAll = async () => {
+    try {
+      const res = await downloadAllCertificates(laporan.pelatihan.pelatihan_id);
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `Sertifikat_${laporan.pelatihan.nama_pelatihan || "Pelatihan"}.zip`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Gagal mengunduh semua sertifikat:", error);
+      toast.error("Gagal mengunduh semua sertifikat.");
+    }
+  };
+
+  const handleMarkAllAttended = async () => {
+    try {
+      const res = await markAllAttended(laporan.pelatihan.pelatihan_id);
+      toast.success(res.data.message || "Semua peserta berhasil ditandai hadir!");
+      fetchPeserta(activePage, limit, pesertaSearch);
+      fetchPesertaStats();
+    } catch (error) {
+      console.error("Gagal menandai semua hadir:", error);
+      toast.error("Gagal menandai semua peserta hadir.");
+    }
+  };
+
+  const next = () => {
+    if (activePage < totalPages) setActivePage((prev) => prev + 1);
+  };
+
+  const prev = () => {
+    if (activePage > 1) setActivePage((prev) => prev - 1);
+  };
+
   const getUploaderName = () => {
     if (!laporan) return "";
-    
     if (laporan.uploader.data_peserta?.nama_lengkap) {
       return laporan.uploader.data_peserta.nama_lengkap;
     } else if (laporan.uploader.data_mitra?.nama_mitra) {
@@ -128,14 +303,30 @@ export default function DetailLaporanKegiatan() {
 
   const getUploaderRole = (role) => {
     switch (role) {
-      case 'admin':
-        return 'Admin';
-      case 'mitra':
-        return 'Mitra';
-      case 'peserta':
-        return 'Peserta';
-      default:
-        return role;
+      case "admin": return "Admin";
+      case "mitra": return "Mitra";
+      case "peserta": return "Peserta";
+      default: return role;
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "pending": return "amber";
+      case "terdaftar": return "blue";
+      case "selesai": return "green";
+      case "tidak_hadir": return "red";
+      default: return "gray";
+    }
+  };
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "pending": return "Menunggu Validasi";
+      case "terdaftar": return "Terkonfirmasi";
+      case "selesai": return "Hadir";
+      case "tidak_hadir": return "Tidak Hadir";
+      default: return status;
     }
   };
 
@@ -194,7 +385,6 @@ export default function DetailLaporanKegiatan() {
         <CardBody className="p-4 sm:p-6">
           {laporan && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Judul Laporan */}
               <div>
                 <Typography variant="h6" color="blue-gray" className="mb-2 text-base sm:text-lg">
                   Judul Laporan
@@ -204,24 +394,19 @@ export default function DetailLaporanKegiatan() {
                 </Typography>
               </div>
 
-              {/* Tanggal Laporan */}
               <div>
                 <Typography variant="h6" color="blue-gray" className="mb-2 text-base sm:text-lg">
                   Tanggal Laporan
                 </Typography>
                 <Typography variant="paragraph" className="text-sm sm:text-base">
-                  {new Date(laporan.tanggal_laporan).toLocaleDateString(
-                    "id-ID",
-                    {
-                      day: "2-digit",
-                      month: "long",
-                      year: "numeric",
-                    }
-                  )}
+                  {new Date(laporan.tanggal_laporan).toLocaleDateString("id-ID", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                  })}
                 </Typography>
               </div>
 
-              {/* Pengunggah */}
               <div>
                 <Typography variant="h6" color="blue-gray" className="mb-2 text-base sm:text-lg">
                   Pengunggah
@@ -235,20 +420,69 @@ export default function DetailLaporanKegiatan() {
                     size="sm"
                     value={getUploaderRole(laporan.uploader.role)}
                     color={
-                      laporan.uploader.role === 'admin' ? 'red' :
-                      laporan.uploader.role === 'mitra' ? 'blue' : 'green'
+                      laporan.uploader.role === "admin" ? "red" :
+                      laporan.uploader.role === "mitra" ? "blue" : "green"
                     }
                     className="rounded-full"
                   />
                 </div>
+              </div>
+
+              <div>
+                <Typography variant="h6" color="blue-gray" className="mb-2 text-base sm:text-lg">
+                  Status
+                </Typography>
+                <Chip
+                  variant="ghost"
+                  size="sm"
+                  value={laporan.status === "final" ? "Final" : "Draft"}
+                  color={laporan.status === "final" ? "green" : "amber"}
+                  className="rounded-full w-fit"
+                />
+              </div>
+
+              <div>
+                <Typography variant="h6" color="blue-gray" className="mb-2 text-base sm:text-lg">
+                  Pelatihan Terkait
+                </Typography>
+                <Typography variant="paragraph" className="text-sm sm:text-base">
+                  {laporan.pelatihan?.nama_pelatihan || "-"}
+                </Typography>
               </div>
             </div>
           )}
         </CardBody>
       </Card>
 
+      {/* Mitra Penyelenggara Card */}
+      {laporan && laporan.pelatihan && laporan.pelatihan.mitra_pelatihan && laporan.pelatihan.mitra_pelatihan.length > 0 && (
+        <Card className="border border-blue-gray-100 shadow-sm mb-6">
+          <CardBody className="p-4 sm:p-6">
+            <Typography variant="h6" color="blue-gray" className="mb-4 text-base sm:text-lg">
+              Mitra Penyelenggara
+            </Typography>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {laporan.pelatihan.mitra_pelatihan.map((mitra, index) => (
+                <div key={index} className="flex flex-col gap-1">
+                  <Typography variant="small" className="font-medium">
+                    {mitra.data_mitra?.nama_mitra || "Unknown"}
+                  </Typography>
+                  <Chip
+                    variant="ghost"
+                    size="sm"
+                    value={mitra.PelatihanMitra?.role_mitra || "pemateri"}
+                    color="blue"
+                    className="rounded-full w-fit capitalize"
+                  />
+                </div>
+              ))}
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
       {/* Isi Laporan Card */}
-      <Card className="border border-blue-gray-100 shadow-sm">
+      <Card className="border border-blue-gray-100 shadow-sm mb-6">
         <CardBody className="p-4 sm:p-6">
           {laporan && (
             <div>
@@ -263,6 +497,249 @@ export default function DetailLaporanKegiatan() {
           )}
         </CardBody>
       </Card>
+
+      {/* Peserta Section - only if laporan has related pelatihan */}
+      {laporan && laporan.pelatihan && (
+        <>
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+            <Card className="border border-amber-200 shadow-sm">
+              <CardBody className="p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center justify-center w-10 h-10 bg-amber-100 rounded-lg">
+                    <ClockIcon className="h-5 w-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <Typography variant="small" className="text-gray-600 text-xs">Menunggu Validasi</Typography>
+                    <Typography variant="h5" color="amber">{pesertaStats.pending}</Typography>
+                  </div>
+                </div>
+                <Typography variant="small" className="text-gray-500 text-[11px] leading-relaxed">
+                  Peserta yang telah mendaftar dan menunggu validasi dari admin.
+                </Typography>
+              </CardBody>
+            </Card>
+
+            <Card className="border border-blue-200 shadow-sm">
+              <CardBody className="p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg">
+                    <CheckBadgeIcon className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <Typography variant="small" className="text-gray-600 text-xs">Terdaftar</Typography>
+                    <Typography variant="h5" color="blue">{pesertaStats.terdaftar}</Typography>
+                  </div>
+                </div>
+                <Typography variant="small" className="text-gray-500 text-[11px] leading-relaxed">
+                  Peserta yang telah divalidasi dan terdaftar resmi sebagai peserta pelatihan.
+                </Typography>
+              </CardBody>
+            </Card>
+
+            <Card className="border border-green-200 shadow-sm">
+              <CardBody className="p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center justify-center w-10 h-10 bg-green-100 rounded-lg">
+                    <CheckCircleIcon className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <Typography variant="small" className="text-gray-600 text-xs">Selesai</Typography>
+                    <Typography variant="h5" color="green">{pesertaStats.selesai}</Typography>
+                  </div>
+                </div>
+                <Typography variant="small" className="text-gray-500 text-[11px] leading-relaxed">
+                  Peserta yang telah mengikuti dan menyelesaikan pelatihan.
+                </Typography>
+              </CardBody>
+            </Card>
+
+            <Card className="border border-red-200 shadow-sm">
+              <CardBody className="p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center justify-center w-10 h-10 bg-red-100 rounded-lg">
+                    <XCircleIcon className="h-5 w-5 text-red-600" />
+                  </div>
+                  <div>
+                    <Typography variant="small" className="text-gray-600 text-xs">Tidak Hadir</Typography>
+                    <Typography variant="h5" color="red">{pesertaStats.tidak_hadir}</Typography>
+                  </div>
+                </div>
+                <Typography variant="small" className="text-gray-500 text-[11px] leading-relaxed">
+                  Peserta yang tidak menghadiri pelatihan.
+                </Typography>
+              </CardBody>
+            </Card>
+
+            <Card className="border border-teal-200 shadow-sm">
+              <CardBody className="p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center justify-center w-10 h-10 bg-teal-100 rounded-lg">
+                    <DocumentCheckIcon className="h-5 w-5 text-teal-600" />
+                  </div>
+                  <div>
+                    <Typography variant="small" className="text-gray-600 text-xs">Sertifikat Siap</Typography>
+                    <Typography variant="h5" className="text-teal-600">{pesertaStats.selesai}</Typography>
+                  </div>
+                </div>
+                <Typography variant="small" className="text-gray-500 text-[11px] leading-relaxed">
+                  Jumlah sertifikat yang telah diterbitkan untuk peserta hadir.
+                </Typography>
+              </CardBody>
+            </Card>
+          </div>
+
+          {/* Peserta Table */}
+          <Card className="border border-blue-gray-100 shadow-sm overflow-visible">
+            <CardHeader
+              floated={false}
+              shadow={false}
+              color="transparent"
+              className="m-0 flex gap-y-4 flex-col md:flex-row md:items-center md:justify-between p-6 sticky top-0 bg-white z-10 border-b border-blue-gray-50 rounded-t-xl"
+            >
+              <div className="flex items-center gap-2">
+                <UserGroupIcon className="h-5 w-5 text-blue-gray-700" />
+                <Typography variant="h6" color="blue-gray">
+                  Daftar Peserta ({pesertaStats.total})
+                </Typography>
+              </div>
+              <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 w-full md:w-auto">
+                {isMounted && authUser?.role === "admin" && (
+                  <>
+                    <Button
+                      size="sm"
+                      color="teal"
+                      variant="outlined"
+                      className="flex items-center justify-center gap-1 text-xs whitespace-nowrap"
+                      onClick={handleMarkAllAttended}
+                    >
+                      <CheckCircleIcon className="h-4 w-4" /> Tandai Semua Hadir
+                    </Button>
+                    {pesertaStats.selesai > 0 && (
+                      <Button
+                        size="sm"
+                        color="green"
+                        variant="outlined"
+                        className="flex items-center justify-center gap-1 text-xs whitespace-nowrap"
+                        onClick={handleDownloadAll}
+                      >
+                        <ArrowDownTrayIcon className="h-4 w-4" /> Unduh Semua Sertifikat
+                      </Button>
+                    )}
+                  </>
+                )}
+                <Input
+                  placeholder="Cari peserta..."
+                  value={pesertaSearch}
+                  onChange={handlePesertaSearch}
+                  className="!w-full md:!w-64 !border-t-blue-gray-200 focus:!border-t-gray-900"
+                  labelProps={{
+                    className: "before:content-none after:content-none",
+                  }}
+                />
+              </div>
+            </CardHeader>
+
+            <CardBody className="px-0 pt-0 pb-2 overflow-visible">
+              <LoadingOverlay active={pesertaLoading}>
+                <div className="overflow-x-auto">
+                  <div className="min-h-[400px]">
+                    <table className="w-full min-w-[800px] table-auto">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          {["No", "Nama", "Email", "No. HP", "Status", "Sertifikat"].map((head) => (
+                            <th
+                              key={head}
+                              className="border-b border-blue-gray-100 py-3 px-5 text-left"
+                            >
+                              <Typography
+                                variant="small"
+                                className="text-[11px] font-bold uppercase text-blue-gray-400"
+                              >
+                                {head}
+                              </Typography>
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                    <tbody>
+                      {pesertaList.length === 0 ? (
+                        <tr>
+                          <td colSpan="6" className="text-center py-10 text-gray-500">
+                            Tidak ada peserta terdaftar.
+                          </td>
+                        </tr>
+                      ) : (
+                        pesertaList.map((peserta, index) => (
+                          <tr key={peserta.id} className="border-y hover:bg-gray-50 transition">
+                            <td className="py-3 px-5">
+                              {(activePage - 1) * limit + index + 1}
+                            </td>
+                            <td className="py-3 px-5 font-medium">
+                              {peserta.nama_lengkap || "-"}
+                            </td>
+                            <td className="py-3 px-5">{peserta.email || "-"}</td>
+                            <td className="py-3 px-5">{peserta.no_telp || "-"}</td>
+                            <td className="py-3 px-5">
+                              {isMounted && authUser?.role === "admin" ? (
+                                <Select
+                                  value={peserta.status}
+                                  onChange={(value) => handleStatusChange(peserta.id, value)}
+                                >
+                                  <Option value="pending">Pending</Option>
+                                  <Option value="terdaftar">Terdaftar</Option>
+                                  <Option value="selesai">Selesai</Option>
+                                  <Option value="tidak_hadir">Tidak Hadir</Option>
+                                </Select>
+                              ) : (
+                                <Chip
+                                  variant="ghost"
+                                  size="sm"
+                                  value={getStatusLabel(peserta.status)}
+                                  color={getStatusColor(peserta.status)}
+                                  className="rounded-full w-fit"
+                                />
+                              )}
+                            </td>
+                            <td className="py-3 px-5">
+                              {peserta.status === "selesai" && peserta.sertifikat_id ? (
+                                <Button
+                                  size="sm"
+                                  color="green"
+                                  variant="outlined"
+                                  className="flex items-center gap-1 text-xs"
+                                  onClick={() => handleDownloadCertificate(peserta.sertifikat_id, peserta.nama_lengkap)}
+                                >
+                                  <ArrowDownTrayIcon className="h-4 w-4" /> Unduh
+                                </Button>
+                              ) : (
+                                <Typography variant="small" className="text-gray-400 text-xs italic">
+                                  Tidak tersedia
+                                </Typography>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                  </div>
+                </div>
+              </LoadingOverlay>
+
+              <Pagination
+                limit={limit}
+                setLimit={setLimit}
+                activePage={activePage}
+                setActivePage={setActivePage}
+                totalPages={totalPages}
+                prev={prev}
+                next={next}
+              />
+            </CardBody>
+          </Card>
+        </>
+      )}
     </div>
   );
 }

@@ -9,6 +9,8 @@ import {
   Input,
   Button,
   Typography,
+  Select,
+  Option,
 } from "@material-tailwind/react";
 import { useParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
@@ -20,7 +22,8 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { 
   fetchLaporanKegiatanById,
-  updateLaporanKegiatan 
+  updateLaporanKegiatan,
+  fetchPelatihanOptions
 } from "@/adminHttpClient";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
@@ -78,9 +81,24 @@ export default function EditLaporanKegiatan() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [pelatihanOptions, setPelatihanOptions] = useState([]);
 
   const dateRef = useRef(null);
   const calendarRef = useRef(null);
+
+  // Fetch pelatihan options
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        const response = await fetchPelatihanOptions();
+        setPelatihanOptions(response.data.data || []);
+      } catch (error) {
+        console.error("Gagal mengambil data pelatihan:", error);
+        toast.error("Gagal mengambil data pelatihan", { position: "top-right" });
+      }
+    };
+    fetchOptions();
+  }, []);
 
   // Fetch laporan data
   useEffect(() => {
@@ -95,6 +113,7 @@ export default function EditLaporanKegiatan() {
           judul_laporan: laporan.judul_laporan,
           isi_laporan: laporan.isi_laporan,
           tanggal_laporan: format(new Date(laporan.tanggal_laporan), "EEEE, dd MMMM yyyy", { locale: localeId }),
+          pelatihan_id: laporan.pelatihan_id || "",
         });
         
         // Set selected date
@@ -122,6 +141,7 @@ export default function EditLaporanKegiatan() {
       .min(10, "Isi laporan minimal 10 karakter")
       .required("Isi laporan wajib diisi"),
     tanggal_laporan: Yup.string().required("Tanggal laporan wajib dipilih"),
+    pelatihan_id: Yup.number().required("Pelatihan wajib dipilih"),
   });
 
   // Formik setup
@@ -130,40 +150,63 @@ export default function EditLaporanKegiatan() {
       judul_laporan: "",
       isi_laporan: "",
       tanggal_laporan: "",
+      pelatihan_id: "",
     },
     validationSchema,
-    onSubmit: async (values) => {
-      try {
-        setLoading(true);
-        
-        const payload = {
-          ...values,
-          tanggal_laporan: format(selectedDate, "yyyy-MM-dd"),
-        };
-
-        const response = await updateLaporanKegiatan(id, payload);
-
-        toast.success(
-          response.data.message || "Laporan kegiatan berhasil diperbarui!",
-          {
-            position: "top-right",
-            autoClose: 2500,
-          }
-        );
-
-        setTimeout(() => router.push("/admin/laporan-kegiatan"), 500);
-      } catch (error) {
-        console.error("Gagal memperbarui laporan kegiatan:", error);
-        toast.error(
-          "Gagal memperbarui laporan kegiatan: " +
-            (error.response?.data?.message || error.message),
-          { position: "top-right", autoClose: 3500 }
-        );
-      } finally {
-        setLoading(false);
-      }
+    onSubmit: async (values, { setSubmitting }) => {
+      // This will be triggered by handleSubmit function
+      setSubmitting(false);
     },
   });
+
+  // Handle submit with status parameter
+  const handleSubmit = async (status) => {
+    // Validate form
+    const errors = await formik.validateForm();
+    if (Object.keys(errors).length > 0) {
+      formik.setTouched({
+        judul_laporan: true,
+        isi_laporan: true,
+        tanggal_laporan: true,
+        pelatihan_id: true,
+      });
+      toast.error("Mohon lengkapi semua field yang wajib diisi", {
+        position: "top-right",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      const payload = {
+        ...formik.values,
+        tanggal_laporan: format(selectedDate, "yyyy-MM-dd"),
+        status: status, // 'draft' or 'final'
+      };
+
+      const response = await updateLaporanKegiatan(id, payload);
+
+      toast.success(
+        response.data.message || "Laporan kegiatan berhasil diperbarui!",
+        {
+          position: "top-right",
+          autoClose: 2500,
+        }
+      );
+
+      setTimeout(() => router.push("/admin/laporan-kegiatan"), 500);
+    } catch (error) {
+      console.error("Gagal memperbarui laporan kegiatan:", error);
+      toast.error(
+        "Gagal memperbarui laporan kegiatan: " +
+          (error.response?.data?.message || error.message),
+        { position: "top-right", autoClose: 3500 }
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Tutup kalender saat klik di luar
   useEffect(() => {
@@ -285,6 +328,30 @@ export default function EditLaporanKegiatan() {
               )}
             </div>
 
+            {/* Pelatihan */}
+            <div>
+              <Select
+                key={`${pelatihanOptions.length}-${formik.values.pelatihan_id}`}
+                label="Pilih Pelatihan"
+                name="pelatihan_id"
+                value={formik.values.pelatihan_id?.toString()}
+                onChange={(value) => formik.setFieldValue("pelatihan_id", parseInt(value))}
+                error={formik.touched.pelatihan_id && Boolean(formik.errors.pelatihan_id)}
+              >
+                {pelatihanOptions.map((pelatihan) => (
+                  <Option key={pelatihan.pelatihan_id} value={pelatihan.pelatihan_id.toString()}>
+                    {pelatihan.nama_pelatihan}
+                  </Option>
+                ))}
+              </Select>
+              {formik.touched.pelatihan_id &&
+                formik.errors.pelatihan_id && (
+                  <Typography variant="small" color="red" className="mt-1">
+                    {formik.errors.pelatihan_id}
+                  </Typography>
+                )}
+            </div>
+
             {/* Isi Laporan */}
             <div>
               <Typography
@@ -309,24 +376,34 @@ export default function EditLaporanKegiatan() {
             </div>
 
             {/* Tombol */}
-            <div className="flex justify-end gap-3 pt-4 border-blue-gray-100">
+            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-blue-gray-100">
               <Button
                 type="button"
                 variant="text"
                 color="blue-gray"
                 onClick={() => router.push("/admin/laporan-kegiatan")}
+                className="w-full sm:w-auto"
               >
                 Batal
               </Button>
-              <Button type="submit" color="blue" disabled={loading}>
-                {loading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Menyimpan...
-                  </div>
-                ) : (
-                  "Simpan"
-                )}
+              <Button 
+                type="button"
+                variant="outlined"
+                color="amber"
+                disabled={loading}
+                onClick={() => handleSubmit('draft')}
+                className="w-full sm:w-auto"
+              >
+                {loading ? "Menyimpan..." : "Simpan sebagai Draf"}
+              </Button>
+              <Button 
+                type="button"
+                color="green"
+                disabled={loading}
+                onClick={() => handleSubmit('final')}
+                className="w-full sm:w-auto"
+              >
+                {loading ? "Menyimpan..." : "Buat Laporan"}
               </Button>
             </div>
           </form>
