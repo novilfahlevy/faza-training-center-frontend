@@ -136,6 +136,12 @@ export default function DetailLaporanKegiatan() {
     total: 0,
   });
 
+  // Track which rows are being updated
+  const [updatingIds, setUpdatingIds] = useState(new Set());
+  const [downloadingIds, setDownloadingIds] = useState(new Set());
+  const [isMarkingAll, setIsMarkingAll] = useState(false);
+  const [isDownloadingAll, setIsDownloadingAll] = useState(false);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -225,6 +231,7 @@ export default function DetailLaporanKegiatan() {
   };
 
   const handleStatusChange = async (pesertaId, newStatus) => {
+    setUpdatingIds((prev) => new Set(prev).add(pesertaId));
     try {
       await updatePesertaStatus(pesertaId, { status: newStatus });
       toast.success("Status peserta berhasil diperbarui!");
@@ -233,10 +240,17 @@ export default function DetailLaporanKegiatan() {
     } catch (error) {
       console.error("Gagal mengubah status:", error);
       toast.error("Gagal memperbarui status peserta.");
+    } finally {
+      setUpdatingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(pesertaId);
+        return next;
+      });
     }
   };
 
   const handleDownloadCertificate = async (sertifikatId, namaLengkap) => {
+    setDownloadingIds((prev) => new Set(prev).add(sertifikatId));
     try {
       const res = await downloadCertificate(sertifikatId);
       const url = window.URL.createObjectURL(new Blob([res.data]));
@@ -250,10 +264,13 @@ export default function DetailLaporanKegiatan() {
     } catch (error) {
       console.error("Gagal mengunduh sertifikat:", error);
       toast.error("Gagal mengunduh sertifikat.");
+    } finally {
+      setDownloadingIds((prev) => { const next = new Set(prev); next.delete(sertifikatId); return next; });
     }
   };
 
   const handleDownloadAll = async () => {
+    setIsDownloadingAll(true);
     try {
       const res = await downloadAllCertificates(laporan.pelatihan.pelatihan_id);
       const url = window.URL.createObjectURL(new Blob([res.data]));
@@ -267,10 +284,13 @@ export default function DetailLaporanKegiatan() {
     } catch (error) {
       console.error("Gagal mengunduh semua sertifikat:", error);
       toast.error("Gagal mengunduh semua sertifikat.");
+    } finally {
+      setIsDownloadingAll(false);
     }
   };
 
   const handleMarkAllAttended = async () => {
+    setIsMarkingAll(true);
     try {
       const res = await markAllAttended(laporan.pelatihan.pelatihan_id);
       toast.success(res.data.message || "Semua peserta berhasil ditandai hadir!");
@@ -279,6 +299,8 @@ export default function DetailLaporanKegiatan() {
     } catch (error) {
       console.error("Gagal menandai semua hadir:", error);
       toast.error("Gagal menandai semua peserta hadir.");
+    } finally {
+      setIsMarkingAll(false);
     }
   };
 
@@ -502,7 +524,7 @@ export default function DetailLaporanKegiatan() {
       {laporan && laporan.pelatihan && (
         <>
           {/* Statistics Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-6">
             <Card className="border border-amber-200 shadow-sm">
               <CardBody className="p-4">
                 <div className="flex items-center gap-3 mb-2">
@@ -590,12 +612,12 @@ export default function DetailLaporanKegiatan() {
           </div>
 
           {/* Peserta Table */}
-          <Card className="border border-blue-gray-100 shadow-sm overflow-visible">
+          <Card className="border border-blue-gray-100 shadow-sm overflow-visible" style={{ overflow: 'visible' }}>
             <CardHeader
               floated={false}
               shadow={false}
               color="transparent"
-              className="m-0 flex gap-y-4 flex-col md:flex-row md:items-center md:justify-between p-6 sticky top-0 bg-white z-10 border-b border-blue-gray-50 rounded-t-xl"
+              className="m-0 flex gap-y-4 flex-col md:flex-row md:items-center md:justify-between p-6 sticky top-0 bg-white z-10 border-b border-blue-gray-50 rounded-t-xl overflow-visible"
             >
               <div className="flex items-center gap-2">
                 <UserGroupIcon className="h-5 w-5 text-blue-gray-700" />
@@ -610,20 +632,30 @@ export default function DetailLaporanKegiatan() {
                       size="sm"
                       color="teal"
                       variant="outlined"
-                      className="flex items-center justify-center gap-1 text-xs whitespace-nowrap"
+                      disabled={isMarkingAll}
+                      className="flex items-center justify-center gap-1 text-xs whitespace-nowrap !overflow-visible"
                       onClick={handleMarkAllAttended}
                     >
-                      <CheckCircleIcon className="h-4 w-4" /> Tandai Semua Hadir
+                      {isMarkingAll ? (
+                        <><div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" /> Memproses...</>
+                      ) : (
+                        <><CheckCircleIcon className="h-4 w-4" /> Tandai Semua Hadir</>
+                      )}
                     </Button>
                     {pesertaStats.selesai > 0 && (
                       <Button
                         size="sm"
                         color="green"
                         variant="outlined"
-                        className="flex items-center justify-center gap-1 text-xs whitespace-nowrap"
+                        disabled={isDownloadingAll}
+                        className="flex items-center justify-center gap-1 text-xs whitespace-nowrap !overflow-visible"
                         onClick={handleDownloadAll}
                       >
-                        <ArrowDownTrayIcon className="h-4 w-4" /> Unduh Semua Sertifikat
+                        {isDownloadingAll ? (
+                          <><div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" /> Mengunduh...</>
+                        ) : (
+                          <><ArrowDownTrayIcon className="h-4 w-4" /> Unduh Semua Sertifikat</>
+                        )}
                       </Button>
                     )}
                   </>
@@ -642,7 +674,71 @@ export default function DetailLaporanKegiatan() {
 
             <CardBody className="px-0 pt-0 pb-2 overflow-visible">
               <LoadingOverlay active={pesertaLoading}>
-                <div className="overflow-x-auto">
+                {/* Mobile: card list */}
+                <div className="block md:hidden divide-y divide-blue-gray-50">
+                  {pesertaList.length === 0 ? (
+                    <div className="text-center py-10 text-gray-500 px-4">Tidak ada peserta terdaftar.</div>
+                  ) : (
+                    pesertaList.map((peserta, index) => (
+                      <div key={peserta.id} className="p-4 space-y-3 bg-white">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <Typography variant="small" className="font-semibold text-blue-gray-800">
+                              {(activePage - 1) * limit + index + 1}. {peserta.nama_lengkap || "-"}
+                            </Typography>
+                            <Typography variant="small" className="text-gray-500 text-xs truncate">{peserta.email || "-"}</Typography>
+                            <Typography variant="small" className="text-gray-500 text-xs">{peserta.no_telp || "-"}</Typography>
+                          </div>
+                          {peserta.status === "selesai" && peserta.sertifikat_id && (
+                            <Button
+                              size="sm"
+                              color="green"
+                              variant="outlined"
+                              disabled={downloadingIds.has(peserta.sertifikat_id)}
+                              className="flex items-center gap-1 text-xs shrink-0"
+                              onClick={() => handleDownloadCertificate(peserta.sertifikat_id, peserta.nama_lengkap)}
+                            >
+                              {downloadingIds.has(peserta.sertifikat_id) ? (
+                                <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <ArrowDownTrayIcon className="h-4 w-4" />
+                              )}
+                            </Button>
+                          )}
+                        </div>
+                        <div className="relative">
+                          {updatingIds.has(peserta.id) && (
+                            <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 rounded">
+                              <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                          )}
+                          {isMounted && authUser?.role === "admin" ? (
+                            <Select
+                              value={peserta.status}
+                              disabled={updatingIds.has(peserta.id)}
+                              onChange={(value) => handleStatusChange(peserta.id, value)}
+                            >
+                              <Option value="pending" disabled>Menunggu Validasi</Option>
+                              <Option value="terdaftar">Terdaftar</Option>
+                              <Option value="selesai">Selesai</Option>
+                              <Option value="tidak_hadir">Tidak Hadir</Option>
+                            </Select>
+                          ) : (
+                            <Chip
+                              variant="ghost"
+                              size="sm"
+                              value={getStatusLabel(peserta.status)}
+                              color={getStatusColor(peserta.status)}
+                              className="rounded-full w-fit"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                {/* Desktop: table */}
+                <div className="hidden md:block overflow-x-auto">
                   <div className="min-h-[400px]">
                     <table className="w-full min-w-[800px] table-auto">
                       <thead className="bg-gray-50">
@@ -682,15 +778,23 @@ export default function DetailLaporanKegiatan() {
                             <td className="py-3 px-5">{peserta.no_telp || "-"}</td>
                             <td className="py-3 px-5">
                               {isMounted && authUser?.role === "admin" ? (
-                                <Select
-                                  value={peserta.status}
-                                  onChange={(value) => handleStatusChange(peserta.id, value)}
-                                >
-                                  <Option value="pending">Pending</Option>
-                                  <Option value="terdaftar">Terdaftar</Option>
-                                  <Option value="selesai">Selesai</Option>
-                                  <Option value="tidak_hadir">Tidak Hadir</Option>
-                                </Select>
+                                <div className="relative">
+                                  {updatingIds.has(peserta.id) && (
+                                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 rounded">
+                                      <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                                    </div>
+                                  )}
+                                  <Select
+                                    value={peserta.status}
+                                    disabled={updatingIds.has(peserta.id)}
+                                    onChange={(value) => handleStatusChange(peserta.id, value)}
+                                  >
+                                    <Option value="pending" disabled>Menunggu Validasi</Option>
+                                    <Option value="terdaftar">Terdaftar</Option>
+                                    <Option value="selesai">Selesai</Option>
+                                    <Option value="tidak_hadir">Tidak Hadir</Option>
+                                  </Select>
+                                </div>
                               ) : (
                                 <Chip
                                   variant="ghost"
@@ -707,10 +811,15 @@ export default function DetailLaporanKegiatan() {
                                   size="sm"
                                   color="green"
                                   variant="outlined"
+                                  disabled={downloadingIds.has(peserta.sertifikat_id)}
                                   className="flex items-center gap-1 text-xs"
                                   onClick={() => handleDownloadCertificate(peserta.sertifikat_id, peserta.nama_lengkap)}
                                 >
-                                  <ArrowDownTrayIcon className="h-4 w-4" /> Unduh
+                                  {downloadingIds.has(peserta.sertifikat_id) ? (
+                                    <><div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" /> Mengunduh...</>
+                                  ) : (
+                                    <><ArrowDownTrayIcon className="h-4 w-4" /> Unduh</>
+                                  )}
                                 </Button>
                               ) : (
                                 <Typography variant="small" className="text-gray-400 text-xs italic">
