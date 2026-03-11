@@ -21,6 +21,7 @@ import {
   EyeIcon,
   CheckCircleIcon,
   DocumentCheckIcon,
+  ArrowDownTrayIcon,
 } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import HapusLaporanModal from "@/components/admin/laporan-kegiatan/hapus-laporan-modal";
@@ -28,6 +29,7 @@ import {
   fetchLaporanKegiatanList,
   fetchLaporanKegiatanStatistics,
   deleteLaporanKegiatan,
+  downloadLaporanPdf,
 } from "@/adminHttpClient";
 import { toast } from "react-toastify";
 import Pagination from "@/components/admin/pagination";
@@ -48,6 +50,7 @@ export default function LaporanKegiatan() {
   const [totalPages, setTotalPages] = useState(1);
 
   const [openModal, setOpenModal] = useState(false);
+  const [downloadingIds, setDownloadingIds] = useState(new Set());
   const [selectedLaporan, setSelectedLaporan] = useState(null);
 
   const [stats, setStats] = useState({ totalLaporan: 0, pelatihanSelesaiMonth: 0, totalSertifikat: 0 });
@@ -437,6 +440,41 @@ export default function LaporanKegiatan() {
                                 <EyeIcon className="h-4 w-4" />
                               </IconButton>
                             </Link>
+                          </Tooltip>
+                          <Tooltip content="Unduh PDF">
+                            <IconButton
+                              variant="outlined"
+                              color="teal"
+                              disabled={downloadingIds.has(item.laporan_id)}
+                              onClick={async () => {
+                                try {
+                                  setDownloadingIds(prev => new Set(prev).add(item.laporan_id));
+                                  const res = await downloadLaporanPdf(item.laporan_id);
+                                  const url = window.URL.createObjectURL(new Blob([res.data]));
+                                  const link = document.createElement("a");
+                                  link.href = url;
+                                  link.setAttribute("download", `Laporan_${item.judul_laporan || 'Kegiatan'}.pdf`);
+                                  document.body.appendChild(link);
+                                  link.click();
+                                  link.remove();
+                                  window.URL.revokeObjectURL(url);
+                                } catch (error) {
+                                  console.error("Gagal mengunduh PDF:", error);
+                                  toast.error("Gagal mengunduh PDF laporan", { position: "top-right" });
+                                } finally {
+                                  setDownloadingIds(prev => {
+                                    const next = new Set(prev);
+                                    next.delete(item.laporan_id);
+                                    return next;
+                                  });
+                                }
+                              }}
+                            >
+                              {downloadingIds.has(item.laporan_id)
+                                ? <span className="h-4 w-4 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+                                : <ArrowDownTrayIcon className="h-4 w-4" />
+                              }
+                            </IconButton>
                           </Tooltip>
                           {isMounted && authUser?.role === "admin" && (
                             <>

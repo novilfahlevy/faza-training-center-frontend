@@ -34,6 +34,7 @@ import {
   downloadCertificate,
   downloadAllCertificates,
   markAllAttended,
+  downloadLaporanPdf,
 } from "@/adminHttpClient";
 import { toast } from "react-toastify";
 import Pagination from "@/components/admin/pagination";
@@ -141,6 +142,7 @@ export default function DetailLaporanKegiatan() {
   const [downloadingIds, setDownloadingIds] = useState(new Set());
   const [isMarkingAll, setIsMarkingAll] = useState(false);
   const [isDownloadingAll, setIsDownloadingAll] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -378,6 +380,34 @@ export default function DetailLaporanKegiatan() {
         >
           <Typography variant="h6" className="text-lg sm:text-xl">Detail Laporan Kegiatan</Typography>
           <div className="flex flex-col-reverse sm:flex-row gap-2 w-full sm:w-auto">
+            <Button
+              color="green"
+              size="sm"
+              className="flex items-center justify-center gap-2 w-full sm:w-auto"
+              onClick={async () => {
+                try {
+                  setIsDownloadingPdf(true);
+                  const res = await downloadLaporanPdf(id);
+                  const url = window.URL.createObjectURL(new Blob([res.data]));
+                  const link = document.createElement("a");
+                  link.href = url;
+                  link.setAttribute("download", `Laporan_${laporan?.judul_laporan || 'Kegiatan'}.pdf`);
+                  document.body.appendChild(link);
+                  link.click();
+                  link.remove();
+                  window.URL.revokeObjectURL(url);
+                } catch (error) {
+                  console.error("Gagal mengunduh PDF:", error);
+                  toast.error("Gagal mengunduh PDF laporan", { position: "top-right" });
+                } finally {
+                  setIsDownloadingPdf(false);
+                }
+              }}
+              disabled={isDownloadingPdf}
+            >
+              <ArrowDownTrayIcon className="h-4 w-4" />
+              {isDownloadingPdf ? "Mengunduh..." : "Unduh PDF"}
+            </Button>
             <Link href={`/admin/laporan-kegiatan/${id}/edit`} className="w-full sm:w-auto">
               <Button
                 color="blue"

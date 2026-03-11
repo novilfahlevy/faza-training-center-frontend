@@ -206,6 +206,9 @@ export const updateLaporanKegiatan = (id, data) =>
 export const deleteLaporanKegiatan = (id) =>
   httpClient.delete(`/admin/laporan-kegiatan/${id}`);
 
+export const downloadLaporanPdf = (id) =>
+  httpClient.get(`/admin/laporan-kegiatan/${id}/download-pdf`, { responseType: 'blob' });
+
 // =============================================================================
 // EDITOR IMAGE ROUTES
 // =============================================================================
